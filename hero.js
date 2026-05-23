@@ -236,5 +236,6 @@ export function destroyHero() {
   if (renderer) renderer.dispose();
 }
 
-const canvas = document.getElementById('hero-canvas');
-if (canvas) initHero(canvas);
+// Canvas hero disabilitato: il "blob" centrale additive saturava illeggibile.
+// Sfondo ora gestito interamente da CSS (gradient statico premium).
+// Per riattivare: const canvas = document.getElementById('hero-canvas'); initHero(canvas);

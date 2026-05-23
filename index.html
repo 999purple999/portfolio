@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Francesco · 999purple999 — Tecnico Informatico · Biella</title>
+<meta name="description" content="Francesco, 19 anni, ITIS Q. Sella Biella. Costruisco software: WebRTC mesh end-to-end, knowledge platform zero-knowledge, plugin audio C++ JUCE, mini-games browser. Disponibile per lavoro remoto o in sede.">
+<meta name="theme-color" content="#a855f7">
+<meta property="og:title" content="Francesco · 19 · Biella · Software builder">
+<meta property="og:description" content="WebRTC mesh. Zero-knowledge collab. JUCE C++ plugin. Cloudflare edge SaaS. Codice come si fa sul serio.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="hero-canvas" aria-hidden="true"></canvas>
+<div class="grid-bg" aria-hidden="true"></div>
+<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="#top" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="#projects">Progetti</a>
+    <a href="#stack">Stack</a>
+    <a href="#about">About</a>
+    <a href="#contact" class="nav-cta">Contatti</a>
+  </div>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu">≡</button>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<header id="top" class="hero">
+  <div class="hero-content">
+    <div class="hero-tag reveal">
+      <span class="hero-tag-dot"></span>
+      <span>Disponibile · remoto o in sede</span>
+    </div>
+    <h1 class="hero-title reveal delay-1">
+      <span class="hero-name">Francesco</span>
+      <span class="hero-handle">999purple999</span>
+    </h1>
+    <p class="hero-sub reveal delay-2">
+      19 anni · Biella · Tecnico Informatico all'<span class="hi">ITIS Q. Sella</span>.
+      Costruisco software <span class="hi">che funziona alla prima esecuzione</span>:
+      protocolli realtime, knowledge platform crittografate end-to-end, plugin audio C++,
+      backend edge serverless.
+    </p>
+    <div class="hero-cta reveal delay-3">
+      <a href="#projects" class="btn btn-primary">Vedi i progetti<span>→</span></a>
+      <a href="https://github.com/999purple999" target="_blank" rel="noopener" class="btn btn-ghost">GitHub<span>↗</span></a>
+    </div>
+    <div class="hero-meta reveal delay-4">
+      <div class="hm"><span class="hm-num">7</span><span class="hm-lbl">progetti attivi</span></div>
+      <div class="hm"><span class="hm-num">4</span><span class="hm-lbl">plugin audio C++ JUCE</span></div>
+      <div class="hm"><span class="hm-num">1</span><span class="hm-lbl">prodotto industriale</span></div>
+      <div class="hm"><span class="hm-num">19</span><span class="hm-lbl">anni · 4 giugno</span></div>
+    </div>
+  </div>
+  <div class="hero-scroll" aria-hidden="true"><span>scroll</span><span class="hero-scroll-line"></span></div>
+</header>
+
+<!-- ============================ WHY ME ============================ -->
+<section id="why" class="section">
+  <div class="container">
+    <h2 class="section-title reveal">Perché <span class="hi">assumermi adesso</span></h2>
+    <p class="section-sub reveal delay-1">Cinque cose che si vedono leggendo il codice, non sentendo le promesse.</p>
+    <div class="why-grid">
+      <article class="why-card reveal delay-1" data-tilt>
+        <div class="why-num">01</div>
+        <h3>Vado dal protocollo binario al CSS in un giorno.</h3>
+        <p>WebRTC SDP-munging, SQLite WAL su DrvFs, glsl shader, Cloudflare Workers, Tailwind, CMake JUCE.
+        Nessuna paura di scendere o salire di livello.</p>
+      </article>
+      <article class="why-card reveal delay-2" data-tilt>
+        <div class="why-num">02</div>
+        <h3>Spedisco prodotti, non prototipi.</h3>
+        <p>HALCYON: 65+ test verdi, GPL-3, release pubblica. K-Quest: pagamenti Stripe, edge D1, anti-bot Turnstile, 10 lingue. Non "ho fatto un repo", è "ho fatto un sistema".</p>
+      </article>
+      <article class="why-card reveal delay-3" data-tilt>
+        <div class="why-num">03</div>
+        <h3>Privacy by design, non per marketing.</h3>
+        <p>K-Perception: AES-256-GCM, zero-knowledge, real-time E2EE via Y.js CRDT. HALCYON: mesh peer-to-peer, audio cifrato DTLS-SRTP, niente cloud. So scrivere software che <span class="hi">tu</span> sei l'unico a leggere.</p>
+      </article>
+      <article class="why-card reveal delay-4" data-tilt>
+        <div class="why-num">04</div>
+        <h3>Decisioni motivate, scritte, ripercorribili.</h3>
+        <p>Ogni progetto ha un ARCHITECTURE.md con tradeoff espliciti. Nessuna "magia": ogni scelta è scritta, ogni alternativa scartata è documentata. Si chiama <span class="hi">engineering</span>.</p>
+      </article>
+      <article class="why-card reveal delay-5" data-tilt>
+        <div class="why-num">05</div>
+        <h3>19 anni. Già una libreria di lavori finiti.</h3>
+        <p>Mentre la maggior parte fa todo-app, io ho 4 plugin audio C++20 con JUCE, una piattaforma realtime open-source, un SaaS edge con pagamenti reali e un prodotto industriale chiuso. <span class="hi">Diplomando ITIS Q. Sella</span> giugno 2026.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PROJECTS ============================ -->
+<section id="projects" class="section section-dark">
+  <div class="container">
+    <h2 class="section-title reveal">I lavori che parlano</h2>
+    <p class="section-sub reveal delay-1">Sette progetti reali. Codice consultabile dove possibile. Per il resto, motivazione esplicita.</p>
+
+    <div class="projects-grid">
+
+      <!-- 1. K-PERCEPTION (private, primo posto) -->
+      <article class="project featured reveal" data-tilt>
+        <div class="project-rank">#01 · flagship</div>
+        <div class="project-badge private">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Repository privato
+        </div>
+        <h3 class="project-title">K-Perception</h3>
+        <p class="project-claim">Notion-grade features. Signal-grade privacy.</p>
+        <p class="project-body">
+          Piattaforma di knowledge management <strong>zero-knowledge end-to-end encrypted</strong>.
+          7 editor mode production-ready, collaborazione real-time via Y.js CRDT,
+          AES-256-GCM lato client, offline-first, enterprise SSO, deploy su Cloudflare edge.
+        </p>
+        <ul class="project-tech">
+          <li>Y.js CRDT</li><li>AES-256-GCM</li><li>Cloudflare Workers</li>
+          <li>D1 / R2 / KV</li><li>SSO SAML/OIDC</li><li>Offline PWA</li>
+        </ul>
+        <div class="project-reason">
+          <strong>Perché non è pubblico:</strong>
+          riservatezza dei contenuti utente, finalità industriali in corso di valutazione,
+          superficie d'attacco da non esporre prematuramente. Demo riservata su richiesta.
+        </div>
+      </article>
+
+      <!-- 2. HALCYON (public) -->
+      <article class="project featured-2 reveal delay-1" data-tilt>
+        <div class="project-rank">#02 · open source</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Public · GPL-3
+        </div>
+        <h3 class="project-title">HALCYON</h3>
+        <p class="project-claim">Self-hosted realtime mesh voice/video platform. Zero cloud, your LAN, your data.</p>
+        <p class="project-body">
+          Server Node monolitico, client vanilla JS senza build step, audio/video peer-to-peer
+          via WebRTC mesh. Chat persistente SQLite con markdown, multi-room URL-driven,
+          screen sharing con audio system, codec preference AV1 → H.264 NVENC → VP9.
+          65+ test verdi tra unit (vitest) e e2e (Playwright).
+        </p>
+        <ul class="project-tech">
+          <li>Node 24 ESM</li><li>WebRTC mesh</li><li>SQLite WAL</li>
+          <li>Vanilla JS / no build</li><li>Vitest + Playwright</li><li>GPL-3</li>
+        </ul>
+        <div class="project-links">
+          <a href="https://github.com/999purple999/halcyon" target="_blank" rel="noopener">Repository →</a>
+          <a href="https://github.com/999purple999/halcyon/releases/tag/v1.0.0-halcyon" target="_blank" rel="noopener">Release v1.0.0 →</a>
+        </div>
+      </article>
+
+      <!-- 3. K-QUEST (public) -->
+      <article class="project reveal delay-2" data-tilt>
+        <div class="project-rank">#03 · SaaS edge</div>
+        <div class="project-badge public">Public</div>
+        <h3 class="project-title">K-Quest</h3>
+        <p class="project-claim">Paid challenge marketplace. La community sceglie, io eseguo.</p>
+        <p class="project-body">
+          Frontend React 18 + Vite + Tailwind + Framer Motion, i18n a 10 lingue.
+          Backend Cloudflare Workers con Hono, database D1 SQLite at-edge, KV per
+          rate-limit, R2 per asset paid-only, Stripe Checkout PCI-compliant,
+          Turnstile come barriera anti-bot. Pannello admin separato dietro TOTP.
+        </p>
+        <ul class="project-tech">
+          <li>React 18 + Vite 6</li><li>Cloudflare Workers</li><li>D1 / KV / R2</li>
+          <li>Stripe Checkout</li><li>Turnstile</li><li>i18n × 10</li>
+        </ul>
+        <div class="project-links">
+          <a href="https://999purple999.github.io/k-quest/" target="_blank" rel="noopener">Live →</a>
+          <a href="https://github.com/999purple999/k-quest" target="_blank" rel="noopener">Repository →</a>
+        </div>
+      </article>
+
+      <!-- 4. KLab DSP plugin suite (private) -->
+      <article class="project reveal delay-3" data-tilt>
+        <div class="project-rank">#04 · audio DSP suite</div>
+        <div class="project-badge private">Repository privati × 4</div>
+        <h3 class="project-title">KLab DSP — plugin VST suite</h3>
+        <p class="project-claim">Quattro plugin audio C++20 con framework JUCE.</p>
+        <p class="project-body">
+          <strong>Binaura</strong> — processore binaurale stereo-to-3D.<br>
+          <strong>FXRack</strong> — rack modulare di effetti VFX con routing dinamico.<br>
+          <strong>StreamSauce</strong> — pre-processore audio per streaming live.<br>
+          <strong>FRKX</strong> — template VST3 con build CMake idiomatico.<br>
+          Tutti con CMake build, JUCE framework, C++20 strict, signal processing real-time.
+        </p>
+        <ul class="project-tech">
+          <li>C++20</li><li>JUCE framework</li><li>CMake</li>
+          <li>VST3</li><li>DSP real-time</li><li>Cross-platform</li>
+        </ul>
+        <div class="project-reason">
+          <strong>Perché non sono pubblici:</strong> codice DSP proprietario,
+          monetizzazione futura, evita reverse-engineering preventivo.
+          Demo audio disponibili su richiesta.
+        </div>
+      </article>
+
+      <!-- 5. Privacy Warfare (public game) -->
+      <article class="project reveal delay-4" data-tilt>
+        <div class="project-rank">#05 · browser game</div>
+        <div class="project-badge public">Public</div>
+        <h3 class="project-title">Privacy Warfare</h3>
+        <p class="project-claim">Roguelite action-RPG nel browser. Vanilla ES, zero build.</p>
+        <p class="project-body">
+          Difendi i tuoi dati da ondate di minacce cyber. 10 armi uniche, 6 abilità,
+          progressione persistente. Zero framework: ES modules puri, GitHub Pages
+          serve l'intera esperienza. Game loop a 60fps senza alcuna dipendenza.
+        </p>
+        <ul class="project-tech">
+          <li>Vanilla ES Modules</li><li>Canvas 2D</li><li>RequestAnimationFrame</li>
+          <li>localStorage save</li><li>No build step</li>
+        </ul>
+        <div class="project-links">
+          <a href="https://klab-dsp.github.io/games/privacy-warfare/" target="_blank" rel="noopener">Gioca →</a>
+        </div>
+      </article>
+
+      <!-- 6. Mini games arcade -->
+      <article class="project reveal delay-5" data-tilt>
+        <div class="project-rank">#06 · arcade</div>
+        <div class="project-badge public">Public · 9 mini-games</div>
+        <h3 class="project-title">KLab Games Arcade</h3>
+        <p class="project-claim">Nove esperimenti browser, zero dipendenze.</p>
+        <p class="project-body">
+          Collab, DataRun, Doc-Shredder, Gravity Sandbox, Interceptor, Magnet,
+          Shredder, Speedtest, Privacy Warfare. Ognuno è un piccolo studio su
+          una meccanica: fisica, networking, input, render. Tutti single-file
+          servibili da GitHub Pages.
+        </p>
+        <div class="project-links">
+          <a href="https://klab-dsp.github.io/" target="_blank" rel="noopener">Arcade →</a>
+        </div>
+      </article>
+
+      <!-- 7. School projects -->
+      <article class="project reveal delay-6" data-tilt>
+        <div class="project-rank">#07 · scuola</div>
+        <div class="project-badge public">Public</div>
+        <h3 class="project-title">Capsula del Tempo · SISTEMI 5B Studio</h3>
+        <p class="project-claim">Due Progressive Web App per l'ITIS Q. Sella.</p>
+        <p class="project-body">
+          <strong>Capsula del Tempo</strong>: PWA della classe 5B INF, ⭐ 2 su GitHub.
+          Service worker per offline, manifest, install prompt.<br>
+          <strong>SISTEMI-5B-STUDIO</strong>: PWA didattica con capitoli interattivi
+          e text-to-speech, manifest, sw.js.
+        </p>
+        <ul class="project-tech">
+          <li>PWA</li><li>Service Worker</li><li>Web App Manifest</li>
+          <li>Vanilla JS</li><li>HTML / CSS</li>
+        </ul>
+        <div class="project-links">
+          <a href="https://github.com/999purple999/capsula-del-tempo" target="_blank" rel="noopener">Capsula →</a>
+          <a href="https://github.com/999purple999/SISTEMI-5B-STUDIO" target="_blank" rel="noopener">Sistemi 5B →</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================ STACK ============================ -->
+<section id="stack" class="section">
+  <div class="container">
+    <h2 class="section-title reveal">Stack che padroneggio</h2>
+    <p class="section-sub reveal delay-1">Le voci con il pallino sono quelle che ho usato in produzione, non sulla carta.</p>
+    <div class="stack-grid">
+      <div class="stack-col reveal delay-1">
+        <h4>Linguaggi</h4>
+        <ul>
+          <li class="prod">JavaScript / TypeScript</li>
+          <li class="prod">C++20</li>
+          <li class="prod">Python</li>
+          <li class="prod">HTML / CSS / GLSL</li>
+          <li>Bash / PowerShell</li>
+        </ul>
+      </div>
+      <div class="stack-col reveal delay-2">
+        <h4>Realtime &amp; networking</h4>
+        <ul>
+          <li class="prod">WebRTC mesh (DTLS-SRTP, ICE restart)</li>
+          <li class="prod">WebSocket signaling</li>
+          <li class="prod">Y.js CRDT</li>
+          <li class="prod">Cloudflare Workers + Hono</li>
+          <li>NAT traversal, codec preference (AV1/H.264/VP9)</li>
+        </ul>
+      </div>
+      <div class="stack-col reveal delay-3">
+        <h4>Frontend</h4>
+        <ul>
+          <li class="prod">React 18 + Vite</li>
+          <li class="prod">Tailwind + Framer Motion</li>
+          <li class="prod">Vanilla JS &amp; ES Modules</li>
+          <li class="prod">Three.js / Canvas 2D</li>
+          <li class="prod">PWA (Service Worker, Manifest)</li>
+        </ul>
+      </div>
+      <div class="stack-col reveal delay-4">
+        <h4>Backend &amp; data</h4>
+        <ul>
+          <li class="prod">Node 24 ESM</li>
+          <li class="prod">SQLite WAL (better-sqlite3)</li>
+          <li class="prod">Cloudflare D1 / KV / R2</li>
+          <li class="prod">Stripe Checkout</li>
+          <li class="prod">Turnstile anti-bot</li>
+        </ul>
+      </div>
+      <div class="stack-col reveal delay-5">
+        <h4>Audio DSP</h4>
+        <ul>
+          <li class="prod">JUCE framework</li>
+          <li class="prod">CMake</li>
+          <li class="prod">VST3</li>
+          <li class="prod">DeepFilterNet wrapper</li>
+          <li>RBJ biquad, true-peak limiter</li>
+        </ul>
+      </div>
+      <div class="stack-col reveal delay-6">
+        <h4>Pratiche</h4>
+        <ul>
+          <li class="prod">Vitest / Playwright / Pytest</li>
+          <li class="prod">ESLint v9 / Prettier / Ruff</li>
+          <li class="prod">Git, branch tagging, release notes</li>
+          <li class="prod">AES-256-GCM, zero-knowledge architecture</li>
+          <li>CI/CD GitHub Actions, edge deploy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ABOUT ============================ -->
+<section id="about" class="section section-dark">
+  <div class="container about-grid">
+    <div class="about-text reveal">
+      <h2 class="section-title">Chi c'è dietro</h2>
+      <p>
+        Sono <strong>Francesco</strong>, 19 anni il <strong>4 giugno</strong>.
+        Vivo a <strong>Biella</strong>, Piemonte. Sto per finire il quinto anno
+        all'ITIS <em>Quintino Sella</em>, indirizzo Informatica — diploma di
+        Tecnico Informatico previsto per <strong>giugno 2026</strong>.
+      </p>
+      <p>
+        Scrivo codice ogni giorno da quando ne avevo 13. Il primo progetto serio
+        è stato un plugin audio per JUCE, l'ultimo è una piattaforma di knowledge
+        management con crittografia end-to-end. In mezzo: pagamenti Stripe a
+        produzione, WebRTC mesh, mini-games browser, PWA per la mia classe.
+      </p>
+      <p>
+        Lavoro con la stessa cura sul piping del backend e sul micro-easing di
+        un hover state. <strong>Disponibile per lavoro da remoto o in sede</strong>
+        — full-time, part-time, stage, collaborazioni progettuali.
+      </p>
+      <div class="about-facts">
+        <div><strong>Residenza</strong><span>Biella · Piemonte · IT</span></div>
+        <div><strong>Età</strong><span>19 anni · 4 giugno 2007</span></div>
+        <div><strong>Studi</strong><span>ITIS Quintino Sella · 5° anno INF</span></div>
+        <div><strong>Stato</strong><span>Disponibile · remoto o on-site</span></div>
+      </div>
+    </div>
+    <aside class="about-side reveal delay-1">
+      <div class="about-quote">
+        <p>«La community sceglie. Io eseguo.»</p>
+        <span>— K-Quest, README</span>
+      </div>
+      <div class="about-quote">
+        <p>«Engineered for clarity.»</p>
+        <span>— HALCYON, tagline</span>
+      </div>
+      <div class="about-quote">
+        <p>«Notion-grade features. Signal-grade privacy.»</p>
+        <span>— K-Perception, claim</span>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================ CONTACT ============================ -->
+<section id="contact" class="section">
+  <div class="container">
+    <h2 class="section-title reveal">Contatti</h2>
+    <p class="section-sub reveal delay-1">Telefono protetto da anti-bot: clicca per rivelarlo. Email diretta sempre disponibile.</p>
+    <div class="contact-grid">
+      <a class="contact-card reveal delay-1" data-tilt
+         href="mailto:accessisoftwarefrancesco@gmail.com">
+        <div class="contact-icon">✉</div>
+        <h4>Email</h4>
+        <p>accessisoftwarefrancesco<span class="muted">@gmail.com</span></p>
+      </a>
+      <button class="contact-card reveal delay-2" data-tilt id="phone-btn" type="button"
+              aria-label="Rivela numero di telefono (protezione anti-bot)">
+        <div class="contact-icon">☎</div>
+        <h4>Telefono</h4>
+        <p id="phone-text"><span class="muted">click per rivelare · anti-bot</span></p>
+      </button>
+      <a class="contact-card reveal delay-3" data-tilt
+         href="https://github.com/999purple999" target="_blank" rel="noopener">
+        <div class="contact-icon">⌥</div>
+        <h4>GitHub</h4>
+        <p>999purple999<span class="muted"> · 9 repo</span></p>
+      </a>
+      <div class="contact-card reveal delay-4" data-tilt>
+        <div class="contact-icon">⌖</div>
+        <h4>Località</h4>
+        <p>Biella · Piemonte · Italia<span class="muted"><br>Remoto o in sede</span></p>
+      </div>
+    </div>
+    <div class="contact-cta reveal delay-5">
+      <p>Cerchi qualcuno che <span class="hi">scrive software che funziona</span>?
+         Scrivimi. Rispondo entro 24h.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© 2026 Francesco · 999purple999 · Biella, Italia</div>
+    <div>
+      <a href="https://github.com/999purple999/portfolio" target="_blank" rel="noopener">Sorgenti aperti su GitHub →</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="hero.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -77,7 +77,7 @@ console.log(
   '%c👋 Ciao. Hai aperto la console.%c\n' +
   'Questo portfolio è single-page, vanilla JS, no build.\n' +
   'Sorgenti: https://github.com/999purple999/portfolio\n' +
-  'Se vuoi parlarne: accessisoftwarefrancesco@gmail.com',
+  'Se vuoi parlarne: klabindustries.hq@gmail.com',
   'background:linear-gradient(135deg,#c084fc,#7c3aed); color:#fff; padding:6px 12px; border-radius:6px; font-weight:700;',
   'color:#a8b4d0; font-family:monospace; line-height:1.6;',
 );

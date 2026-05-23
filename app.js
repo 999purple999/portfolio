@@ -1,16 +1,22 @@
 // Portfolio app: scroll reveals, scroll progress bar, nav toggle, tilt cards,
 // phone reveal (anti-bot).
 
-// IntersectionObserver per le animazioni scroll
+// Reveals: prima opt-in alla classe .js-ready (CSS imposta opacity:0), poi IO
+// aggiunge .visible quando entrano in viewport. Se JS fallisce, le card
+// restano comunque visibili (opacity:1 di default).
+const reveals = document.querySelectorAll('.reveal');
+reveals.forEach((el) => el.classList.add('js-ready'));
 const io = new IntersectionObserver(
   (entries) => {
     entries.forEach((e) => {
       if (e.isIntersecting) e.target.classList.add('visible');
     });
   },
-  { threshold: 0.12, rootMargin: '0px 0px -10% 0px' },
+  { threshold: 0.08, rootMargin: '0px 0px -5% 0px' },
 );
-document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+reveals.forEach((el) => io.observe(el));
+// Safety net: dopo 3s, forza visible su tutto (caso IO non triggera).
+setTimeout(() => reveals.forEach((el) => el.classList.add('visible')), 3000);
 
 // Scroll progress + nav scrolled state
 const progress = document.getElementById('scroll-progress');

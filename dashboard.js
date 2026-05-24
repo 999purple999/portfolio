@@ -3,34 +3,34 @@ const M = window.__METRICS;
 const root = document.getElementById('dashboard-root');
 if (root && M) {
   root.innerHTML = `
-    <div class="dash-counter" data-tilt>
+    <div class="dash-counter" >
       <div class="dc-num" data-count="${M.totalRepos}">0</div>
       <div class="dc-lbl">repositories</div>
     </div>
-    <div class="dash-counter" data-tilt>
+    <div class="dash-counter" >
       <div class="dc-num" data-count="${M.totalLoc}">0</div>
       <div class="dc-lbl">lines of code</div>
     </div>
-    <div class="dash-counter" data-tilt>
+    <div class="dash-counter" >
       <div class="dc-num" data-count="${M.languages.length}">0</div>
       <div class="dc-lbl">languages mastered</div>
     </div>
-    <div class="dash-counter" data-tilt>
+    <div class="dash-counter" >
       <div class="dc-num" data-count="${Math.round(M.totalBytes / 1024)}">0</div>
       <div class="dc-lbl">KB of source shipped</div>
     </div>
 
-    <div class="dash-chart dash-chart-wide" data-tilt>
+    <div class="dash-chart dash-chart-wide" >
       <h4>commits — last 12 months</h4>
       <canvas id="chart-commits" height="120"></canvas>
     </div>
 
-    <div class="dash-chart" data-tilt>
+    <div class="dash-chart" >
       <h4>language breakdown</h4>
       <canvas id="chart-langs" height="120"></canvas>
     </div>
 
-    <div class="dash-langs" data-tilt>
+    <div class="dash-langs" >
       <h4>by bytes shipped</h4>
       <ul>
         ${M.languages
@@ -47,7 +47,7 @@ if (root && M) {
       </ul>
     </div>
 
-    <div class="dash-latest" data-tilt>
+    <div class="dash-latest" >
       <h4>last activity</h4>
       <div class="dl-date">${M.lastPushed}</div>
       <div class="dl-desc">most recent push across ${M.publicRepos} public + ${M.privateRepos} private repos</div>

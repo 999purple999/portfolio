@@ -6,7 +6,7 @@ import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
 let renderer, scene, camera, group, nodesMesh, linesMesh, raf;
 const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const N_NODES = IS_TOUCH ? 28 : 56;
+const N_NODES = IS_TOUCH ? 20 : 36;
 const RADIUS = 1.7;
 const LINK_DIST = 1.45; // soglia distanza per disegnare edge
 
@@ -76,9 +76,9 @@ const lineFrag = /* glsl */ `
 
 export function initHero(canvasEl) {
   if (!canvasEl) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  renderer = new THREE.WebGLRenderer({ canvas: canvasEl, alpha: true, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(dpr);
+  // PERF: dpr fisso a 1 (era 2) -> 4× meno fragment GPU. antialias off (MSAA cara).
+  renderer = new THREE.WebGLRenderer({ canvas: canvasEl, alpha: true, antialias: false, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(1);
   const sz = canvasEl.getBoundingClientRect();
   renderer.setSize(sz.width, sz.height, false);
   renderer.setClearColor(0x000000, 0);
@@ -157,8 +157,15 @@ export function initHero(canvasEl) {
     my = ((e.clientY - r.top) / r.height) * 2 - 1;
   }, { passive: true });
 
+  // PERF: pausa RAF quando canvas off-screen o tab hidden
+  let visible = true, inView = true;
+  document.addEventListener('visibilitychange', () => { visible = !document.hidden; if (visible && inView) start(); });
+  const visIo = new IntersectionObserver((es) => { inView = es[0].isIntersecting; if (inView && visible) start(); }, { threshold: 0 });
+  visIo.observe(canvasEl);
+
   const clock = new THREE.Clock();
   function animate() {
+    if (!visible || !inView) { raf = null; return; }
     raf = requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
     sharedU.uTime.value = t;
@@ -173,7 +180,8 @@ export function initHero(canvasEl) {
     group.rotation.x = Math.sin(t * 0.08) * 0.15 + (-my * 0.35);
     renderer.render(scene, camera);
   }
-  animate();
+  function start() { if (!raf) raf = requestAnimationFrame(animate); }
+  start();
 
   const ro = new ResizeObserver(() => {
     const s = canvasEl.getBoundingClientRect();

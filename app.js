@@ -1,6 +1,13 @@
 // Portfolio app: scroll reveals, scroll progress bar, nav toggle, tilt cards,
 // phone reveal (anti-bot).
 
+// PERF: marquee anima solo se in viewport
+const mq = document.querySelector('.marquee');
+if (mq) {
+  const mqIo = new IntersectionObserver((es) => mq.classList.toggle('in-view', es[0].isIntersecting), { threshold: 0 });
+  mqIo.observe(mq);
+}
+
 // Reveals: prima opt-in alla classe .js-ready (CSS imposta opacity:0), poi IO
 // aggiunge .visible quando entrano in viewport. Se JS fallisce, le card
 // restano comunque visibili (opacity:1 di default).
@@ -38,22 +45,24 @@ if (burger && links) {
   links.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => links.classList.remove('open')));
 }
 
-// Cursor follower (desktop only)
+// Cursor follower (desktop only) — PERF: RAF parte solo finché ring non raggiunge dot
 const cd = document.getElementById('cursor-dot');
 const cr = document.getElementById('cursor-ring');
-let cx = 0, cy = 0, rx = 0, ry = 0;
+let cx = 0, cy = 0, rx = 0, ry = 0, crRaf = null;
 if (cd && cr && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+  function ringLoop() {
+    const dx = cx - rx, dy = cy - ry;
+    rx += dx * 0.2; ry += dy * 0.2;
+    cr.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+    if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) crRaf = requestAnimationFrame(ringLoop);
+    else crRaf = null;
+  }
   window.addEventListener('mousemove', (e) => {
     cx = e.clientX; cy = e.clientY;
     cd.classList.add('active'); cr.classList.add('active');
     cd.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
+    if (!crRaf) crRaf = requestAnimationFrame(ringLoop);
   }, { passive: true });
-  function ringLoop() {
-    rx += (cx - rx) * 0.18; ry += (cy - ry) * 0.18;
-    cr.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
-    requestAnimationFrame(ringLoop);
-  }
-  ringLoop();
   document.querySelectorAll('a,button,[data-tilt],.contact-card').forEach((el) => {
     el.addEventListener('mouseenter', () => cr.classList.add('hover'));
     el.addEventListener('mouseleave', () => cr.classList.remove('hover'));

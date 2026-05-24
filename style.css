@@ -216,8 +216,10 @@ nav.scrolled { background:rgba(4,5,10,.92); border-color:var(--border2) }
 .dc-num { font-family:var(--font-display); font-size:clamp(2.2rem,4vw,3.4rem); font-weight:700; background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#67e8f9 100%); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1; font-variation-settings:"opsz" 96 }
 .dc-lbl { font-family:var(--font-mono); font-size:.72rem; color:var(--text3); text-transform:uppercase; letter-spacing:.1em; font-weight:500 }
 
-.dash-chart { grid-column:span 2; padding:1.4rem; border-radius:var(--r2); background:linear-gradient(160deg,rgba(20,24,40,.92),rgba(12,14,26,.92)); border:1px solid var(--border2); box-shadow:var(--shadow-card); min-height:240px; position:relative }
+.dash-chart { grid-column:span 2; padding:1.4rem; border-radius:var(--r2); background:linear-gradient(160deg,rgba(20,24,40,.92),rgba(12,14,26,.92)); border:1px solid var(--border2); box-shadow:var(--shadow-card); position:relative; display:flex; flex-direction:column }
 .dash-chart-wide { grid-column:span 4 }
+.chart-box { position:relative; flex:1; min-height:220px; width:100% }
+.chart-box canvas { position:absolute; inset:0 }
 .dash-chart h4,.dash-langs h4,.dash-latest h4 { font-family:var(--font-mono); font-size:.74rem; color:var(--kp3); text-transform:uppercase; letter-spacing:.12em; margin-bottom:1rem; font-weight:600 }
 
 .dash-langs { grid-column:span 2; padding:1.4rem; border-radius:var(--r2); background:linear-gradient(160deg,rgba(20,24,40,.92),rgba(12,14,26,.92)); border:1px solid var(--border2); box-shadow:var(--shadow-card) }
@@ -261,7 +263,9 @@ html.light .footer { background:linear-gradient(180deg,transparent,rgba(235,235,
 .cursor-dot { width:6px; height:6px; border-radius:50%; background:var(--kp); box-shadow:0 0 12px var(--kp); transform:translate(-50%,-50%) }
 .cursor-ring { width:34px; height:34px; border:1px solid rgba(168,85,247,.5); border-radius:50%; transform:translate(-50%,-50%); transition:width .25s,height .25s,opacity .3s,border-color .25s }
 .cursor-ring.hover { width:54px; height:54px; border-color:rgba(192,132,252,.85); background:rgba(168,85,247,.06) }
-@media (hover:hover) and (pointer:fine) { .cursor-dot.active,.cursor-ring.active { opacity:1 } body { cursor:none } a,button,[data-tilt],.nav-links a,.contact-card { cursor:none } }
+/* FIX cursor invisibile: il custom è OPT-IN extra, il cursore di sistema resta SEMPRE visibile */
+@media (hover:hover) and (pointer:fine) { .cursor-dot.active,.cursor-ring.active { opacity:.85 } }
+.cursor-dot,.cursor-ring { mix-blend-mode:normal }
 
 /* PROJECT card inner glow on hover */
 .project { isolation:isolate }

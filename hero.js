@@ -1,84 +1,78 @@
-// Hero scene: ORB 3D centrale, mesh isosfera con displacement shader noise.
-// Niente più 40k particle additive che saturavano a blob bianco.
-// Stile: oggetto unico, contenuto, espressivo. Apple-product-page energy.
+// Hero: NETWORK MESH 3D simbolico — nodi connessi, edges pulsanti.
+// Simboleggia: mesh P2P (HALCYON), collab CRDT (K-Perception), edge SaaS (K-Quest),
+// modular DSP routing (KLab). Visivamente: "connessioni che lavorano".
 
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
-let renderer, scene, camera, orb, ring1, ring2, raf;
+let renderer, scene, camera, group, nodesMesh, linesMesh, raf;
 const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+const N_NODES = IS_TOUCH ? 22 : 38;
+const RADIUS = 1.6;
+const LINK_DIST = 1.55; // soglia distanza per disegnare edge
 
-const vert = /* glsl */ `
+const nodeVert = /* glsl */ `
   uniform float uTime;
-  varying vec3 vNormal;
-  varying vec3 vPos;
-
-  // 3D simplex noise (Ashima)
-  vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
-  vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
-  vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
-  vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
-  float snoise(vec3 v){
-    const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
-    vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);
-    vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
-    vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;
-    i=mod289(i);
-    vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
-    float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;
-    vec4 j=p-49.0*floor(p*ns.z*ns.z); vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
-    vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);
-    vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
-    vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));
-    vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
-    vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
-    vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
-    p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;
-    vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
-    return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
-  }
-
+  attribute float aSeed;
+  varying float vSeed;
+  varying float vGlow;
   void main(){
     vec3 pos = position;
-    float n = snoise(pos * 1.6 + vec3(uTime * 0.25));
-    float n2 = snoise(pos * 3.2 + vec3(uTime * 0.15));
-    pos += normal * (n * 0.18 + n2 * 0.06);
-    vNormal = normalize(normalMatrix * normal);
-    vPos = pos;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    // micro float per dare vita
+    pos.x += sin(uTime * 0.4 + aSeed * 6.28) * 0.025;
+    pos.y += cos(uTime * 0.3 + aSeed * 6.28) * 0.025;
+    pos.z += sin(uTime * 0.5 + aSeed * 3.14) * 0.025;
+    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+    gl_Position = projectionMatrix * mv;
+    float dist = length(mv.xyz);
+    gl_PointSize = (52.0 / dist) * (1.0 + 0.4 * sin(uTime * 1.6 + aSeed * 9.0));
+    vSeed = aSeed;
+    vGlow = smoothstep(8.0, 2.0, dist);
+  }
+`;
+const nodeFrag = /* glsl */ `
+  precision highp float;
+  uniform float uTime;
+  varying float vSeed;
+  varying float vGlow;
+  void main(){
+    vec2 uv = gl_PointCoord - 0.5;
+    float d = length(uv);
+    if (d > 0.5) discard;
+    float core = pow(1.0 - d * 2.0, 1.8);
+    float halo = pow(1.0 - d * 2.0, 0.6) * 0.22;
+    // colore: purple di base con cyan occasionale (1 nodo su 6)
+    bool accent = fract(vSeed * 7.0) > 0.83;
+    vec3 col = accent ? vec3(0.40, 0.85, 1.0) : vec3(0.78, 0.42, 1.0);
+    vec3 final = col * (core + halo);
+    gl_FragColor = vec4(final, (core + halo) * vGlow);
   }
 `;
 
-const frag = /* glsl */ `
-  precision highp float;
+const lineVert = /* glsl */ `
   uniform float uTime;
-  varying vec3 vNormal;
-  varying vec3 vPos;
-
+  attribute float aPair;
+  varying float vAlpha;
   void main(){
-    // Fresnel rim: luce sul bordo, scuro al centro -> effetto "core energetico"
-    float fres = pow(1.0 - max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0), 2.6);
-    // Gradient interno: purple deep -> cyan rim
-    vec3 inner = vec3(0.20, 0.05, 0.45);  // purple deep
-    vec3 rim   = vec3(0.66, 0.40, 1.0);   // light purple
-    vec3 accent= vec3(0.40, 0.85, 1.0);   // cyan accent sul bordo
-    vec3 col = mix(inner, rim, fres);
-    col = mix(col, accent, fres * fres * 0.7);
-    // brillantino animato
-    float spark = 0.5 + 0.5 * sin(uTime * 1.4 + vPos.y * 6.0);
-    col += vec3(0.05, 0.02, 0.10) * spark;
-    gl_FragColor = vec4(col, 0.92);
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * mv;
+    // pulse animato per edge (data-flow visivo)
+    float pulse = 0.5 + 0.5 * sin(uTime * 1.2 + aPair * 6.28);
+    vAlpha = 0.10 + pulse * 0.35;
+  }
+`;
+const lineFrag = /* glsl */ `
+  precision highp float;
+  varying float vAlpha;
+  void main(){
+    gl_FragColor = vec4(0.65, 0.40, 1.0, vAlpha);
   }
 `;
 
 export function initHero(canvasEl) {
   if (!canvasEl) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  renderer = new THREE.WebGLRenderer({
-    canvas: canvasEl, alpha: true, antialias: true, powerPreference: 'high-performance',
-  });
+  renderer = new THREE.WebGLRenderer({ canvas: canvasEl, alpha: true, antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(dpr);
-
-  // Canvas relativo al wrapper hero, NON fullscreen
   const sz = canvasEl.getBoundingClientRect();
   renderer.setSize(sz.width, sz.height, false);
   renderer.setClearColor(0x000000, 0);
@@ -87,28 +81,64 @@ export function initHero(canvasEl) {
   camera = new THREE.PerspectiveCamera(45, sz.width / sz.height, 0.1, 100);
   camera.position.set(0, 0, 5);
 
-  const geo = new THREE.IcosahedronGeometry(1.2, IS_TOUCH ? 5 : 7);
-  const mat = new THREE.ShaderMaterial({
-    vertexShader: vert, fragmentShader: frag,
+  group = new THREE.Group();
+  scene.add(group);
+
+  // === NODI: posizionati su superficie sferica (fibonacci sphere per uniformità) ===
+  const positions = new Float32Array(N_NODES * 3);
+  const seeds = new Float32Array(N_NODES);
+  const nodes = []; // copia js per calcolo edges
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N_NODES; i++) {
+    const y = 1 - (i / (N_NODES - 1)) * 2;
+    const r = Math.sqrt(1 - y * y);
+    const theta = golden * i;
+    const x = Math.cos(theta) * r;
+    const z = Math.sin(theta) * r;
+    const px = x * RADIUS, py = y * RADIUS, pz = z * RADIUS;
+    positions[i * 3] = px; positions[i * 3 + 1] = py; positions[i * 3 + 2] = pz;
+    seeds[i] = Math.random();
+    nodes.push([px, py, pz]);
+  }
+  const nodeGeo = new THREE.BufferGeometry();
+  nodeGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  nodeGeo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
+  const nodeMat = new THREE.ShaderMaterial({
+    vertexShader: nodeVert, fragmentShader: nodeFrag,
     uniforms: { uTime: { value: 0 } },
-    transparent: true,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   });
-  orb = new THREE.Mesh(geo, mat);
-  scene.add(orb);
+  nodesMesh = new THREE.Points(nodeGeo, nodeMat);
+  group.add(nodesMesh);
 
-  // Anelli orbita (wireframe)
-  const ringGeo = new THREE.TorusGeometry(1.8, 0.005, 8, 128);
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.35 });
-  ring1 = new THREE.Mesh(ringGeo, ringMat);
-  ring1.rotation.x = Math.PI / 2.3;
-  scene.add(ring1);
-  ring2 = new THREE.Mesh(ringGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.22 }));
-  ring2.rotation.x = Math.PI / 1.6;
-  ring2.rotation.y = Math.PI / 3;
-  ring2.scale.setScalar(1.25);
-  scene.add(ring2);
+  // === EDGES: linee fra coppie di nodi vicini ===
+  const linePositions = [];
+  const linePairs = [];
+  for (let i = 0; i < N_NODES; i++) {
+    for (let j = i + 1; j < N_NODES; j++) {
+      const dx = nodes[i][0] - nodes[j][0];
+      const dy = nodes[i][1] - nodes[j][1];
+      const dz = nodes[i][2] - nodes[j][2];
+      const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (d < LINK_DIST) {
+        linePositions.push(...nodes[i], ...nodes[j]);
+        const pair = Math.random();
+        linePairs.push(pair, pair);
+      }
+    }
+  }
+  const lineGeo = new THREE.BufferGeometry();
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linePositions), 3));
+  lineGeo.setAttribute('aPair', new THREE.BufferAttribute(new Float32Array(linePairs), 1));
+  const lineMat = new THREE.ShaderMaterial({
+    vertexShader: lineVert, fragmentShader: lineFrag,
+    uniforms: { uTime: { value: 0 } },
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  linesMesh = new THREE.LineSegments(lineGeo, lineMat);
+  group.add(linesMesh);
 
-  // Mouse parallax leggero
+  // === Mouse parallax ===
   let mx = 0, my = 0;
   canvasEl.parentElement?.addEventListener('mousemove', (e) => {
     const r = canvasEl.parentElement.getBoundingClientRect();
@@ -120,18 +150,15 @@ export function initHero(canvasEl) {
   function animate() {
     raf = requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
-    mat.uniforms.uTime.value = t;
-    if (orb) {
-      orb.rotation.y = t * 0.18 + mx * 0.6;
-      orb.rotation.x = -my * 0.4;
-    }
-    if (ring1) ring1.rotation.z = t * 0.25;
-    if (ring2) ring2.rotation.z = -t * 0.18;
+    nodeMat.uniforms.uTime.value = t;
+    lineMat.uniforms.uTime.value = t;
+    // rotazione organica + parallax
+    group.rotation.y = t * 0.16 + mx * 0.5;
+    group.rotation.x = Math.sin(t * 0.08) * 0.15 + (-my * 0.35);
     renderer.render(scene, camera);
   }
   animate();
 
-  // Resize via ResizeObserver (legato al wrapper)
   const ro = new ResizeObserver(() => {
     const s = canvasEl.getBoundingClientRect();
     if (s.width === 0) return;

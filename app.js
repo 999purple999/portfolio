@@ -61,18 +61,25 @@ if (cd && cr && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
   window.addEventListener('mouseleave', () => { cd.classList.remove('active'); cr.classList.remove('active'); });
 }
 
-// Tilt cards (perspective 3D al pointer)
+// R1: Tilt damped smooth (lerp factor 0.14, target=0 on leave)
 document.querySelectorAll('[data-tilt]').forEach((card) => {
-  let rect;
-  function update(e) {
-    rect = rect || card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    card.style.transform = `perspective(900px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateY(-4px)`;
+  let tx = 0, ty = 0, cx = 0, cy = 0, hovering = false, raf;
+  function loop() {
+    cx += (tx - cx) * 0.14;
+    cy += (ty - cy) * 0.14;
+    card.style.transform = `perspective(1000px) rotateY(${cx * 7}deg) rotateX(${-cy * 7}deg) translateY(${hovering ? -4 : 0}px) translateZ(0)`;
+    if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001 || hovering) raf = requestAnimationFrame(loop);
+    else { card.style.transform = ''; raf = null; }
   }
-  card.addEventListener('mouseenter', () => { rect = card.getBoundingClientRect(); });
-  card.addEventListener('mousemove', update);
-  card.addEventListener('mouseleave', () => { card.style.transform = ''; rect = null; });
+  function start() { if (!raf) raf = requestAnimationFrame(loop); }
+  card.addEventListener('mouseenter', () => { hovering = true; start(); });
+  card.addEventListener('mousemove', (e) => {
+    const r = card.getBoundingClientRect();
+    tx = (e.clientX - r.left) / r.width - 0.5;
+    ty = (e.clientY - r.top) / r.height - 0.5;
+    start();
+  });
+  card.addEventListener('mouseleave', () => { hovering = false; tx = 0; ty = 0; start(); });
 });
 
 // Phone reveal (anti-bot): il numero NON è nel sorgente HTML. È memorizzato
@@ -100,6 +107,24 @@ if (phoneBtn && phoneText) {
     }
   });
 }
+
+// R9: Konami code → secret unlock (per i recruiter curiosi)
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let kSeq = [];
+window.addEventListener('keydown', (e) => {
+  kSeq.push(e.key);
+  if (kSeq.length > KONAMI.length) kSeq.shift();
+  if (kSeq.length === KONAMI.length && kSeq.every((k, i) => k === KONAMI[i])) {
+    document.body.style.transition = 'filter .5s';
+    document.body.style.filter = 'hue-rotate(180deg) saturate(1.4)';
+    const toast = document.createElement('div');
+    toast.textContent = '🎮  Konami unlocked. You found me.';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:14px 24px;background:linear-gradient(135deg,#c084fc,#7c3aed);color:#fff;border-radius:12px;font-family:var(--font-mono);font-weight:700;font-size:.85rem;z-index:9999;box-shadow:0 16px 40px rgba(168,85,247,.4);animation:popIn .4s';
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); document.body.style.filter = ''; }, 4000);
+    kSeq = [];
+  }
+});
 
 // Console egg per i nerd che aprono F12
 console.log(

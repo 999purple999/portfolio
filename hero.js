@@ -174,5 +174,18 @@ export function destroyHero() {
   if (renderer) renderer.dispose();
 }
 
+// R6: lazy init Three.js solo se canvas in viewport (perf su page load)
 const canvas = document.getElementById('hero-canvas');
-if (canvas) initHero(canvas);
+if (canvas) {
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        initHero(canvas);
+        io.disconnect();
+      }
+    }, { rootMargin: '50px' });
+    io.observe(canvas);
+  } else {
+    initHero(canvas);
+  }
+}

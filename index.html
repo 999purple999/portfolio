@@ -37,6 +37,7 @@
     <button data-lang="it" type="button">IT</button>
     <button data-lang="zh" type="button">中</button>
   </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
   <button class="nav-burger" id="nav-burger" aria-label="Menu">≡</button>
 </nav>
 
@@ -115,6 +116,14 @@
         <p data-i18n="why.06_p">I build RAG pipelines, decompose tasks across agent sessions, validate every output, persist context across weeks. The result: production-grade systems shipped in days instead of months. The skill 2026 hiring managers fight over.</p>
       </article>
     </div>
+  </div>
+</section>
+
+<section id="dashboard" class="section">
+  <div class="container">
+    <h2 class="section-title reveal" data-i18n="dash.title">Live Impact · Real Metrics</h2>
+    <p class="section-sub reveal delay-1" data-i18n="dash.sub">Numbers extracted from my GitHub repositories. No mockups, no fiction.</p>
+    <div class="dashboard-grid" id="dashboard-root"></div>
   </div>
 </section>
 
@@ -442,6 +451,8 @@
 
 <script type="module" src="hero.js"></script>
 <script src="i18n.js"></script>
+<script src="dashboard-data.js"></script>
+<script src="dashboard.js" defer></script>
 <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -199,8 +199,37 @@ nav.scrolled { background:rgba(4,5,10,.92); border-color:var(--border2) }
 .contact-cta::before { content:''; position:absolute; top:-50%; left:50%; transform:translateX(-50%); width:80%; height:200%; background:radial-gradient(ellipse,rgba(168,85,247,.10),transparent 60%); pointer-events:none }
 .contact-cta p { font-size:1.18rem; color:var(--text1); font-family:var(--font-display); font-weight:500; letter-spacing:-.01em; position:relative }
 
-/* FOOTER */
-.footer { padding:3rem 0 2.5rem; border-top:1px solid var(--border); margin-top:4rem }
+/* MARQUEE tech */
+.marquee { overflow:hidden; padding:1.5rem 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:rgba(8,10,20,.6); mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent); -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent); position:relative; z-index:5 }
+.marquee-track { display:inline-flex; gap:2rem; animation:marquee 45s linear infinite; white-space:nowrap; will-change:transform; font-family:var(--font-mono); font-size:.82rem; color:var(--text2); font-weight:500; letter-spacing:.04em }
+.marquee-track span { color:var(--text2) }
+.marquee-track span:nth-child(even) { color:var(--kp3); font-weight:700 }
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* SECTION DIVIDERS */
+.section + .section::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:60%; max-width:600px; height:1px; background:linear-gradient(90deg,transparent,rgba(168,85,247,.3),transparent) }
+
+/* CURSOR FOLLOWER (desktop only) */
+.cursor-dot,.cursor-ring { position:fixed; top:0; left:0; pointer-events:none; z-index:9999; mix-blend-mode:screen; transition:opacity .3s; opacity:0 }
+.cursor-dot { width:6px; height:6px; border-radius:50%; background:var(--kp); box-shadow:0 0 12px var(--kp); transform:translate(-50%,-50%) }
+.cursor-ring { width:34px; height:34px; border:1px solid rgba(168,85,247,.5); border-radius:50%; transform:translate(-50%,-50%); transition:width .25s,height .25s,opacity .3s,border-color .25s }
+.cursor-ring.hover { width:54px; height:54px; border-color:rgba(192,132,252,.85); background:rgba(168,85,247,.06) }
+@media (hover:hover) and (pointer:fine) { .cursor-dot.active,.cursor-ring.active { opacity:1 } body { cursor:none } a,button,[data-tilt],.nav-links a,.contact-card { cursor:none } }
+
+/* PROJECT card inner glow on hover */
+.project { isolation:isolate }
+.project::before { content:''; position:absolute; inset:-1px; border-radius:var(--r2); padding:1px; background:linear-gradient(135deg,rgba(168,85,247,.0),rgba(168,85,247,.0)); pointer-events:none; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; opacity:0; transition:opacity var(--tr-fast),background var(--tr-fast); z-index:0 }
+.project:hover::before { opacity:1; background:linear-gradient(135deg,rgba(192,132,252,.6),rgba(103,232,249,.4)) }
+.project > * { position:relative; z-index:1 }
+
+/* FOOTER ENHANCED */
+.footer { padding:3.5rem 0 2.8rem; border-top:1px solid var(--border); margin-top:5rem; background:linear-gradient(180deg,transparent,rgba(8,10,20,.7)) }
+.footer-inner { display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:2rem; align-items:start }
+.footer-col h5 { font-family:var(--font-mono); font-size:.72rem; color:var(--kp3); text-transform:uppercase; letter-spacing:.12em; margin-bottom:.9rem; font-weight:600 }
+.footer-col p,.footer-col a { font-size:.85rem; color:var(--text3); line-height:1.7; text-decoration:none; display:block }
+.footer-col a:hover { color:var(--kp3) }
+.footer-bot { grid-column:1/-1; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; font-size:.78rem; color:var(--text3); font-family:var(--font-mono) }
+@media (max-width:780px) { .footer-inner { grid-template-columns:1fr } }
 .footer-inner { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; font-size:.84rem; color:var(--text3) }
 .footer a { color:var(--kp3); text-decoration:none }
 .footer a:hover { color:var(--kp4) }

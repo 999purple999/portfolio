@@ -6,9 +6,9 @@ import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
 let renderer, scene, camera, group, nodesMesh, linesMesh, raf;
 const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const N_NODES = IS_TOUCH ? 22 : 38;
-const RADIUS = 1.6;
-const LINK_DIST = 1.55; // soglia distanza per disegnare edge
+const N_NODES = IS_TOUCH ? 28 : 56;
+const RADIUS = 1.7;
+const LINK_DIST = 1.45; // soglia distanza per disegnare edge
 
 const nodeVert = /* glsl */ `
   uniform float uTime;

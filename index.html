@@ -64,6 +64,16 @@
   <div class="hero-scroll" aria-hidden="true"><span data-i18n="scroll">scroll</span><span class="hero-scroll-line"></span></div>
 </header>
 
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>JavaScript</span><span>·</span><span>TypeScript</span><span>·</span><span>C++20</span><span>·</span><span>Python</span><span>·</span><span>WebRTC</span><span>·</span><span>Cloudflare Workers</span><span>·</span><span>JUCE</span><span>·</span><span>SQLite WAL</span><span>·</span><span>Three.js</span><span>·</span><span>Y.js CRDT</span><span>·</span><span>Stripe</span><span>·</span><span>React 18</span><span>·</span><span>Vite</span><span>·</span><span>Tailwind</span><span>·</span><span>AES-256-GCM</span><span>·</span><span>Playwright</span><span>·</span><span>Vitest</span><span>·</span>
+    <span>JavaScript</span><span>·</span><span>TypeScript</span><span>·</span><span>C++20</span><span>·</span><span>Python</span><span>·</span><span>WebRTC</span><span>·</span><span>Cloudflare Workers</span><span>·</span><span>JUCE</span><span>·</span><span>SQLite WAL</span><span>·</span><span>Three.js</span><span>·</span><span>Y.js CRDT</span><span>·</span><span>Stripe</span><span>·</span><span>React 18</span><span>·</span><span>Vite</span><span>·</span><span>Tailwind</span><span>·</span><span>AES-256-GCM</span><span>·</span><span>Playwright</span><span>·</span><span>Vitest</span><span>·</span>
+  </div>
+</div>
+
+<div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+
 <section id="why" class="section">
   <div class="container">
     <h2 class="section-title reveal"><span data-i18n="why.title">Why hire me</span> <span class="hi" data-i18n="why.title_b">right now</span></h2>
@@ -401,9 +411,28 @@
 
 <footer class="footer">
   <div class="container footer-inner">
-    <div data-i18n="footer.year">© 2026 Francesco · 999purple999 · Biella, Italy</div>
-    <div>
+    <div class="footer-col">
+      <h5>Francesco · 999purple999</h5>
+      <p>IT Technician · 19 · Biella</p>
+      <p>Building software that ships.</p>
+      <p style="margin-top:.6rem;color:var(--text2)"><strong style="color:var(--text1)">klabindustries.hq@gmail.com</strong></p>
+    </div>
+    <div class="footer-col">
+      <h5>Projects</h5>
+      <a href="https://github.com/999purple999/halcyon" target="_blank" rel="noopener">HALCYON</a>
+      <a href="https://github.com/999purple999/k-quest" target="_blank" rel="noopener">K-Quest</a>
+      <a href="https://klab-dsp.github.io/" target="_blank" rel="noopener">KLab Games</a>
+      <a href="https://github.com/999purple999/capsula-del-tempo" target="_blank" rel="noopener">Capsula del Tempo</a>
+    </div>
+    <div class="footer-col">
+      <h5>Links</h5>
+      <a href="https://github.com/999purple999" target="_blank" rel="noopener">GitHub</a>
       <a href="https://github.com/999purple999/portfolio" target="_blank" rel="noopener" data-i18n="footer.src">Open sources on GitHub →</a>
+      <a href="mailto:klabindustries.hq@gmail.com">Contact</a>
+    </div>
+    <div class="footer-bot">
+      <span data-i18n="footer.year">© 2026 Francesco · 999purple999 · Biella, Italy</span>
+      <span>Engineered with care · Built locally · Hosted on GitHub Pages</span>
     </div>
   </div>
 </footer>

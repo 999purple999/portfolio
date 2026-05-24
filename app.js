@@ -38,6 +38,29 @@ if (burger && links) {
   links.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => links.classList.remove('open')));
 }
 
+// Cursor follower (desktop only)
+const cd = document.getElementById('cursor-dot');
+const cr = document.getElementById('cursor-ring');
+let cx = 0, cy = 0, rx = 0, ry = 0;
+if (cd && cr && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+  window.addEventListener('mousemove', (e) => {
+    cx = e.clientX; cy = e.clientY;
+    cd.classList.add('active'); cr.classList.add('active');
+    cd.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
+  }, { passive: true });
+  function ringLoop() {
+    rx += (cx - rx) * 0.18; ry += (cy - ry) * 0.18;
+    cr.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+    requestAnimationFrame(ringLoop);
+  }
+  ringLoop();
+  document.querySelectorAll('a,button,[data-tilt],.contact-card').forEach((el) => {
+    el.addEventListener('mouseenter', () => cr.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cr.classList.remove('hover'));
+  });
+  window.addEventListener('mouseleave', () => { cd.classList.remove('active'); cr.classList.remove('active'); });
+}
+
 // Tilt cards (perspective 3D al pointer)
 document.querySelectorAll('[data-tilt]').forEach((card) => {
   let rect;

@@ -12,21 +12,27 @@ const LINK_DIST = 1.45; // soglia distanza per disegnare edge
 
 const nodeVert = /* glsl */ `
   uniform float uTime;
+  uniform vec2 uMouse;       // pointer normalizzato -1..1 (W3)
+  uniform float uGlow;       // 0..1 boost al hover card
   attribute float aSeed;
   varying float vSeed;
   varying float vGlow;
   void main(){
     vec3 pos = position;
-    // micro float per dare vita
     pos.x += sin(uTime * 0.4 + aSeed * 6.28) * 0.025;
     pos.y += cos(uTime * 0.3 + aSeed * 6.28) * 0.025;
     pos.z += sin(uTime * 0.5 + aSeed * 3.14) * 0.025;
+    // W3: leggera attrazione verso il cursore proiettato in screen-space
+    vec3 mw = vec3(uMouse.x * 1.5, uMouse.y * 1.5, 0.0);
+    float d = distance(pos, mw);
+    float pull = smoothstep(2.0, 0.4, d) * 0.18;
+    pos += normalize(mw - pos) * pull;
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mv;
     float dist = length(mv.xyz);
-    gl_PointSize = (52.0 / dist) * (1.0 + 0.4 * sin(uTime * 1.6 + aSeed * 9.0));
+    gl_PointSize = (52.0 / dist) * (1.0 + 0.4 * sin(uTime * 1.6 + aSeed * 9.0)) * (1.0 + uGlow * 0.6);
     vSeed = aSeed;
-    vGlow = smoothstep(8.0, 2.0, dist);
+    vGlow = smoothstep(8.0, 2.0, dist) + uGlow * 0.4;
   }
 `;
 const nodeFrag = /* glsl */ `
@@ -103,9 +109,14 @@ export function initHero(canvasEl) {
   const nodeGeo = new THREE.BufferGeometry();
   nodeGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   nodeGeo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
+  const sharedU = {
+    uTime: { value: 0 },
+    uMouse: { value: new THREE.Vector2(0, 0) },
+    uGlow: { value: 0 },
+  };
   const nodeMat = new THREE.ShaderMaterial({
     vertexShader: nodeVert, fragmentShader: nodeFrag,
-    uniforms: { uTime: { value: 0 } },
+    uniforms: sharedU,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   });
   nodesMesh = new THREE.Points(nodeGeo, nodeMat);
@@ -132,7 +143,7 @@ export function initHero(canvasEl) {
   lineGeo.setAttribute('aPair', new THREE.BufferAttribute(new Float32Array(linePairs), 1));
   const lineMat = new THREE.ShaderMaterial({
     vertexShader: lineVert, fragmentShader: lineFrag,
-    uniforms: { uTime: { value: 0 } },
+    uniforms: { uTime: sharedU.uTime, uGlow: sharedU.uGlow },
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   });
   linesMesh = new THREE.LineSegments(lineGeo, lineMat);
@@ -150,8 +161,13 @@ export function initHero(canvasEl) {
   function animate() {
     raf = requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
-    nodeMat.uniforms.uTime.value = t;
-    lineMat.uniforms.uTime.value = t;
+    sharedU.uTime.value = t;
+    // W3: glow ease towards target (set da listener globale window.__hero.glow)
+    const tgt = (window.__heroGlowTarget || 0);
+    sharedU.uGlow.value += (tgt - sharedU.uGlow.value) * 0.08;
+    // mouse smoothing
+    sharedU.uMouse.value.x += (mx - sharedU.uMouse.value.x) * 0.1;
+    sharedU.uMouse.value.y += (-my - sharedU.uMouse.value.y) * 0.1;
     // rotazione organica + parallax
     group.rotation.y = t * 0.16 + mx * 0.5;
     group.rotation.x = Math.sin(t * 0.08) * 0.15 + (-my * 0.35);

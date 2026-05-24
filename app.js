@@ -61,6 +61,12 @@ if (cd && cr && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
   window.addEventListener('mouseleave', () => { cd.classList.remove('active'); cr.classList.remove('active'); });
 }
 
+// W3: hero glow on card hover (uniform pulse via window flag, hero.js reads it)
+document.querySelectorAll('[data-tilt]').forEach((el) => {
+  el.addEventListener('mouseenter', () => { window.__heroGlowTarget = 1; });
+  el.addEventListener('mouseleave', () => { window.__heroGlowTarget = 0; });
+});
+
 // R1: Tilt damped smooth (lerp factor 0.14, target=0 on leave)
 document.querySelectorAll('[data-tilt]').forEach((card) => {
   let tx = 0, ty = 0, cx = 0, cy = 0, hovering = false, raf;
@@ -125,6 +131,93 @@ window.addEventListener('keydown', (e) => {
     kSeq = [];
   }
 });
+
+// W5: PWA register + web-vitals (debug mode only via ?debug=1)
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW failed', e));
+  });
+}
+if (new URLSearchParams(location.search).get('debug') === '1') {
+  const s = document.createElement('script');
+  s.type = 'module';
+  s.textContent = `
+    import {onLCP, onFID, onCLS, onINP} from 'https://unpkg.com/web-vitals@3?module';
+    const badge = document.createElement('div');
+    badge.style.cssText = 'position:fixed;bottom:12px;left:12px;z-index:9999;background:rgba(0,0,0,.85);color:#c084fc;font:11px/1.4 ui-monospace,monospace;padding:8px 12px;border-radius:8px;border:1px solid rgba(168,85,247,.3);min-width:140px';
+    badge.innerHTML = 'LCP: —<br>CLS: —<br>INP: —';
+    document.body.appendChild(badge);
+    const m = { LCP: '—', CLS: '—', INP: '—' };
+    const upd = () => { badge.innerHTML = Object.entries(m).map(([k,v]) => k+': '+v).join('<br>'); };
+    onLCP(({value}) => { m.LCP = Math.round(value)+'ms'; upd(); });
+    onCLS(({value}) => { m.CLS = value.toFixed(3); upd(); });
+    onINP(({value}) => { m.INP = Math.round(value)+'ms'; upd(); });
+  `;
+  document.head.appendChild(s);
+}
+
+// W6: aggiorna og:title / og:description quando cambia lingua
+function updateMetaTagsForLang() {
+  if (!window.__i18n) return;
+  const lang = window.__i18n.current();
+  const total = (window.__METRICS && window.__METRICS.totalRepos) || 10;
+  const titles = { en: `Francesco · ${total} projects · ITIS Q. Sella · Biella`, it: `Francesco · ${total} progetti · ITIS Q. Sella · Biella`, zh: `Francesco · ${total} 个项目 · ITIS Q. Sella · 比耶拉` };
+  const set = (sel, content) => { const el = document.querySelector(sel); if (el) el.setAttribute('content', content); };
+  set('meta[property="og:title"]', titles[lang] || titles.en);
+}
+document.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => setTimeout(updateMetaTagsForLang, 50)));
+setTimeout(updateMetaTagsForLang, 200);
+
+// W6: CV PDF export
+async function exportCVPdf() {
+  const btn = document.getElementById('cv-export');
+  if (btn) btn.textContent = 'Generating…';
+  try {
+    const [{ default: jsPDF }] = await Promise.all([
+      import('https://cdn.jsdelivr.net/npm/jspdf@2.5.2/+esm'),
+    ]);
+    const M = window.__METRICS || {};
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    let y = 18;
+    doc.setFillColor(168, 85, 247);
+    doc.rect(0, 0, 210, 8, 'F');
+    doc.setFontSize(22); doc.setTextColor(20, 20, 30); doc.text('Francesco · 999purple999', 16, y); y += 7;
+    doc.setFontSize(11); doc.setTextColor(80, 80, 100);
+    doc.text('IT Technician · 19 yo · Biella, Piedmont, Italy', 16, y); y += 5;
+    doc.text('klabindustries.hq@gmail.com · github.com/999purple999', 16, y); y += 10;
+    doc.setDrawColor(168, 85, 247); doc.line(16, y, 194, y); y += 8;
+    doc.setFontSize(14); doc.setTextColor(20, 20, 30); doc.text('METRICS', 16, y); y += 6;
+    doc.setFontSize(10); doc.setTextColor(50, 50, 70);
+    doc.text(`Total repositories: ${M.totalRepos || 10}  ·  Public: ${M.publicRepos || 5}  ·  Private: ${M.privateRepos || 5}`, 16, y); y += 5;
+    doc.text(`Lines of code shipped: ${(M.totalLoc || 158000).toLocaleString()}  ·  Languages: ${(M.languages || []).length || 10}`, 16, y); y += 8;
+    doc.setFontSize(14); doc.setTextColor(20, 20, 30); doc.text('PROJECTS', 16, y); y += 6;
+    doc.setFontSize(10); doc.setTextColor(50, 50, 70);
+    const lines = [
+      'HALCYON — Self-hosted realtime mesh voice/video. Node + WebRTC + SQLite. GPL-3.',
+      'K-Quest — Paid challenge marketplace. React + Cloudflare Workers + Stripe.',
+      'K-Perception (private) — Zero-knowledge encrypted notes. Y.js CRDT + AES-256-GCM.',
+      'KLab DSP suite (4 private) — Binaura, FXRack, StreamSauce, FRKX. C++20 + JUCE.',
+      'Privacy Warfare — Roguelite action-RPG vanilla ES, GitHub Pages.',
+      'KLab Games Arcade — 9 mini-games browser, zero dependencies.',
+      'Capsula del Tempo + SISTEMI 5B — Two PWAs for ITIS Q. Sella.',
+    ];
+    lines.forEach((l) => { doc.text('• ' + l, 16, y); y += 5; });
+    y += 5;
+    doc.setFontSize(14); doc.setTextColor(20, 20, 30); doc.text('STACK', 16, y); y += 6;
+    doc.setFontSize(10); doc.setTextColor(50, 50, 70);
+    doc.text('JavaScript / TypeScript / C++20 / Python · WebRTC mesh · JUCE · Cloudflare Workers · Y.js CRDT · AES-256-GCM · Three.js · Stripe · Vitest / Playwright · AI orchestration', 16, y, { maxWidth: 178 });
+    y += 14;
+    doc.setFontSize(8); doc.setTextColor(120, 120, 140);
+    doc.text(`Generated ${new Date().toISOString().slice(0, 10)} from live portfolio metrics. https://999purple999.github.io/portfolio/`, 16, 285);
+    doc.save('Francesco-999purple999-CV.pdf');
+    if (btn) btn.textContent = 'Download CV (PDF)';
+  } catch (e) {
+    console.warn('PDF export failed', e);
+    if (btn) btn.textContent = 'PDF failed · retry';
+  }
+}
+const cvBtn = document.getElementById('cv-export');
+if (cvBtn) cvBtn.addEventListener('click', exportCVPdf);
 
 // Console egg per i nerd che aprono F12
 console.log(

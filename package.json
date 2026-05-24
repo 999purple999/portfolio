@@ -1,0 +1,14 @@
+{
+  "name": "999purple999-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "python -m http.server 8765",
+    "test:e2e": "playwright test",
+    "test:install": "playwright install chromium --with-deps"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

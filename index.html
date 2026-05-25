@@ -31,6 +31,7 @@
   <a href="#top" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
   <div class="nav-links">
     <a href="#projects" data-i18n="nav.projects">Projects</a>
+    <a href="#outreach" data-i18n="nav.outreach">Outreach</a>
     <a href="#stack" data-i18n="nav.stack">Stack</a>
     <a href="#about" data-i18n="nav.about">About</a>
     <a href="#contact" class="nav-cta" data-i18n="nav.contact">Contact</a>
@@ -258,6 +259,93 @@
         <div class="project-links">
           <a href="https://github.com/999purple999/capsula-del-tempo" target="_blank" rel="noopener" data-i18n="projects.school_link_a">Capsula →</a>
           <a href="https://github.com/999purple999/SISTEMI-5B-STUDIO" target="_blank" rel="noopener" data-i18n="projects.school_link_b">Sistemi 5B →</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="outreach" class="section">
+  <div class="container">
+    <h2 class="section-title reveal" data-i18n="outreach.title">Real work on upstream repos</h2>
+    <p class="section-sub reveal delay-1" data-i18n="outreach.sub">Four issues on real open-source projects. Two with code ready to ship, one with an honest design proposal, one with a code-review angle. Every page below documents what was done, the trade-offs taken, and what the maintainer needs to do next.</p>
+
+    <div class="projects-grid">
+
+      <article class="project featured reveal" data-tilt>
+        <div class="project-rank" data-i18n="outreach.hf_rank">#01 · code ready</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issue #1979 · PR-shaped branch
+        </div>
+        <h3 class="project-title">Hugging Face</h3>
+        <p class="project-claim" data-i18n="outreach.hf_claim">Sharded safetensors metadata, 3 → 2 HTTP requests per shard.</p>
+        <p class="project-body" data-i18n="outreach.hf_body">Real fix for huggingface.js #1979. New private helper that bypasses fileDownloadInfo and issues two direct range requests against the resolve URL. Reproduces the upstream benchmark where DeepSeek-Math-V2 (163 shards) stops failing 100% of runs. Three offline vitest unit tests with mocked fetch, PR-shaped README, every safety invariant of the previous path preserved.</p>
+        <ul class="project-tech">
+          <li>TypeScript</li><li>vitest</li><li>fetch + Range</li>
+          <li>@huggingface/hub</li><li>+114 / −1 LOC</li><li>3 tests</li>
+        </ul>
+        <div class="project-links">
+          <a href="azienda-huggingface.html" data-i18n="outreach.hf_link_page">View the case →</a>
+          <a href="https://github.com/huggingface/huggingface.js/issues/1979" target="_blank" rel="noopener" data-i18n="outreach.hf_link_issue">Issue #1979 ↗</a>
+        </div>
+      </article>
+
+      <article class="project featured-2 reveal delay-1" data-tilt>
+        <div class="project-rank" data-i18n="outreach.mm_rank">#02 · code ready</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issue #1143 · PR-shaped branch
+        </div>
+        <h3 class="project-title">Mattermost</h3>
+        <p class="project-claim" data-i18n="outreach.mm_claim">Pre-flight diagnostic for Docker RFC1918 ICE leak.</p>
+        <p class="project-body" data-i18n="outreach.mm_body">Real fix for mattermost-plugin-calls #1143. Detects the misconfiguration shape that today silently drops calls minutes after they connect (Docker 172.x advertised as ICE host candidate, coturn rejects with 403). Zero behaviour change: one loud LogError at activate when ALL four conditions hold. Three Go unit tests over 13 boundary IPs, RFC1918 + RFC6598 + IPv6 ULA coverage.</p>
+        <ul class="project-tech">
+          <li>Go</li><li>WebRTC / ICE</li><li>RFC1918 + RFC6598</li>
+          <li>net.Interface</li><li>+334 LOC</li><li>3 tests</li>
+        </ul>
+        <div class="project-links">
+          <a href="azienda-mattermost.html" data-i18n="outreach.mm_link_page">View the case →</a>
+          <a href="https://github.com/mattermost/mattermost-plugin-calls/issues/1143" target="_blank" rel="noopener" data-i18n="outreach.mm_link_issue">Issue #1143 ↗</a>
+        </div>
+      </article>
+
+      <article class="project reveal delay-2" data-tilt>
+        <div class="project-rank" data-i18n="outreach.cf_rank">#03 · design proposal</div>
+        <div class="project-badge private">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span data-i18n="outreach.cf_badge">Issue #14076 · proposal-only, no code yet</span>
+        </div>
+        <h3 class="project-title">ComfyUI</h3>
+        <p class="project-claim" data-i18n="outreach.cf_claim">Design alignment before code, because the lifecycle is fragile.</p>
+        <p class="project-body" data-i18n="outreach.cf_body">Comfyanonymous's model_unload + free_memory drops the only Python handle on evicted models, GC reclaims the CPU weights, every prompt re-reads from disk. A drive-by patch would silently break at least three other systems (pin-budget under racing requests, the weakref.finalize chain, MPS/ROCm offload semantics). The branch ships a failure trace pinned to line numbers, the fix shape, and four direct questions for the maintainer.</p>
+        <ul class="project-tech">
+          <li>Python</li><li>VRAM / RAM cache</li><li>LRU eviction</li>
+          <li>weakref.finalize</li><li>model_management.py</li><li>+117 doc LOC</li>
+        </ul>
+        <div class="project-links">
+          <a href="azienda-comfyui.html" data-i18n="outreach.cf_link_page">View the case →</a>
+          <a href="https://github.com/comfyanonymous/ComfyUI/issues/14076" target="_blank" rel="noopener" data-i18n="outreach.cf_link_issue">Issue #14076 ↗</a>
+        </div>
+      </article>
+
+      <article class="project reveal delay-3" data-tilt>
+        <div class="project-rank" data-i18n="outreach.op_rank">#04 · code review</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issue #5523 · post-merge follow-up
+        </div>
+        <h3 class="project-title">Opik · Comet</h3>
+        <p class="project-claim" data-i18n="outreach.op_claim">Came in for the bug, found their fix already merged, kept reading.</p>
+        <p class="project-body" data-i18n="outreach.op_body">Verified PR #6624 closed the original task-error silent-swallow targeted by issue #5523. Then traced the sibling pattern still present in calculateScores lines 505-509: when a metric throws (not the task), the error is logged-only with no entry in scoreResults — the same UX failure mode the issue was opened against, one layer deeper. Cold mail leads with the diligence, not a duplicate PR. Stack overlap with opik-frontend is 1:1.</p>
+        <ul class="project-tech">
+          <li>TypeScript</li><li>React 18 + Vite</li><li>Tailwind</li>
+          <li>vitest</li><li>EvaluationEngine</li><li>code review</li>
+        </ul>
+        <div class="project-links">
+          <a href="azienda-opik.html" data-i18n="outreach.op_link_page">View the case →</a>
+          <a href="https://github.com/comet-ml/opik/issues/5523" target="_blank" rel="noopener" data-i18n="outreach.op_link_issue">Issue #5523 ↗</a>
         </div>
       </article>
 

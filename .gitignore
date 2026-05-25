@@ -1,0 +1,18 @@
+# Private outreach material — never push
+upwork-profile.*
+upwork-profile-*.md
+cold-emails.md
+cold-emails-*.md
+COLD_OUTREACH_OVERVIEW.md
+WORK_HUNT_PLAN.md
+workrepo-analysis-rag.md
+
+# Editor & OS noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Local notes
+NOTES.md
+TODO.local.md

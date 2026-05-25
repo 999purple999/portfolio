@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ComfyUI · #14076 · Francesco · 999purple999</title>
+<meta name="description" content="Design proposal for ComfyUI issue #14076 — RAM model cache. No drive-by code; alignment-first because the patcher / finalizer / weakref lifecycle is fragile.">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kp:#a855f7;--kp2:#7c3aed;--kp3:#c084fc;--kp4:#e9d5ff;
+  --cy:#67e8f9;--emerald:#10b981;--rose:#ef4444;--gold:#fbbf24;
+  --bg0:#04050a;--bg1:#080a14;--bg2:#0e1120;--bg3:#161a2c;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+  --text1:#f5f7ff;--text2:#9aa4c0;--text3:#5d6685;
+  --tr:480ms cubic-bezier(.16,1,.3,1);--tr-fast:260ms cubic-bezier(.16,1,.3,1);
+  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --font-body:'Geist','Inter',ui-sans-serif,system-ui,sans-serif;
+  --grad-kp:linear-gradient(135deg,#c084fc 0%,#a855f7 45%,#7c3aed 100%);
+  --grad-rim:linear-gradient(135deg,#c084fc 0%,#67e8f9 100%);
+  --shadow-card:0 12px 36px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--font-body);background:var(--bg0);color:var(--text1);min-height:100dvh;overflow-x:hidden;line-height:1.65;font-weight:400;letter-spacing:-.005em;
+  background:radial-gradient(60% 40% at 20% 8%,rgba(168,85,247,.10),transparent 70%),radial-gradient(50% 35% at 80% 25%,rgba(124,58,237,.07),transparent 65%),radial-gradient(40% 30% at 50% 70%,rgba(103,232,249,.04),transparent 70%),linear-gradient(180deg,#06070e 0%,#04050a 60%,#06070e 100%);background-attachment:fixed;}
+::selection{background:rgba(168,85,247,.4);color:#fff}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 75% 60% at 50% 30%,#000 25%,transparent 78%);opacity:.55}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 clamp(1rem,3vw,3rem);height:64px;background:rgba(4,5,10,.65);backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--border);transition:background var(--tr)}
+nav.scrolled{background:rgba(4,5,10,.92);border-color:var(--border2)}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.18em;color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:600}
+.nav-mark{width:30px;height:30px;border-radius:8px;background:var(--grad-kp);display:grid;place-items:center;font-family:var(--font-display);font-size:.82rem;color:#fff;font-weight:700;box-shadow:0 0 18px rgba(168,85,247,.45),0 1px 0 rgba(255,255,255,.18) inset}
+.nav-links{display:flex;align-items:center;gap:1.8rem}
+.nav-links a{color:var(--text2);font-size:.85rem;text-decoration:none;transition:color var(--tr-fast);font-weight:500}
+.nav-links a:hover{color:var(--text1)}
+.nav-cta{padding:8px 18px;border-radius:8px;background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.32);color:var(--kp3) !important;font-weight:600}
+.container{max-width:1160px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem);position:relative;z-index:2}
+.hi{background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+.hero{padding:140px 0 90px}
+.crumbs{display:inline-flex;align-items:center;gap:.6rem;padding:6px 14px;border-radius:99px;background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);font-size:.78rem;font-family:var(--font-mono);color:var(--kp3);margin-bottom:1.5rem;font-weight:600;letter-spacing:.04em}
+.crumbs span:not(:last-child)::after{content:" →";color:var(--text3);margin:0 .3em}
+.status-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.8rem}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;font-size:.74rem;font-family:var(--font-mono);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.pill-green{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.36);color:#34d399}
+.pill-amber{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.36);color:var(--gold)}
+.pill-blue{background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.32);color:var(--cy)}
+.pill-purple{background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);color:var(--kp3)}
+.pill-rose{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.36);color:#fca5a5}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+h1.title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1;letter-spacing:-.03em;font-weight:600;margin-bottom:1rem;font-variation-settings:"opsz" 96}
+h1.title .name{background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#a855f7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.issue-line{font-family:var(--font-mono);font-size:1rem;color:var(--text2);margin-bottom:1.6rem;letter-spacing:.02em}
+.issue-line a{color:var(--cy);text-decoration:none;border-bottom:1px dashed rgba(103,232,249,.4)}
+.issue-line code{font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px}
+.lede{font-size:1.18rem;color:var(--text2);max-width:760px;margin-bottom:2.4rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.9rem;text-decoration:none;transition:transform var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);border:none;cursor:pointer}
+.btn-primary{background:var(--grad-kp);color:#fff;box-shadow:0 10px 28px rgba(168,85,247,.36),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(168,85,247,.5),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text1);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border3)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-bottom:1rem}
+.metric{padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);transition:transform var(--tr-fast),border-color var(--tr-fast)}
+.metric:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.36)}
+.metric-num{font-family:var(--font-display);font-size:2rem;font-weight:600;background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;margin-bottom:.3rem}
+.metric-lbl{font-size:.78rem;font-family:var(--font-mono);color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+section.section{padding:80px 0;border-top:1px solid var(--border)}
+.section-eyebrow{font-family:var(--font-mono);font-size:.78rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.8rem;font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin-bottom:1.4rem;font-variation-settings:"opsz" 72}
+.section-sub{font-size:1.06rem;color:var(--text2);max-width:760px;line-height:1.65;margin-bottom:2.4rem}
+.section-sub code,p code,.card li code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.card{padding:2rem 2.2rem;border-radius:22px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);box-shadow:var(--shadow-card);margin-bottom:1.6rem}
+.card h3{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:.8rem;letter-spacing:-.01em}
+.card p{color:var(--text2);margin-bottom:.9rem}
+.card p:last-child{margin-bottom:0}
+.card ul,.card ol{color:var(--text2);padding-left:1.4rem;margin-bottom:.9rem}
+.card ul li,.card ol li{margin-bottom:.4rem;line-height:1.65}
+.code-block{font-family:var(--font-mono);font-size:.84rem;line-height:1.65;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:14px;padding:1.2rem 1.4rem;overflow-x:auto;color:#cbd5e1;margin:1rem 0 1.4rem}
+.code-block .comment{color:#64748b;font-style:italic}
+.code-block .keyword{color:var(--kp3);font-weight:600}
+.code-block .string{color:#86efac}
+.diagram-wrap{margin:1.6rem 0;padding:1.6rem;border-radius:18px;background:rgba(255,255,255,.02);border:1px solid var(--border2);overflow-x:auto}
+.diagram-wrap .mermaid{font-family:var(--font-mono) !important;display:flex;justify-content:center}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
+.kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
+.kv dd{color:var(--text1)}
+.kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
+.callout strong{color:var(--kp3)}
+.callout.warn{border-left-color:var(--gold);background:rgba(251,191,36,.06)}
+.callout.warn strong{color:var(--gold)}
+.timeline{display:grid;gap:1rem;margin:1.6rem 0}
+.timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-step{font-family:var(--font-mono);font-size:.75rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.1em;padding-top:.2rem;font-weight:600}
+.timeline-body h4{font-family:var(--font-display);font-weight:600;margin-bottom:.3rem;font-size:1.04rem}
+.timeline-body p{color:var(--text2);font-size:.94rem;margin:0}
+footer{padding:60px 0 80px;border-top:1px solid var(--border);text-align:center;color:var(--text3)}
+footer a{color:var(--kp3);text-decoration:none}
+@media (max-width:780px){.nav-links{display:none}.kv{grid-template-columns:1fr}.kv dt{padding-top:0;font-size:.74rem}.timeline-row{grid-template-columns:1fr;gap:.4rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="index.html#projects">Projects</a>
+    <a href="azienda-huggingface.html">Hugging Face</a>
+    <a href="azienda-mattermost.html">Mattermost</a>
+    <a href="azienda-opik.html">Opik</a>
+    <a href="https://github.com/999purple999/ComfyUI/tree/proposal/14076-ram-model-cache" class="nav-cta" target="_blank" rel="noopener">View branch ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="crumbs"><span>Outreach</span><span>ComfyUI</span><span>Proposal #14076</span></div>
+    <div class="status-row">
+      <span class="pill pill-amber"><span class="pill-dot"></span>Design proposal · No code yet</span>
+      <span class="pill pill-blue">Failure trace mapped</span>
+      <span class="pill pill-purple">4 questions to maintainer</span>
+      <span class="pill pill-rose">Awaiting alignment before any PR</span>
+    </div>
+    <h1 class="title"><span class="name">ComfyUI</span></h1>
+    <p class="issue-line">comfyanonymous/ComfyUI · issue <a href="https://github.com/comfyanonymous/ComfyUI/issues/14076" target="_blank" rel="noopener">#14076</a> · branch <code>proposal/14076-ram-model-cache</code></p>
+    <p class="lede">Models get evicted from VRAM and then re-read from disk on every prompt, even when the host has 60+ GB of free system RAM. The bug is real and the cause is identified — but a drive-by patch would silently break at least three other systems. <span class="hi">This branch deliberately ships zero code</span>: it ships an honest design proposal, a failure trace pinned to specific line numbers, and four direct questions for <code>comfyanonymous</code> before any code is touched.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/999purple999/ComfyUI/tree/proposal/14076-ram-model-cache" target="_blank" rel="noopener">View proposal on GitHub <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/comfyanonymous/ComfyUI/issues/14076" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">~5-15s</div><div class="metric-lbl">Disk reload per workflow iteration (current cost)</div></div>
+      <div class="metric"><div class="metric-num">3</div><div class="metric-lbl">Failure modes a naïve patch would silently introduce</div></div>
+      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">Specific questions for the maintainer before coding</div></div>
+      <div class="metric"><div class="metric-num">2-3 days</div><div class="metric-lbl">From alignment to a real PR with tests</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">01 · The problem</div>
+    <h2 class="section-title">Free RAM is sitting there, but the next prompt still hits the disk</h2>
+    <p class="section-sub">The reporter has 24 GB VRAM and runs a multi-model Wan workflow. When a model gets evicted from VRAM, ComfyUI doesn't keep its weights in CPU RAM as a write-through cache — it drops the only Python handle, the garbage collector reclaims the weights, and the next prompt loads them from disk again. On a 60+ GB workstation with weights that could comfortably live in system memory, every iteration eats 5-15 seconds of disk I/O for nothing.</p>
+
+    <div class="card">
+      <h3>The exact code path that drops the handle</h3>
+      <p>Two specific places, both in <code>comfy/model_management.py</code>:</p>
+      <ol>
+        <li><code>model_unload()</code> at line 619 — calls <code>self.model.detach(unpatch_weights)</code>, then nulls out <code>self.model_finalizer</code> and <code>self.real_model</code>. The model's weight references are gone from the patcher side.</li>
+        <li><code>free_memory()</code> at line 706 — calls <code>current_loaded_models.pop(i)</code> and appends the popped <code>LoadedModel</code> to a local <code>unloaded_models</code> list that the caller in <code>load_models_gpu()</code> discards.</li>
+      </ol>
+      <p>The <code>offload_device</code> is CPU for nearly every config, so the actual weight tensors live in host RAM up until that <code>pop</code> happens. The problem isn't where the bytes go — it's that nobody keeps a Python reference to them, so Python's garbage collector reclaims them on the next major collection.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart TD
+  Run1[Workflow run 1] --> Load1["load_models_gpu()<br/>reads weights from disk"]
+  Load1 --> Use1[VRAM model used for prompt]
+  Use1 --> Pressure[VRAM pressure]
+  Pressure --> Unload["model_unload()<br/>+ free_memory()<br/>pops LoadedModel"]
+  Unload --> GC["GC reclaims CPU weights<br/>(only handle was the pop'd LoadedModel)"]
+  GC --> Run2[Workflow run 2]
+  Run2 --> Load2["load_models_gpu()<br/>reads weights from disk AGAIN"]
+  Load2 --> Slow["5-15 s disk I/O<br/>even with 60 GB free RAM"]
+  style GC fill:#1e0a0a,stroke:#ef4444,color:#fca5a5
+  style Slow fill:#1e0a0a,stroke:#ef4444,color:#fca5a5
+      </pre>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">02 · Why no drive-by patch</div>
+    <h2 class="section-title">Three ways a naïve "keep weights in RAM" patch would silently break</h2>
+    <p class="section-sub">ComfyUI's memory management is tightly coupled to the patcher / finalizer / weakref lifecycle in <code>comfy/model_patcher.py</code>. The natural reflex — hold a strong reference to the model in a side cache — interacts poorly with three existing systems.</p>
+
+    <div class="card">
+      <h3>Failure mode 1 · pin-budget underflow</h3>
+      <p>The <code>ensure_pin_budget</code> + <code>dynamic_pins</code> path manages CUDA pinned-memory pools. If a cache holds models with active dynamic pins, racing requests to <code>ensure_pin_registerable</code> can underflow the recorded budget — meaning <code>can_unload_sorted</code> later picks the wrong victim, and a model that should be retained gets evicted instead.</p>
+    </div>
+
+    <div class="card">
+      <h3>Failure mode 2 · the weakref.finalize chain</h3>
+      <p>At <code>model_management.py:610</code>, every <code>LoadedModel</code> registers <code>weakref.finalize(real_model, cleanup_models)</code>. The finalizer fires only when the <em>real_model</em> becomes unreachable. If a cache holds a strong reference to the model, the finalizer never fires, <code>cleanup_models</code> never runs, and <code>current_loaded_models</code> grows monotonically until the process runs out of memory entirely.</p>
+    </div>
+
+    <div class="card">
+      <h3>Failure mode 3 · divergent offload semantics on MPS / ROCm</h3>
+      <p>On CUDA, the CPU offload device is host RAM and tensor lifetime is straightforward. On MPS (Apple Silicon) and ROCm (AMD), offload can pin host memory differently or involve hidden copies, and the assumption "weights live in plain RAM until I drop the reference" no longer holds. A patch that works flawlessly on a CUDA RTX 5080 can OOM an M3 Max or a RX 7900 XT.</p>
+    </div>
+
+    <div class="callout warn"><strong>Why this matters for the operator (you, hiring):</strong> sending a drive-by PR that "fixes" #14076 but introduces silent regressions on Mac or AMD is worse than not sending one. The proposal flow — design doc + explicit questions + agreement before code — protects both sides. It also signals to the maintainer that I read enough of the codebase to know <em>where</em> the patch is non-trivial, not just <em>what</em> the symptom is.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">03 · The proposed fix shape</div>
+    <h2 class="section-title">Opt-in flag, gated LRU cache, auto-tune on high-RAM hosts</h2>
+    <p class="section-sub">Three small primitives. None of them ship until <code>comfyanonymous</code> signs off on the answers to four specific design questions.</p>
+
+    <div class="card">
+      <h3>1 · New CLI flag</h3>
+      <p><code>--ram-model-cache-mb N</code>. Default <code>0</code> means today's behavior, byte for byte. When set to a positive value, <code>free_memory()</code> stops calling <code>current_loaded_models.pop(i)</code> immediately and instead moves the model into a dedicated <code>ram_cached_models</code> deque with an LRU policy bounded by:</p>
+      <div class="code-block">sum(m.model_memory() <span class="keyword">for</span> m <span class="keyword">in</span> ram_cached_models) &lt;= args.ram_model_cache_mb * (1024 ** 2)</div>
+    </div>
+
+    <div class="card">
+      <h3>2 · Cache hit in <code>load_models_gpu()</code></h3>
+      <p>Before initialising a model from disk, <code>load_models_gpu()</code> checks <code>ram_cached_models</code>. On hit, the model is popped out of the cache, <code>model_load()</code> runs (which moves weights back to VRAM), and it gets re-appended to <code>current_loaded_models</code>. No disk read.</p>
+    </div>
+
+    <div class="card">
+      <h3>3 · Auto-tune on high-RAM hosts</h3>
+      <p>When <code>--ram-model-cache-mb</code> is unset and the host has more than 64 GB of free system RAM at startup, default the cap to <code>min(0.25 * free_ram, 32 GB)</code>. Users with 128 GB RAM and 24 GB VRAM (the exact shape of the bug reporter's machine) get the speedup without touching flags. A <code>--no-ram-model-cache</code> switch disables the auto-tune for strict-today-behavior users.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+  R[Run N] --> Q{model in<br/>current_loaded_models?}
+  Q -- yes --> Use[Use it]
+  Q -- no --> C{model in<br/>ram_cached_models?}
+  C -- yes --> H[Pop from cache<br/>model_load to VRAM<br/>append to current_loaded]
+  H --> Use
+  C -- no --> D[Read from disk]
+  D --> Use
+  Use --> Done[Run N complete]
+  Done --> P{VRAM pressure?}
+  P -- yes --> M["Move evicted model<br/>to ram_cached_models<br/>(bounded by cap)"]
+  P -- no --> R2[Run N+1]
+  M --> R2
+  style H fill:#0a1e10,stroke:#10b981,color:#86efac
+  style D fill:#1e1408,stroke:#fbbf24,color:#fde68a
+      </pre>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Edge cases enumerated in the proposal</h3>
+    <dl class="kv">
+      <dt>Dynamic models</dt><dd><code>model.is_dynamic()</code> path keeps current behavior (those manage their own pinning).</dd>
+      <dt>Multi-GPU</dt><dd>Cache is host-RAM, GPU-agnostic. Works the same on 1 or 8 GPUs.</dd>
+      <dt>Custom nodes</dt><dd>No API change. Cache is transparent.</dd>
+      <dt>Host RAM pressure</dt><dd>Cache shrinks under <code>psutil.virtual_memory().available</code> pressure. Never causes OOM.</dd>
+      <dt>Finalizer order</dt><dd>When a cached model is evicted, <code>model_finalizer.detach()</code> is called once explicitly before GC.</dd>
+      <dt>--clear-cache-on-prompt</dt><dd>Open question for the maintainer — should the new cache honor it identically?</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · The four questions for the maintainer</div>
+    <h2 class="section-title">Where coding waits for alignment</h2>
+    <div class="card">
+      <ol>
+        <li><strong>Opt-in flag vs auto-tune-on-by-default.</strong> Is the <code>--ram-model-cache-mb</code> opt-in the shape you want, or do you prefer auto-tune ON by default (with <code>--no-ram-model-cache</code> to disable)?</li>
+        <li><strong>Finalizer teardown order.</strong> Does the <code>weakref.finalize</code> chain in <code>model_patcher.py</code> need a specific teardown order I should match? I plan to call <code>model_finalizer.detach()</code> once at cache-eviction time; does that cover it?</li>
+        <li><strong>Eviction policy.</strong> Plain LRU, or LRU-with-cost-awareness (bigger models stay longer because the disk-reload penalty scales with size)?</li>
+        <li><strong>--clear-cache-on-prompt.</strong> Should the new cache honor this switch identically to <code>current_loaded_models</code>? Currently it clears the GPU cache, not host RAM.</li>
+      </ol>
+    </div>
+    <div class="callout"><strong>Once these four are answered:</strong> a real PR follows within 2-3 days, with vitest-equivalent Python tests in <code>tests-unit/comfy/test_model_management.py</code> covering cache hit, cache miss, LRU eviction, cap enforcement, and graceful behavior under host RAM pressure. The verification plan in the proposal runs against the reporter's exact <code>WanWorkflow.json</code>.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">05 · The outreach</div>
+    <h2 class="section-title">Where this stands</h2>
+    <p class="section-sub">ComfyUI is run by one core maintainer with strong opinions. Drive-by PRs to <code>model_management.py</code> have historically been bounced. The proposal-first flow is calibrated for that culture.</p>
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Proposal document committed</h4><p>Local branch <code>proposal/14076-ram-model-cache</code>, commit <code>f9f5b59</code>. The document is the deliverable — no executable code yet.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Reach out via Discord (preferred) or the GitHub issue thread</h4><p>Discord first because <code>comfyanonymous</code> is more responsive there than via email. The message links to the proposal branch and asks the four questions explicitly.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">If aligned</div><div class="timeline-body"><h4>PR opens within 2-3 days with tests</h4><p>Real code, tests, benchmarks against the WanWorkflow. Estimated 3-5 days of total work from alignment to merge.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 1-2 weeks, contract within 6 weeks</h4><p>Realistic odds for this lead alone: ~15-30% conversation, ~5% contract. ComfyUI is mostly a single-maintainer project; contracts here are rare. More likely outcome: referral to a custom-node-shop or an inference-tooling company.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">06 · How to verify</div>
+    <h2 class="section-title">Reproduce every claim</h2>
+    <div class="code-block">
+<span class="comment"># Confirm the branch + commit + proposal doc exist locally</span>
+<span class="keyword">cd</span> c:/Users/FRA/Documents/github/workrepo/ComfyUI
+git switch proposal/14076-ram-model-cache
+git log --stat -1               <span class="comment"># expect commit f9f5b59, 1 file</span>
+cat PROPOSAL_ISSUE_14076.md     <span class="comment"># the deliverable</span>
+    </div>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">There are no tests to run, because there is no code yet. That is the point: alignment first, code after.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem"><a href="index.html">← Back to portfolio</a> · <a href="WORK_HUNT_PLAN.md">Work-hunt plan</a> · <a href="COLD_OUTREACH_OVERVIEW.md">Outreach overview</a></p>
+    <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{primaryColor:'#1a1228',primaryTextColor:'#f5f7ff',primaryBorderColor:'#7c3aed',lineColor:'#a855f7',secondaryColor:'#0a1e10',tertiaryColor:'#080a14',fontFamily:'Geist Mono, monospace',fontSize:'14px'},flowchart:{curve:'basis',padding:24}});
+  document.addEventListener('scroll',()=>{const nav=document.getElementById('nav');if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');});
+</script>
+</body>
+</html>

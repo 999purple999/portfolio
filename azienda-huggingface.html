@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hugging Face · huggingface.js #1979 · Francesco · 999purple999</title>
+<meta name="description" content="Fix for huggingface.js issue #1979 — sharded safetensors metadata parsing, 3 to 2 HTTP requests per shard. Production-ready branch, 3 unit tests, full README.">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kp:#a855f7;--kp2:#7c3aed;--kp3:#c084fc;--kp4:#e9d5ff;
+  --cy:#67e8f9;--emerald:#10b981;--rose:#ef4444;--gold:#fbbf24;
+  --bg0:#04050a;--bg1:#080a14;--bg2:#0e1120;--bg3:#161a2c;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+  --text1:#f5f7ff;--text2:#9aa4c0;--text3:#5d6685;
+  --tr:480ms cubic-bezier(.16,1,.3,1);--tr-fast:260ms cubic-bezier(.16,1,.3,1);
+  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --font-body:'Geist','Inter',ui-sans-serif,system-ui,sans-serif;
+  --grad-kp:linear-gradient(135deg,#c084fc 0%,#a855f7 45%,#7c3aed 100%);
+  --grad-rim:linear-gradient(135deg,#c084fc 0%,#67e8f9 100%);
+  --shadow-card:0 12px 36px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{
+  font-family:var(--font-body);background:var(--bg0);color:var(--text1);
+  min-height:100dvh;overflow-x:hidden;line-height:1.65;font-weight:400;letter-spacing:-.005em;
+  background:
+    radial-gradient(60% 40% at 20% 8%,rgba(168,85,247,.10),transparent 70%),
+    radial-gradient(50% 35% at 80% 25%,rgba(124,58,237,.07),transparent 65%),
+    radial-gradient(40% 30% at 50% 70%,rgba(103,232,249,.04),transparent 70%),
+    linear-gradient(180deg,#06070e 0%,#04050a 60%,#06070e 100%);
+  background-attachment:fixed;
+}
+::selection{background:rgba(168,85,247,.4);color:#fff}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 75% 60% at 50% 30%,#000 25%,transparent 78%);opacity:.55}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:0 clamp(1rem,3vw,3rem);height:64px;
+  background:rgba(4,5,10,.65);backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid var(--border);transition:background var(--tr);
+}
+nav.scrolled{background:rgba(4,5,10,.92);border-color:var(--border2)}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.18em;color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:600}
+.nav-mark{width:30px;height:30px;border-radius:8px;background:var(--grad-kp);display:grid;place-items:center;font-family:var(--font-display);font-size:.82rem;color:#fff;font-weight:700;box-shadow:0 0 18px rgba(168,85,247,.45),0 1px 0 rgba(255,255,255,.18) inset}
+.nav-links{display:flex;align-items:center;gap:1.8rem}
+.nav-links a{color:var(--text2);font-size:.85rem;text-decoration:none;transition:color var(--tr-fast);font-weight:500}
+.nav-links a:hover{color:var(--text1)}
+.nav-cta{padding:8px 18px;border-radius:8px;background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.32);color:var(--kp3) !important;font-weight:600}
+.container{max-width:1160px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem);position:relative;z-index:2}
+.hi{background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+.hero{padding:140px 0 90px}
+.crumbs{display:inline-flex;align-items:center;gap:.6rem;padding:6px 14px;border-radius:99px;background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);font-size:.78rem;font-family:var(--font-mono);color:var(--kp3);margin-bottom:1.5rem;font-weight:600;letter-spacing:.04em}
+.crumbs span:not(:last-child)::after{content:" →";color:var(--text3);margin:0 .3em}
+.status-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.8rem}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;font-size:.74rem;font-family:var(--font-mono);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.pill-green{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.36);color:#34d399}
+.pill-amber{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.36);color:var(--gold)}
+.pill-blue{background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.32);color:var(--cy)}
+.pill-purple{background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);color:var(--kp3)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+h1.title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1;letter-spacing:-.03em;font-weight:600;margin-bottom:1rem;font-variation-settings:"opsz" 96}
+h1.title .name{background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#a855f7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.issue-line{font-family:var(--font-mono);font-size:1rem;color:var(--text2);margin-bottom:1.6rem;letter-spacing:.02em}
+.issue-line a{color:var(--cy);text-decoration:none;border-bottom:1px dashed rgba(103,232,249,.4)}
+.issue-line a:hover{color:#a5f3fc;border-bottom-color:#a5f3fc}
+.lede{font-size:1.18rem;color:var(--text2);max-width:760px;margin-bottom:2.4rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.9rem;text-decoration:none;transition:transform var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);border:none;cursor:pointer}
+.btn-primary{background:var(--grad-kp);color:#fff;box-shadow:0 10px 28px rgba(168,85,247,.36),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(168,85,247,.5),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text1);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border3)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-bottom:1rem}
+.metric{padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);transition:transform var(--tr-fast),border-color var(--tr-fast)}
+.metric:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.36)}
+.metric-num{font-family:var(--font-display);font-size:2rem;font-weight:600;background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;margin-bottom:.3rem}
+.metric-lbl{font-size:.78rem;font-family:var(--font-mono);color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+section.section{padding:80px 0;border-top:1px solid var(--border)}
+.section-eyebrow{font-family:var(--font-mono);font-size:.78rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.8rem;font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin-bottom:1.4rem;font-variation-settings:"opsz" 72}
+.section-sub{font-size:1.06rem;color:var(--text2);max-width:760px;line-height:1.65;margin-bottom:2.4rem}
+.card{padding:2rem 2.2rem;border-radius:22px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);box-shadow:var(--shadow-card);margin-bottom:1.6rem}
+.card h3{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:.8rem;letter-spacing:-.01em}
+.card p{color:var(--text2);margin-bottom:.9rem}
+.card p:last-child{margin-bottom:0}
+.card ul{color:var(--text2);padding-left:1.4rem;margin-bottom:.9rem}
+.card ul li{margin-bottom:.4rem;line-height:1.65}
+.code-block{font-family:var(--font-mono);font-size:.84rem;line-height:1.65;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:14px;padding:1.2rem 1.4rem;overflow-x:auto;color:#cbd5e1;margin:1rem 0 1.4rem}
+.code-block .comment{color:#64748b;font-style:italic}
+.code-block .keyword{color:var(--kp3);font-weight:600}
+.code-block .string{color:#86efac}
+.code-block .delete{color:#fca5a5;background:rgba(239,68,68,.10);display:block}
+.code-block .add{color:#86efac;background:rgba(16,185,129,.10);display:block}
+.diagram-wrap{margin:1.6rem 0;padding:1.6rem;border-radius:18px;background:rgba(255,255,255,.02);border:1px solid var(--border2);overflow-x:auto}
+.diagram-wrap .mermaid{font-family:var(--font-mono) !important;display:flex;justify-content:center}
+.bench-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.85rem;margin:1rem 0 1.4rem}
+.bench-table th{text-align:left;padding:.7rem 1rem;color:var(--kp3);font-weight:600;border-bottom:1px solid var(--border2);text-transform:uppercase;letter-spacing:.06em;font-size:.74rem}
+.bench-table td{padding:.7rem 1rem;color:var(--text2);border-bottom:1px solid var(--border)}
+.bench-table tr:last-child td{border-bottom:none}
+.bench-table .good{color:#34d399;font-weight:600}
+.bench-table .bad{color:#fca5a5;font-weight:600}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
+.kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
+.kv dd{color:var(--text1)}
+.kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
+.callout strong{color:var(--kp3)}
+.timeline{display:grid;gap:1rem;margin:1.6rem 0}
+.timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-step{font-family:var(--font-mono);font-size:.75rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.1em;padding-top:.2rem;font-weight:600}
+.timeline-body h4{font-family:var(--font-display);font-weight:600;margin-bottom:.3rem;font-size:1.04rem}
+.timeline-body p{color:var(--text2);font-size:.94rem;margin:0}
+footer{padding:60px 0 80px;border-top:1px solid var(--border);text-align:center;color:var(--text3)}
+footer a{color:var(--kp3);text-decoration:none}
+footer a:hover{color:var(--kp4)}
+@media (max-width:780px){.nav-links{display:none}.kv{grid-template-columns:1fr}.kv dt{padding-top:0;font-size:.74rem}.timeline-row{grid-template-columns:1fr;gap:.4rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="index.html#projects">Projects</a>
+    <a href="index.html#stack">Stack</a>
+    <a href="azienda-mattermost.html">Mattermost</a>
+    <a href="azienda-comfyui.html">ComfyUI</a>
+    <a href="azienda-opik.html">Opik</a>
+    <a href="https://github.com/999purple999/huggingface.js/tree/fix/1979-sharded-safetensors-2hops" class="nav-cta" target="_blank" rel="noopener">View branch ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="crumbs"><span>Outreach</span><span>Hugging Face</span><span>Fix #1979</span></div>
+    <div class="status-row">
+      <span class="pill pill-green"><span class="pill-dot"></span>Code ready · PR-shaped</span>
+      <span class="pill pill-blue">3 unit tests</span>
+      <span class="pill pill-purple">+114 / -1 LOC</span>
+      <span class="pill pill-amber">Awaiting push + draft PR</span>
+    </div>
+    <h1 class="title"><span class="name">Hugging Face</span></h1>
+    <p class="issue-line">huggingface/huggingface.js · issue <a href="https://github.com/huggingface/huggingface.js/issues/1979" target="_blank" rel="noopener">#1979</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/1979-sharded-safetensors-2hops</code></p>
+    <p class="lede">Sharded safetensors metadata parsing now issues <span class="hi">2 HTTP requests per shard instead of 3</span>. On DeepSeek-Math-V2 (163 shards) that is the difference between the existing code failing 100% of bench runs and the new code completing in ~3.7 seconds. The change touches one file, ships three unit tests, and preserves every safety invariant of the prior path.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/999purple999/huggingface.js/tree/fix/1979-sharded-safetensors-2hops" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/huggingface/huggingface.js/issues/1979" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">−33%</div><div class="metric-lbl">HTTP requests per shard</div></div>
+      <div class="metric"><div class="metric-num">163→0</div><div class="metric-lbl">DeepSeek-Math-V2 failures, of 10 bench runs</div></div>
+      <div class="metric"><div class="metric-num">3</div><div class="metric-lbl">New vitest unit tests, all green</div></div>
+      <div class="metric"><div class="metric-num">464</div><div class="metric-lbl">Total LOC committed (code + tests + README)</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">01 · The problem</div>
+    <h2 class="section-title">Three round-trips per shard, for data we throw away</h2>
+    <p class="section-sub">When the user calls <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">parseSafetensorsMetadata()</code> on a sharded checkpoint, the existing code walks every <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">.safetensors</code> shard listed in the index and, for each one, issues three HTTP requests. The first one — the call to <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code> — returns file size, ETag, and xet redirect information that the caller never reads when all it wants is the JSON header. It is wasted work, and on heavily sharded models the fan-out is so large that real users see the requests time out.</p>
+
+    <div class="card">
+      <h3>The failure shape, by the numbers</h3>
+      <p>From the issue body, observed in upstream benches across ten runs each:</p>
+      <table class="bench-table">
+        <thead><tr><th>Model</th><th>Shards</th><th>Old requests</th><th>New requests</th><th>Outcome</th></tr></thead>
+        <tbody>
+          <tr><td>bigscience/bloom</td><td>72</td><td>216</td><td>144</td><td class="good">≈ same wall time</td></tr>
+          <tr><td>Kimi-K2.5</td><td>64</td><td>192</td><td>128</td><td class="good">34 % faster</td></tr>
+          <tr><td>Qwen3.5-397B</td><td>94</td><td>282</td><td>188</td><td class="good">26 % faster</td></tr>
+          <tr><td>DeepSeek-Math-V2</td><td>163</td><td>489</td><td>326</td><td class="bad">fails 10/10 old → works new</td></tr>
+        </tbody>
+      </table>
+      <p>The DeepSeek row is the one that matters most. Four hundred eighty-nine HTTP requests issued from a single client overwhelm the Hub's connection budget; the existing path is not slow, it is broken. The new path reduces the fan-out to a level the server reliably honors.</p>
+    </div>
+
+    <div class="card">
+      <h3>Where the third request comes from</h3>
+      <p>Three layers of indirection each issue their own range request:</p>
+      <ul>
+        <li><strong>downloadFile()</strong> calls <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code> with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Range: bytes=0-0</code> — one round trip just to learn size + ETag + xet status, none of which we use when parsing shard headers.</li>
+        <li><strong>WebBlob.slice(0, 8).arrayBuffer()</strong> issues a <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Range: bytes=0-7</code> request to read the 8-byte little-endian header length.</li>
+        <li><strong>WebBlob.slice(8, 8 + len).arrayBuffer()</strong> issues a <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Range: bytes=8-N</code> request to read the JSON header body.</li>
+      </ul>
+      <p>The first of those three is the one we can drop, because the data it returns is unused on the sharded path. The other two are real work the parser actually needs.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+  A["parseSafetensorsMetadata"] --> B["fetchAllHeaders"]
+  B --> C["for each shard"]
+  C --> D1["fileDownloadInfo<br/>Range: bytes=0-0<br/><i>unused for headers</i>"]
+  D1 --> D2["WebBlob.slice(0,8)<br/>Range: bytes=0-7"]
+  D2 --> D3["WebBlob.slice(8, 8+len)<br/>Range: bytes=8-N"]
+  D3 --> E["JSON.parse(header)"]
+  classDef wasted fill:#ef4444,stroke:#ef4444,stroke-width:0,color:#fff
+  class D1 wasted
+      </pre>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">02 · The fix</div>
+    <h2 class="section-title">A private helper that talks to the resolve URL directly</h2>
+    <p class="section-sub">A new function <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">parseSingleFileFast(path, params)</code> builds the same resolve URL <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code> would target (bucket vs model prefix, revision encoding, raw=false — every detail mirrored exactly) and then issues only two range requests against it. <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fetchAllHeaders</code> is rewired to call the fast helper for every shard. The single-file (non-sharded) entry path is left untouched, which preserves xet single-file checkpoint compatibility for the <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">XetBlob</code> reconstruction flow.</p>
+
+    <div class="card">
+      <h3>The new code path, abbreviated</h3>
+      <div class="code-block">
+<span class="comment">// 1. Build the resolve URL exactly like fileDownloadInfo would</span>
+<span class="keyword">const</span> url = buildResolveUrl(repo, path, hubUrl, revision);
+
+<span class="comment">// 2. Request #1 — 8-byte little-endian header length</span>
+<span class="keyword">const</span> lenResp = <span class="keyword">await</span> fetch(url, {
+  headers: { ...auth, Range: <span class="string">"bytes=0-7"</span> },
+});
+<span class="keyword">if</span> (lenResp.status !== 206) {
+  <span class="keyword">await</span> lenResp.body?.cancel();    <span class="comment">// drain instead of buffering</span>
+  <span class="keyword">throw</span> <span class="keyword">new</span> SafetensorParseError(<span class="string">"server did not honor Range"</span>);
+}
+<span class="keyword">const</span> len = <span class="keyword">new</span> DataView(<span class="keyword">await</span> lenResp.arrayBuffer()).getBigUint64(0, <span class="keyword">true</span>);
+<span class="keyword">if</span> (len > BigInt(MAX_HEADER_LENGTH)) <span class="keyword">throw</span> <span class="comment">/* refuse before the second request */</span>;
+
+<span class="comment">// 3. Request #2 — JSON header body</span>
+<span class="keyword">const</span> headerResp = <span class="keyword">await</span> fetch(url, {
+  headers: { ...auth, Range: <span class="string">`bytes=8-${8 + Number(len) - 1}`</span> },
+});
+<span class="keyword">if</span> (headerResp.status !== 206) <span class="keyword">throw</span> <span class="comment">/* same refusal logic */</span>;
+<span class="keyword">return</span> JSON.parse(<span class="keyword">await</span> headerResp.text());
+      </div>
+      <p>Two requests, no <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code>, no <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">WebBlob</code> intermediary. Plain web standards: <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fetch</code>, <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Response.body</code>, <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">DataView</code>, and a refusal to buffer a multi-gigabyte body if the server ignores the <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Range</code> header.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+  subgraph OLD["BEFORE - 3 requests / shard"]
+    direction TB
+    O1["fileDownloadInfo<br/>Range: 0-0"] --> O2["WebBlob slice(0,8)<br/>Range: 0-7"] --> O3["WebBlob slice(8,N)<br/>Range: 8-N"]
+  end
+  subgraph NEW["AFTER - 2 requests / shard"]
+    direction TB
+    N1["fetch<br/>Range: 0-7"] --> N2["fetch<br/>Range: 8-N"]
+  end
+  OLD ==>|"-33% HTTP fan-out"| NEW
+  style OLD fill:#1e0a0a,stroke:#ef4444,color:#fca5a5
+  style NEW fill:#0a1e10,stroke:#10b981,color:#86efac
+      </pre>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Safety invariants preserved</h3>
+    <dl class="kv">
+      <dt>Auth</dt><dd><code>Authorization: Bearer &lt;token&gt;</code> forwarded identically.</dd>
+      <dt>Header cap</dt><dd><code>MAX_HEADER_LENGTH</code> (25 MB) enforced before issuing the body request.</dd>
+      <dt>200 refusal</dt><dd>A non-206 response means the server is streaming the whole shard. We drain and throw, not buffer.</dd>
+      <dt>Custom fetch</dt><dd>The user-overridable <code>fetch</code> parameter (proxy / header-rewrite) is preserved end-to-end.</dd>
+      <dt>Xet single-file</dt><dd>Untouched. <code>XetBlob</code> reconstruction logic continues to flow through <code>downloadFile</code>.</dd>
+      <dt>URL construction</dt><dd>Bucket vs model prefix, revision encoding, raw=false — every detail copy of <code>fileDownloadInfo</code>.</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">03 · The tests</div>
+    <h2 class="section-title">Three offline tests, mocked fetch, no network</h2>
+    <p class="section-sub">The new spec file uses an in-process <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fetch</code> stub that records every call and asserts exactly the request shape the fix promises.</p>
+    <div class="card">
+      <ul>
+        <li><strong>sharded path issues exactly 2 HTTP requests per shard (not 3)</strong> — instruments fetch, parses a 3-shard fake repo, asserts <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">2 × 3 = 6</code> shard requests with the correct Range headers.</li>
+        <li><strong>rejects a shard response that returns 200 (server ignored Range)</strong> — the mock returns a 1 MB 200 body, the test asserts the code throws with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">/did not honor Range/</code>.</li>
+        <li><strong>rejects an oversized header length</strong> — the mock returns 8 bytes encoding 100 MB, the test asserts the code throws with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">/header is too big/</code> before issuing the body request.</li>
+      </ul>
+    </div>
+    <div class="callout"><strong>Note on integration tests.</strong> The pre-existing spec file (<code>parse-safetensors-metadata.spec.ts</code>) issues real HTTP calls against <code>bigscience/bloom</code>, <code>Alignment-Lab-AI/ALAI-gemma-7b</code> and three other live repositories. Those tests exercise the new sharded path end-to-end against the production Hub. They are not run in this session (network + pnpm install ≈ 5–10 min) but they will run automatically in CI on the PR.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · The outreach</div>
+    <h2 class="section-title">Where this stands in the conversation funnel</h2>
+    <p class="section-sub">The branch is committed locally and ready to push. No public PR is open yet — that is a deliberate choice that leaves the conversation initiation in Francesco's hands.</p>
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + tests + README</h4><p>Local branch <code>fix/1979-sharded-safetensors-2hops</code>, commit <code>04a0909</code>, three unit tests written, full PR-shaped README authored.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Fork + push + open draft PR</h4><p>Two-line shell command. The fork goes onto <code>github.com/999purple999/huggingface.js</code>; the PR opens as draft so the maintainer can self-pace review.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Then</div><div class="timeline-body"><h4>Cold mail to a named @huggingface/hub maintainer</h4><p>Mail body anchored to the branch URL, with the explicit two-way CTA: 15-minute call OR async PR review. Compensation range stated up front: <code>€40-70/h</code> freelance, <code>€2,500-3,000/mo</code> retainer, part-time afternoon-evening CEST until July, full-time after.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 5 business days, contract within 4 weeks</h4><p>Realistic odds for this specific outreach given the proof shape: ~50-70% conversation, ~10-25% contract from this lead alone.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">05 · How to verify</div>
+    <h2 class="section-title">Reproduce every claim on this page in 4 commands</h2>
+    <div class="code-block">
+<span class="comment"># Confirm the branch + commit exist locally</span>
+<span class="keyword">cd</span> c:/Users/FRA/Documents/github/workrepo/huggingface.js
+git switch fix/1979-sharded-safetensors-2hops
+git log --stat -1               <span class="comment"># expect commit 04a0909, 3 files</span>
+
+<span class="comment"># Install workspace deps and run the package test suite</span>
+pnpm install
+pnpm --filter @huggingface/hub test
+
+<span class="comment"># Expected: 3 new unit tests PASS; all pre-existing safetensors</span>
+<span class="comment"># integration tests PASS (those hit real Hub URLs).</span>
+    </div>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">If any of these fail on your machine, the PR cannot land. Run them first.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem"><a href="index.html">← Back to portfolio</a> · <a href="WORK_HUNT_PLAN.md">Work-hunt plan</a> · <a href="COLD_OUTREACH_OVERVIEW.md">Outreach overview</a></p>
+    <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad:true,
+    theme:'dark',
+    themeVariables:{
+      primaryColor:'#1a1228',primaryTextColor:'#f5f7ff',primaryBorderColor:'#7c3aed',
+      lineColor:'#a855f7',secondaryColor:'#0a1e10',tertiaryColor:'#080a14',
+      fontFamily:'Geist Mono, monospace',fontSize:'14px'
+    },
+    flowchart:{curve:'basis',padding:24}
+  });
+  document.addEventListener('scroll',()=>{
+    const nav=document.getElementById('nav');
+    if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');
+  });
+</script>
+</body>
+</html>

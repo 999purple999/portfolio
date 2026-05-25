@@ -349,6 +349,82 @@
         </div>
       </article>
 
+      <article class="project reveal delay-4" data-tilt>
+        <div class="project-rank" data-i18n="outreach.xa_rank">#05 · code ready</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issue #7807 · PR-shaped branch
+        </div>
+        <h3 class="project-title">Xanadu · PennyLane</h3>
+        <p class="project-claim" data-i18n="outreach.xa_claim">Same circuit, two devices, two drawings — closed the asymmetry.</p>
+        <p class="project-body" data-i18n="outreach.xa_body">Issue #7807: `default.qubit(wires=3)` rendered with the grouping brackets, `default.qubit()` rendered without. Root cause in `pennylane/drawer/_add_obj.py`: the `len(m.wires) == 0` branch of `_add_measurement` forgot to call `_add_grouping_symbols`. Fix mirrors the `_add_global_op` pattern, single-wire devices untouched, two snapshot tests updated and the remaining drift documented for the maintainer to pin-up against pytest.</p>
+        <ul class="project-tech">
+          <li>Python</li><li>pytest</li><li>quantum ML</li>
+          <li>drawer</li><li>+10 / −1 LOC core</li><li>2 snapshots</li>
+        </ul>
+        <div class="project-links">
+          <a href="azienda-xanadu.html" data-i18n="outreach.xa_link_page">View the case →</a>
+          <a href="https://github.com/PennyLaneAI/pennylane/issues/7807" target="_blank" rel="noopener" data-i18n="outreach.xa_link_issue">Issue #7807 ↗</a>
+        </div>
+      </article>
+
+      <article class="project reveal delay-5" data-tilt>
+        <div class="project-rank" data-i18n="outreach.sb_rank">#06 · code ready</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issue #408 · PR-shaped branch
+        </div>
+        <h3 class="project-title">SandboxAQ · Tangelo</h3>
+        <p class="project-claim" data-i18n="outreach.sb_claim">One bug, four identical instances in the same file.</p>
+        <p class="project-body" data-i18n="outreach.sb_body">`Circuit([Gate("H", 0)] * 2).simplify()` returned None. The fix touches four methods — simplify, remove_redundant_gates, remove_small_rotations, merge_rotations — not one, because they all wrap a top-level function and splat its result into `self.__dict__` with no `return self`. Two of the four even documented a Returns clause the implementation never matched. One line per method, plus a regression test that pins the issue's exact failing line and three analogous cases.</p>
+        <ul class="project-tech">
+          <li>Python</li><li>pytest</li><li>quantum chemistry</li>
+          <li>API design</li><li>+25 / −8 LOC</li><li>4 methods fixed</li>
+        </ul>
+        <div class="project-links">
+          <a href="azienda-sandboxaq.html" data-i18n="outreach.sb_link_page">View the case →</a>
+          <a href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener" data-i18n="outreach.sb_link_issue">Issue #408 ↗</a>
+        </div>
+      </article>
+
+      <article class="project reveal delay-6" data-tilt>
+        <div class="project-rank" data-i18n="outreach.id_rank">#07 · code ready</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issue #298 · PR-shaped branch
+        </div>
+        <h3 class="project-title">Idiap · coqui-ai-TTS</h3>
+        <p class="project-claim" data-i18n="outreach.id_claim">Structural memory leak at the API boundary, fixed in 8 lines.</p>
+        <p class="project-body" data-i18n="outreach.id_body">Issue #298: RSS climbed linearly during VITS synthesis in a loop. Root cause was structural — `BaseTTS.synthesize` returned a dict containing the full inference output (eight tensors, none detached). Upstream only reads `outputs["wav"]` when VITS is the model, so the other seven tensors lingered in the caller's frame until Python GC ran. A small `_release` helper that does `detach().cpu()` on every tensor before the dict crosses the function boundary closes the leak without API changes.</p>
+        <ul class="project-tech">
+          <li>Python</li><li>PyTorch</li><li>TTS / VITS</li>
+          <li>memory profiling</li><li>+18 / −5 LOC</li><li>backward-compat</li>
+        </ul>
+        <div class="project-links">
+          <a href="azienda-idiap.html" data-i18n="outreach.id_link_page">View the case →</a>
+          <a href="https://github.com/idiap/coqui-ai-TTS/issues/298" target="_blank" rel="noopener" data-i18n="outreach.id_link_issue">Issue #298 ↗</a>
+        </div>
+      </article>
+
+      <article class="project reveal delay-7" data-tilt>
+        <div class="project-rank" data-i18n="outreach.si_rank">#08 · feature starter</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issue #2 · feature starter on dedicated branch
+        </div>
+        <h3 class="project-title">Simula / Osmocom · pysim</h3>
+        <p class="project-claim" data-i18n="outreach.si_claim">Decoding APDUs from MBIM PCAPs — a new ApduSource that slots into the pattern that already exists.</p>
+        <p class="project-body" data-i18n="outreach.si_body">Issue #2 asked whether pysim can decode APDUs from a Wireshark capture of a cellular modem talking to an eSIM over MBIM. pysim already had pyshark_gsmtap.py and pyshark_rspro.py adapters; MBIM slots straight in. The new pyshark_mbim.py filters by the MS_UICC_LOW_LEVEL_ACCESS service UUID, reads mbim.cid, and routes APDU payloads into the shared ApduCommands pipeline. Open items (ATR from UICC_RESET, APDU fragmentation, LiveCapture variant) are called out explicitly in the README rather than shipped half-baked.</p>
+        <ul class="project-tech">
+          <li>Python</li><li>pyshark / tshark</li><li>MBIM / USB CDC</li>
+          <li>SIM cards / eSIM</li><li>+270 LOC</li><li>cellular telecom</li>
+        </ul>
+        <div class="project-links">
+          <a href="azienda-simula.html" data-i18n="outreach.si_link_page">View the case →</a>
+          <a href="https://github.com/simula/pysim/issues/2" target="_blank" rel="noopener" data-i18n="outreach.si_link_issue">Issue #2 ↗</a>
+        </div>
+      </article>
+
     </div>
   </div>
 </section>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SandboxAQ · Tangelo #408 · Francesco · 999purple999</title>
+<meta name="description" content="Fix for Tangelo issue #408 — Circuit.simplify() returns NoneType. One fix for four identical convenience methods.">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--kp:#a855f7;--kp2:#7c3aed;--kp3:#c084fc;--kp4:#e9d5ff;--cy:#67e8f9;--emerald:#10b981;--rose:#ef4444;--gold:#fbbf24;--bg0:#04050a;--bg1:#080a14;--bg2:#0e1120;--bg3:#161a2c;--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);--text1:#f5f7ff;--text2:#9aa4c0;--text3:#5d6685;--tr:480ms cubic-bezier(.16,1,.3,1);--tr-fast:260ms cubic-bezier(.16,1,.3,1);--font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;--font-mono:'Geist Mono',ui-monospace,Menlo,monospace;--font-body:'Geist','Inter',ui-sans-serif,system-ui,sans-serif;--grad-kp:linear-gradient(135deg,#c084fc 0%,#a855f7 45%,#7c3aed 100%);--grad-rim:linear-gradient(135deg,#c084fc 0%,#67e8f9 100%);--shadow-card:0 12px 36px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--font-body);background:var(--bg0);color:var(--text1);min-height:100dvh;overflow-x:hidden;line-height:1.65;font-weight:400;letter-spacing:-.005em;background:radial-gradient(60% 40% at 20% 8%,rgba(168,85,247,.10),transparent 70%),radial-gradient(50% 35% at 80% 25%,rgba(124,58,237,.07),transparent 65%),radial-gradient(40% 30% at 50% 70%,rgba(103,232,249,.04),transparent 70%),linear-gradient(180deg,#06070e 0%,#04050a 60%,#06070e 100%);background-attachment:fixed}
+::selection{background:rgba(168,85,247,.4);color:#fff}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 75% 60% at 50% 30%,#000 25%,transparent 78%);opacity:.55}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 clamp(1rem,3vw,3rem);height:64px;background:rgba(4,5,10,.65);backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--border);transition:background var(--tr)}
+nav.scrolled{background:rgba(4,5,10,.92);border-color:var(--border2)}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.18em;color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:600}
+.nav-mark{width:30px;height:30px;border-radius:8px;background:var(--grad-kp);display:grid;place-items:center;font-family:var(--font-display);font-size:.82rem;color:#fff;font-weight:700;box-shadow:0 0 18px rgba(168,85,247,.45),0 1px 0 rgba(255,255,255,.18) inset}
+.nav-links{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+.nav-links a{color:var(--text2);font-size:.82rem;text-decoration:none;transition:color var(--tr-fast);font-weight:500}
+.nav-links a:hover{color:var(--text1)}
+.nav-cta{padding:8px 18px;border-radius:8px;background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.32);color:var(--kp3) !important;font-weight:600}
+.container{max-width:1160px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem);position:relative;z-index:2}
+.hi{background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+.hero{padding:140px 0 90px}
+.crumbs{display:inline-flex;align-items:center;gap:.6rem;padding:6px 14px;border-radius:99px;background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);font-size:.78rem;font-family:var(--font-mono);color:var(--kp3);margin-bottom:1.5rem;font-weight:600;letter-spacing:.04em}
+.crumbs span:not(:last-child)::after{content:" →";color:var(--text3);margin:0 .3em}
+.status-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.8rem}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;font-size:.74rem;font-family:var(--font-mono);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.pill-green{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.36);color:#34d399}
+.pill-amber{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.36);color:var(--gold)}
+.pill-blue{background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.32);color:var(--cy)}
+.pill-purple{background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);color:var(--kp3)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+h1.title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1;letter-spacing:-.03em;font-weight:600;margin-bottom:1rem;font-variation-settings:"opsz" 96}
+h1.title .name{background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#a855f7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.issue-line{font-family:var(--font-mono);font-size:1rem;color:var(--text2);margin-bottom:1.6rem;letter-spacing:.02em}
+.issue-line a{color:var(--cy);text-decoration:none;border-bottom:1px dashed rgba(103,232,249,.4)}
+.issue-line code{font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px}
+.lede{font-size:1.18rem;color:var(--text2);max-width:760px;margin-bottom:2.4rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.9rem;text-decoration:none;transition:transform var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);border:none;cursor:pointer}
+.btn-primary{background:var(--grad-kp);color:#fff;box-shadow:0 10px 28px rgba(168,85,247,.36),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(168,85,247,.5),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text1);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border3)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-bottom:1rem}
+.metric{padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);transition:transform var(--tr-fast),border-color var(--tr-fast)}
+.metric:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.36)}
+.metric-num{font-family:var(--font-display);font-size:2rem;font-weight:600;background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;margin-bottom:.3rem}
+.metric-lbl{font-size:.78rem;font-family:var(--font-mono);color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+section.section{padding:80px 0;border-top:1px solid var(--border)}
+.section-eyebrow{font-family:var(--font-mono);font-size:.78rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.8rem;font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin-bottom:1.4rem;font-variation-settings:"opsz" 72}
+.section-sub{font-size:1.06rem;color:var(--text2);max-width:760px;line-height:1.65;margin-bottom:2.4rem}
+.section-sub code,p code,.card li code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.card{padding:2rem 2.2rem;border-radius:22px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);box-shadow:var(--shadow-card);margin-bottom:1.6rem}
+.card h3{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:.8rem;letter-spacing:-.01em}
+.card p{color:var(--text2);margin-bottom:.9rem}
+.card p:last-child{margin-bottom:0}
+.card ul,.card ol{color:var(--text2);padding-left:1.4rem;margin-bottom:.9rem}
+.card ul li,.card ol li{margin-bottom:.4rem;line-height:1.65}
+.code-block{font-family:var(--font-mono);font-size:.84rem;line-height:1.65;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:14px;padding:1.2rem 1.4rem;overflow-x:auto;color:#cbd5e1;margin:1rem 0 1.4rem;white-space:pre}
+.code-block .comment{color:#64748b;font-style:italic}
+.code-block .keyword{color:var(--kp3);font-weight:600}
+.code-block .string{color:#86efac}
+.diagram-wrap{margin:1.6rem 0;padding:1.6rem;border-radius:18px;background:rgba(255,255,255,.02);border:1px solid var(--border2);overflow-x:auto}
+.diagram-wrap .mermaid{font-family:var(--font-mono) !important;display:flex;justify-content:center}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
+.kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
+.kv dd{color:var(--text1)}
+.kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
+.callout strong{color:var(--kp3)}
+.timeline{display:grid;gap:1rem;margin:1.6rem 0}
+.timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-step{font-family:var(--font-mono);font-size:.75rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.1em;padding-top:.2rem;font-weight:600}
+.timeline-body h4{font-family:var(--font-display);font-weight:600;margin-bottom:.3rem;font-size:1.04rem}
+.timeline-body p{color:var(--text2);font-size:.94rem;margin:0}
+footer{padding:60px 0 80px;border-top:1px solid var(--border);text-align:center;color:var(--text3)}
+footer a{color:var(--kp3);text-decoration:none}
+@media (max-width:780px){.nav-links{display:none}.kv{grid-template-columns:1fr}.kv dt{padding-top:0;font-size:.74rem}.timeline-row{grid-template-columns:1fr;gap:.4rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="index.html#outreach">Outreach</a>
+    <a href="azienda-huggingface.html">Hugging Face</a>
+    <a href="azienda-mattermost.html">Mattermost</a>
+    <a href="azienda-xanadu.html">Xanadu</a>
+    <a href="azienda-idiap.html">Idiap</a>
+    <a href="azienda-simula.html">Simula</a>
+    <a href="https://github.com/999purple999/Tangelo/tree/fix/408-simplify-returns-self" class="nav-cta" target="_blank" rel="noopener">View branch ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="crumbs"><span>Outreach</span><span>SandboxAQ / Tangelo</span><span>Fix #408</span></div>
+    <div class="status-row">
+      <span class="pill pill-green"><span class="pill-dot"></span>Code ready · PR-shaped</span>
+      <span class="pill pill-blue">1 regression test</span>
+      <span class="pill pill-purple">+25 / −8 LOC</span>
+      <span class="pill pill-amber">Awaiting push + draft PR</span>
+    </div>
+    <h1 class="title"><span class="name">SandboxAQ · Tangelo</span></h1>
+    <p class="issue-line">sandbox-quantum/Tangelo · issue <a href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener">#408</a> · branch <code>fix/408-simplify-returns-self</code></p>
+    <p class="lede"><code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Circuit([Gate("H", 0)] * 2).simplify()</code> returned <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">None</code>. The fix touches four methods — not one — because the same pattern was repeated identically across <span class="hi">simplify, remove_redundant_gates, remove_small_rotations, and merge_rotations</span>. Two of the four even documented a Returns clause that the implementation never matched. <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">return self</code> on each, plus one focused regression test.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/999purple999/Tangelo/tree/fix/408-simplify-returns-self" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">Identical instances of the same bug, all fixed in one pass</div></div>
+      <div class="metric"><div class="metric-num">2 / 4</div><div class="metric-lbl">Methods whose docstrings already promised Returns: Circuit</div></div>
+      <div class="metric"><div class="metric-num">5 LOC</div><div class="metric-lbl">Actual code added — one line per method</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">Breaking changes for in-place callers</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">01 · The problem</div>
+    <h2 class="section-title">A one-liner that should return a Circuit, doesn't</h2>
+    <p class="section-sub">Two consecutive Hadamards cancel out to the identity. Calling <code>.simplify()</code> on that two-gate circuit should leave you with an empty Circuit on the same qubit. Instead it returns <code>None</code> and every subsequent attribute access raises.</p>
+
+    <div class="card">
+      <h3>The same pattern, four times in <code>circuit.py</code></h3>
+      <p>Each of the four convenience methods is the same shape:</p>
+      <div class="code-block">
+<span class="keyword">def</span> simplify(self, max_cycles=100, ...):
+    opt_circuit = simplify(self, ...)        <span class="comment"># top-level function, returns Circuit</span>
+    self.__dict__ = opt_circuit.__dict__     <span class="comment"># in-place mutation</span>
+    <span class="comment"># ← no return statement: method returns None</span>
+      </div>
+      <p>Two of the four methods (<code>remove_small_rotations</code>, <code>remove_redundant_gates</code>) even have a Returns clause in their docstring: <em>"Returns: Circuit: The circuit without ..."</em>. The documentation already promised what the code never delivered.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">02 · The fix</div>
+    <h2 class="section-title">One line per method, in-place semantic preserved</h2>
+    <p class="section-sub">Adding <code>return self</code> at the end of each method makes the expression form work without changing anything for callers that ignore the return value.</p>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+  Call["Circuit([H,H]).simplify()"] --> Wrap[method body]
+  Wrap --> Inner[top-level simplify - returns Circuit]
+  Inner --> Splat["self.__dict__ = opt.__dict__<br/>in-place mutation"]
+  Splat -- "before:<br/>(no return)" --> NoneOut["⛔ returns None"]
+  Splat -- "after:<br/>return self" --> SelfOut["✓ returns self (the in-place mutated Circuit)"]
+  style NoneOut fill:#1e0a0a,stroke:#ef4444,color:#fca5a5
+  style SelfOut fill:#0a1e10,stroke:#10b981,color:#86efac
+      </pre>
+    </div>
+
+    <div class="card">
+      <h3>Why <code>return self</code> instead of a separate <code>simplified()</code> method</h3>
+      <ul>
+        <li>The strictly cleanest design would be to add <code>simplified()</code> / <code>without_redundant_gates()</code> for the read-only form. But that doubles the API surface for every existing pass.</li>
+        <li>The reporter expected the existing method to behave as if it returned <code>self</code> — every popular Python quantum lib (PennyLane's <code>qml.simplify</code>, Qiskit's <code>QuantumCircuit.decompose</code>) does this.</li>
+        <li>In-place semantic is preserved: existing callers writing <code>c.simplify(); use(c)</code> behave identically.</li>
+      </ul>
+      <p>If the SandboxAQ team prefers the split API, the patch is trivial to fold into a <code>simplified()</code> variant — happy to rewrite either way on signal.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">03 · The test</div>
+    <h2 class="section-title">One regression that pins the issue's exact failing line</h2>
+    <div class="code-block">
+<span class="keyword">def</span> test_simplify_returns_circuit_when_everything_cancels(self):
+    <span class="string">"""Regression test for issue #408."""</span>
+
+    <span class="comment"># The original failing one-liner from the issue body.</span>
+    c = Circuit([Gate(<span class="string">"H"</span>, 0)] * 2).simplify()
+    <span class="keyword">assert</span> c <span class="keyword">is not</span> <span class="keyword">None</span>
+    <span class="keyword">assert</span> isinstance(c, Circuit)
+    <span class="keyword">assert</span> len(c._gates) == 0
+    <span class="keyword">assert</span> c.width == 1
+
+    <span class="comment"># Analogous guarantee for the other three convenience methods.</span>
+    c1 = Circuit([Gate(<span class="string">"X"</span>, 0)]).remove_redundant_gates()
+    c2 = Circuit([Gate(<span class="string">"RZ"</span>, 0, parameter=1e-9)]).remove_small_rotations()
+    c3 = Circuit([Gate(<span class="string">"RZ"</span>, 0, parameter=0.1),
+                  Gate(<span class="string">"RZ"</span>, 0, parameter=0.2)]).merge_rotations()
+    <span class="keyword">for</span> name, returned <span class="keyword">in</span> [(<span class="string">"remove_redundant_gates"</span>, c1),
+                            (<span class="string">"remove_small_rotations"</span>, c2),
+                            (<span class="string">"merge_rotations"</span>, c3)]:
+        <span class="keyword">assert</span> returned <span class="keyword">is not</span> <span class="keyword">None</span>
+        <span class="keyword">assert</span> isinstance(returned, Circuit)
+    </div>
+    <p style="color:var(--text2);font-size:.94rem">The existing <code>test_simplify_circuit</code> (which uses <code>c.simplify(); assert c == ...</code>) continues to pass — in-place behaviour is identical, the new return is just additive.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · The outreach</div>
+    <h2 class="section-title">Where this stands</h2>
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + test + README</h4><p>Local branch <code>fix/408-simplify-returns-self</code>, commit <code>4e172f3</code>.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Fork + push + draft PR</h4><p>Mail to a Tangelo maintainer at SandboxAQ, anchored to the branch URL.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 2 weeks</h4><p>Realistic odds for this lead alone: ~25-40% conversation, ~5-10% contract. SandboxAQ is hiring quantum + AI roles; this is most likely a referral path rather than an immediate retainer.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">05 · How to verify</div>
+    <h2 class="section-title">Reproduce in 4 commands</h2>
+    <div class="code-block">
+<span class="keyword">cd</span> c:/Users/FRA/Documents/github/workrepo/Tangelo
+git switch fix/408-simplify-returns-self
+git log --stat -1               <span class="comment"># commit 4e172f3, 3 files</span>
+pip install -e .
+pytest tangelo/linq/tests/test_circuits.py::TestCircuits::test_simplify_returns_circuit_when_everything_cancels -v
+pytest tangelo/linq/tests/test_circuits.py::TestCircuits::test_simplify_circuit -v   <span class="comment"># existing, still passes</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem"><a href="index.html">← Back to portfolio</a> · <a href="index.html#outreach">Outreach overview</a></p>
+    <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{primaryColor:'#1a1228',primaryTextColor:'#f5f7ff',primaryBorderColor:'#7c3aed',lineColor:'#a855f7',secondaryColor:'#0a1e10',tertiaryColor:'#080a14',fontFamily:'Geist Mono, monospace',fontSize:'14px'},flowchart:{curve:'basis',padding:24}});
+  document.addEventListener('scroll',()=>{const nav=document.getElementById('nav');if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');});
+</script>
+</body>
+</html>

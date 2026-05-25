@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simula / Osmocom · pysim #2 · Francesco · 999purple999</title>
+<meta name="description" content="Starter implementation for pysim issue #2 — decoding APDUs from MBIM PCAP captures. New pyshark_mbim.py adapter mirroring the existing pyshark_gsmtap.py pattern.">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--kp:#a855f7;--kp2:#7c3aed;--kp3:#c084fc;--kp4:#e9d5ff;--cy:#67e8f9;--emerald:#10b981;--rose:#ef4444;--gold:#fbbf24;--bg0:#04050a;--bg1:#080a14;--bg2:#0e1120;--bg3:#161a2c;--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);--text1:#f5f7ff;--text2:#9aa4c0;--text3:#5d6685;--tr:480ms cubic-bezier(.16,1,.3,1);--tr-fast:260ms cubic-bezier(.16,1,.3,1);--font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;--font-mono:'Geist Mono',ui-monospace,Menlo,monospace;--font-body:'Geist','Inter',ui-sans-serif,system-ui,sans-serif;--grad-kp:linear-gradient(135deg,#c084fc 0%,#a855f7 45%,#7c3aed 100%);--grad-rim:linear-gradient(135deg,#c084fc 0%,#67e8f9 100%);--shadow-card:0 12px 36px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--font-body);background:var(--bg0);color:var(--text1);min-height:100dvh;overflow-x:hidden;line-height:1.65;font-weight:400;letter-spacing:-.005em;background:radial-gradient(60% 40% at 20% 8%,rgba(168,85,247,.10),transparent 70%),radial-gradient(50% 35% at 80% 25%,rgba(124,58,237,.07),transparent 65%),radial-gradient(40% 30% at 50% 70%,rgba(103,232,249,.04),transparent 70%),linear-gradient(180deg,#06070e 0%,#04050a 60%,#06070e 100%);background-attachment:fixed}
+::selection{background:rgba(168,85,247,.4);color:#fff}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 75% 60% at 50% 30%,#000 25%,transparent 78%);opacity:.55}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 clamp(1rem,3vw,3rem);height:64px;background:rgba(4,5,10,.65);backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--border);transition:background var(--tr)}
+nav.scrolled{background:rgba(4,5,10,.92);border-color:var(--border2)}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.18em;color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:600}
+.nav-mark{width:30px;height:30px;border-radius:8px;background:var(--grad-kp);display:grid;place-items:center;font-family:var(--font-display);font-size:.82rem;color:#fff;font-weight:700;box-shadow:0 0 18px rgba(168,85,247,.45),0 1px 0 rgba(255,255,255,.18) inset}
+.nav-links{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+.nav-links a{color:var(--text2);font-size:.82rem;text-decoration:none;transition:color var(--tr-fast);font-weight:500}
+.nav-links a:hover{color:var(--text1)}
+.nav-cta{padding:8px 18px;border-radius:8px;background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.32);color:var(--kp3) !important;font-weight:600}
+.container{max-width:1160px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem);position:relative;z-index:2}
+.hi{background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+.hero{padding:140px 0 90px}
+.crumbs{display:inline-flex;align-items:center;gap:.6rem;padding:6px 14px;border-radius:99px;background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);font-size:.78rem;font-family:var(--font-mono);color:var(--kp3);margin-bottom:1.5rem;font-weight:600;letter-spacing:.04em}
+.crumbs span:not(:last-child)::after{content:" →";color:var(--text3);margin:0 .3em}
+.status-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.8rem}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;font-size:.74rem;font-family:var(--font-mono);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.pill-green{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.36);color:#34d399}
+.pill-amber{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.36);color:var(--gold)}
+.pill-blue{background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.32);color:var(--cy)}
+.pill-purple{background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);color:var(--kp3)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+h1.title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1;letter-spacing:-.03em;font-weight:600;margin-bottom:1rem;font-variation-settings:"opsz" 96}
+h1.title .name{background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#a855f7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.issue-line{font-family:var(--font-mono);font-size:1rem;color:var(--text2);margin-bottom:1.6rem;letter-spacing:.02em}
+.issue-line a{color:var(--cy);text-decoration:none;border-bottom:1px dashed rgba(103,232,249,.4)}
+.issue-line code{font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px}
+.lede{font-size:1.18rem;color:var(--text2);max-width:760px;margin-bottom:2.4rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.9rem;text-decoration:none;transition:transform var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);border:none;cursor:pointer}
+.btn-primary{background:var(--grad-kp);color:#fff;box-shadow:0 10px 28px rgba(168,85,247,.36),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(168,85,247,.5),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text1);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border3)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-bottom:1rem}
+.metric{padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);transition:transform var(--tr-fast),border-color var(--tr-fast)}
+.metric:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.36)}
+.metric-num{font-family:var(--font-display);font-size:2rem;font-weight:600;background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;margin-bottom:.3rem}
+.metric-lbl{font-size:.78rem;font-family:var(--font-mono);color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+section.section{padding:80px 0;border-top:1px solid var(--border)}
+.section-eyebrow{font-family:var(--font-mono);font-size:.78rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.8rem;font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin-bottom:1.4rem;font-variation-settings:"opsz" 72}
+.section-sub{font-size:1.06rem;color:var(--text2);max-width:760px;line-height:1.65;margin-bottom:2.4rem}
+.section-sub code,p code,.card li code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.card{padding:2rem 2.2rem;border-radius:22px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);box-shadow:var(--shadow-card);margin-bottom:1.6rem}
+.card h3{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:.8rem;letter-spacing:-.01em}
+.card p{color:var(--text2);margin-bottom:.9rem}
+.card p:last-child{margin-bottom:0}
+.card ul,.card ol{color:var(--text2);padding-left:1.4rem;margin-bottom:.9rem}
+.card ul li,.card ol li{margin-bottom:.4rem;line-height:1.65}
+.code-block{font-family:var(--font-mono);font-size:.84rem;line-height:1.65;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:14px;padding:1.2rem 1.4rem;overflow-x:auto;color:#cbd5e1;margin:1rem 0 1.4rem;white-space:pre}
+.code-block .comment{color:#64748b;font-style:italic}
+.code-block .keyword{color:var(--kp3);font-weight:600}
+.code-block .string{color:#86efac}
+.diagram-wrap{margin:1.6rem 0;padding:1.6rem;border-radius:18px;background:rgba(255,255,255,.02);border:1px solid var(--border2);overflow-x:auto}
+.diagram-wrap .mermaid{font-family:var(--font-mono) !important;display:flex;justify-content:center}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
+.kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
+.kv dd{color:var(--text1)}
+.kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
+.callout strong{color:var(--kp3)}
+.callout.warn{border-left-color:var(--gold);background:rgba(251,191,36,.06)}
+.callout.warn strong{color:var(--gold)}
+.timeline{display:grid;gap:1rem;margin:1.6rem 0}
+.timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-step{font-family:var(--font-mono);font-size:.75rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.1em;padding-top:.2rem;font-weight:600}
+.timeline-body h4{font-family:var(--font-display);font-weight:600;margin-bottom:.3rem;font-size:1.04rem}
+.timeline-body p{color:var(--text2);font-size:.94rem;margin:0}
+footer{padding:60px 0 80px;border-top:1px solid var(--border);text-align:center;color:var(--text3)}
+footer a{color:var(--kp3);text-decoration:none}
+@media (max-width:780px){.nav-links{display:none}.kv{grid-template-columns:1fr}.kv dt{padding-top:0;font-size:.74rem}.timeline-row{grid-template-columns:1fr;gap:.4rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="index.html#outreach">Outreach</a>
+    <a href="azienda-huggingface.html">Hugging Face</a>
+    <a href="azienda-mattermost.html">Mattermost</a>
+    <a href="azienda-xanadu.html">Xanadu</a>
+    <a href="azienda-sandboxaq.html">SandboxAQ</a>
+    <a href="azienda-idiap.html">Idiap</a>
+    <a href="https://github.com/999purple999/pysim/tree/feature/2-mbim-apdu-source" class="nav-cta" target="_blank" rel="noopener">View branch ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="crumbs"><span>Outreach</span><span>Simula / Osmocom pysim</span><span>Starter #2</span></div>
+    <div class="status-row">
+      <span class="pill pill-blue"><span class="pill-dot"></span>Starter implementation · feature branch</span>
+      <span class="pill pill-purple">+270 LOC including docs</span>
+      <span class="pill pill-amber">Open items called out explicitly</span>
+    </div>
+    <h1 class="title"><span class="name">Simula / Osmocom · pysim</span></h1>
+    <p class="issue-line">simula/pysim · issue <a href="https://github.com/simula/pysim/issues/2" target="_blank" rel="noopener">#2</a> (mirror of upstream <a href="https://gitea.osmocom.org/sim-card/pysim" target="_blank" rel="noopener">osmocom pysim</a>) · branch <code>feature/2-mbim-apdu-source</code></p>
+    <p class="lede">The reporter asked whether pysim can decode APDUs from a Wireshark capture of their cellular modem talking to an eSIM over MBIM. <span class="hi">pysim already has the same shape</span> for GSMTAP (<code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">pyshark_gsmtap.py</code>) and Osmocom RSPRO (<code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">pyshark_rspro.py</code>). MBIM slots straight into that pattern. This branch ships the starter implementation as <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">pyshark_mbim.py</code>.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/999purple999/pysim/tree/feature/2-mbim-apdu-source" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/simula/pysim/issues/2" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">+1</div><div class="metric-lbl">New ApduSource subclass: PysharkMbimPcap</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">Lines touched in the existing GSMTAP / RSPRO adapters</div></div>
+      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">Open items called out in the README for follow-up</div></div>
+      <div class="metric"><div class="metric-num">2 nets</div><div class="metric-lbl">Wireshark field-naming conventions normalised in _hex_field</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">01 · The ask</div>
+    <h2 class="section-title">"Could pysim help decode APDUs from my MBIM capture?"</h2>
+    <p class="section-sub">The reporter was tinkering with the embedded eSIM in their modem, captured the USB traffic with Wireshark, and noticed MBIM frames carrying what looked like raw SIM APDUs. They couldn't find a way to decode them in Wireshark itself and asked the obvious question.</p>
+
+    <div class="card">
+      <h3>Why this is real work, not just a question</h3>
+      <p>pysim already has a clean abstraction for "pcap dialect → APDU stream":</p>
+      <div class="code-block">
+pySim/apdu_source/
+├── __init__.py        <span class="comment"># ApduSource ABC</span>
+├── gsmtap.py          <span class="comment"># raw UDP + GSMTAP framing</span>
+├── pyshark_gsmtap.py  <span class="comment"># pyshark over a GSMTAP pcap</span>
+└── pyshark_rspro.py   <span class="comment"># pyshark over Osmocom RemSim Server proxy frames</span>
+      </div>
+      <p>Adding <code>pyshark_mbim.py</code> slots straight into that pattern. The MBIM service ID for SIM access (<code>MS_UICC_LOW_LEVEL_ACCESS</code>, UUID <code>c2f6588e-f037-4bc9-8665-f4d44bd09367</code>) and the relevant CIDs (<code>UICC_APDU = 4</code>, <code>UICC_RESET = 6</code>, …) are stable across vendors, so the dissector path is well-defined.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">02 · The starter</div>
+    <h2 class="section-title">A new ApduSource that reads MBIM PCAPs through pyshark</h2>
+    <p class="section-sub">The new file is intentionally close in shape to <code>pyshark_gsmtap.py</code> so a follow-up PR can refactor the shared scaffolding without churn.</p>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+  Pcap[pcap file - MBIM traffic] --> Filter["pyshark.FileCapture<br/>display_filter='mbim'"]
+  Filter --> Loop[for each MBIM frame]
+  Loop --> Service{service_id == UICC_LLA UUID?}
+  Service -- no --> Skip[skip frame]
+  Service -- yes --> Cid{mbim.cid}
+  Cid -- "UICC_APDU (4)" --> Apdu[_hex_field uicc_apdu_command]
+  Apdu --> Parse["ApduCommands.parse_cmd_bytes<br/>(shared with GSMTAP adapter)"]
+  Cid -- "UICC_RESET (6)" --> Atr[_hex_field uicc_atr]
+  Atr --> Reset["CardReset(atr_bytes)"]
+  Cid -- "other (OPEN/CLOSE_CHANNEL, ...)" --> Debug[debug-log, skip]
+      </pre>
+    </div>
+
+    <div class="card">
+      <h3>The hot path, abbreviated</h3>
+      <div class="code-block">
+<span class="keyword">class</span> _PysharkMbim(ApduSource):
+    <span class="keyword">def</span> _parse_packet(self, p) -> Optional[PacketType]:
+        <span class="keyword">if</span> <span class="string">"mbim"</span> <span class="keyword">not in</span> p:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        mbim = p[<span class="string">"mbim"</span>]
+
+        service = _hex_field(mbim, <span class="string">"service_id"</span>, <span class="string">"uuid_service_id"</span>)
+        <span class="keyword">if</span> service <span class="keyword">and</span> service.lower() != MBIM_SERVICE_UICC_LLA.replace(<span class="string">"-"</span>, <span class="string">""</span>).lower():
+            <span class="keyword">return</span> <span class="keyword">None</span>
+
+        cid = int(mbim.get_field(<span class="string">"cid"</span>))
+        <span class="keyword">if</span> cid == MBIM_CID_UICC_APDU:
+            apdu_hex = _hex_field(mbim, <span class="string">"uicc_apdu_command"</span>, <span class="string">"uicc_apdu"</span>, <span class="string">"apdu"</span>)
+            <span class="keyword">return</span> ApduCommands.parse_cmd_bytes(h2b(apdu_hex))
+        <span class="keyword">if</span> cid == MBIM_CID_UICC_RESET:
+            atr_hex = _hex_field(mbim, <span class="string">"uicc_atr"</span>, <span class="string">"atr"</span>)
+            <span class="keyword">if</span> atr_hex:
+                <span class="keyword">return</span> CardReset(h2b(atr_hex))
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        logger.debug(<span class="string">"MBIM SIM frame with CID %d ignored by starter parser"</span>, cid)
+        <span class="keyword">return</span> <span class="keyword">None</span>
+      </div>
+      <p>The <code>_hex_field</code> helper normalises Wireshark's two output conventions (colon-separated hex vs bare hex; <code>use_json=True</code> vs the default XML mode) so a capture from either toolchain decodes without per-version glue at the call site.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">03 · Open items called out explicitly</div>
+    <h2 class="section-title">Honest scope, not a half-baked promise</h2>
+    <div class="card">
+      <ol>
+        <li><strong>ATR extraction from UICC_RESET responses.</strong> A successful reset frame carries the new ATR; the parser stubs it (<code>CardReset(h2b(atr_hex))</code>) when the field is present, but no real reset trace was on hand to validate.</li>
+        <li><strong>APDU fragmentation across MBIM frames.</strong> Modems are free to split APDUs longer than ~256 bytes across multiple <code>UICC_APDU</code> messages. The starter assumes single-frame APDUs because every MBIM capture the issue's reproducer pcap contains is in that regime; a follow-up should add the reassembly state machine.</li>
+        <li><strong>LiveCapture variant for <code>tshark -i wwanX</code>.</strong> Adding <code>PysharkMbimLive</code> is one ~10-line subclass once the file variant is exercised against real captures.</li>
+        <li><strong>OPEN_CHANNEL / CLOSE_CHANNEL frames.</strong> Currently logged at DEBUG. They are metadata for higher-level callers and only matter once the consuming code wants to track logical channels.</li>
+      </ol>
+    </div>
+    <div class="callout warn"><strong>Why no in-tree test yet.</strong> The existing pyshark adapters (<code>pyshark_gsmtap.py</code>, <code>pyshark_rspro.py</code>) ship without their own unit tests for the same reason: a meaningful test needs an actual pcap to exercise tshark, and that means committing a binary fixture and running a <code>tshark</code> subprocess in CI. Happy to ship a small fixture pcap + <code>tests/apdu_source/test_pyshark_mbim.py</code> in a follow-up if the maintainer wants it.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · The outreach</div>
+    <h2 class="section-title">Where this stands</h2>
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + README</h4><p>Local branch <code>feature/2-mbim-apdu-source</code>, commit <code>4fa939c</code>. The repository's canonical home is on Osmocom's gitea (<code>gitea.osmocom.org/sim-card/pysim</code>); the simula/pysim GitHub mirror is where issue #2 was filed.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Send the patch upstream via the osmocom mailing list (<code>simtrace@lists.osmocom.org</code>)</h4><p>Osmocom takes patches on gitea or on the list; mailing list is more responsive for a sole maintainer (Harald Welte).</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 1 week, contract within 6 weeks</h4><p>Realistic odds for this lead alone: ~25-40% conversation (osmocom is small but responsive), ~5% contract (it's a non-profit). The more likely win condition is a referral to sysmocom, the commercial entity behind osmocom, who do contract embedded / cellular infrastructure work.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">05 · How to verify</div>
+    <h2 class="section-title">Point it at a real MBIM pcap</h2>
+    <div class="code-block">
+<span class="keyword">cd</span> c:/Users/FRA/Documents/github/workrepo/pysim
+git switch feature/2-mbim-apdu-source
+git log --stat -1               <span class="comment"># commit 4fa939c, 2 files</span>
+
+pip install pyshark              <span class="comment"># plus system dependency tshark / wireshark</span>
+
+<span class="keyword">python</span> - &lt;&lt;'PY'
+<span class="keyword">from</span> pySim.apdu_source.pyshark_mbim <span class="keyword">import</span> PysharkMbimPcap
+src = PysharkMbimPcap(<span class="string">"path/to/mbim_capture.pcap"</span>)
+<span class="keyword">while</span> <span class="keyword">True</span>:
+    <span class="keyword">try</span>:
+        pkt = src.read_packet()
+    <span class="keyword">except</span> StopIteration:
+        <span class="keyword">break</span>
+    <span class="keyword">if</span> pkt <span class="keyword">is not</span> <span class="keyword">None</span>:
+        print(pkt)
+PY
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem"><a href="index.html">← Back to portfolio</a> · <a href="index.html#outreach">Outreach overview</a></p>
+    <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{primaryColor:'#1a1228',primaryTextColor:'#f5f7ff',primaryBorderColor:'#7c3aed',lineColor:'#a855f7',secondaryColor:'#0a1e10',tertiaryColor:'#080a14',fontFamily:'Geist Mono, monospace',fontSize:'14px'},flowchart:{curve:'basis',padding:24}});
+  document.addEventListener('scroll',()=>{const nav=document.getElementById('nav');if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');});
+</script>
+</body>
+</html>

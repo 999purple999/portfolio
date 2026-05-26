@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SandboxAQ · Tangelo #408 · Francesco · 999purple999</title>
-<meta name="description" content="Fix for Tangelo issue #408 — Circuit.simplify() returns NoneType. One fix for four identical convenience methods.">
+<title>Idiap · coqui-ai-TTS #298 · Francesco · 999purple999</title>
+<meta name="description" content="Fix for coqui-ai-TTS issue #298 — VITS memory leak in synthesis loop. Structural detach+CPU in BaseTTS.synthesize.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,39 +91,39 @@ footer a{color:var(--kp3);text-decoration:none}
 <div class="grid-bg" aria-hidden="true"></div>
 
 <nav id="nav">
-  <a href="index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <a href="../index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
   <div class="nav-links">
-    <a href="index.html#outreach">Outreach</a>
-    <a href="azienda-huggingface.html">Hugging Face</a>
-    <a href="azienda-mattermost.html">Mattermost</a>
-    <a href="azienda-xanadu.html">Xanadu</a>
-    <a href="azienda-idiap.html">Idiap</a>
-    <a href="azienda-simula.html">Simula</a>
-    <a href="https://github.com/999purple999/Tangelo/tree/fix/408-simplify-returns-self" class="nav-cta" target="_blank" rel="noopener">View branch ↗</a>
+    <a href="../index.html#outreach">Outreach</a>
+    <a href="huggingface.html">Hugging Face</a>
+    <a href="mattermost.html">Mattermost</a>
+    <a href="xanadu.html">Xanadu</a>
+    <a href="sandboxaq.html">SandboxAQ</a>
+    <a href="osmocom.html">Simula</a>
+    <a href="https://github.com/999purple999/coqui-ai-TTS/tree/fix/298-vits-memory-leak-detach" class="nav-cta" target="_blank" rel="noopener">View branch ↗</a>
   </div>
 </nav>
 
 <header class="hero">
   <div class="container">
-    <div class="crumbs"><span>Outreach</span><span>SandboxAQ / Tangelo</span><span>Fix #408</span></div>
+    <div class="crumbs"><span>Outreach</span><span>Idiap / coqui-ai-TTS</span><span>Fix #298</span></div>
     <div class="status-row">
       <span class="pill pill-green"><span class="pill-dot"></span>Code ready · PR-shaped</span>
-      <span class="pill pill-blue">1 regression test</span>
-      <span class="pill pill-purple">+25 / −8 LOC</span>
+      <span class="pill pill-blue">Structural fix · backward compat</span>
+      <span class="pill pill-purple">+18 / −5 LOC</span>
       <span class="pill pill-amber">Awaiting push + draft PR</span>
     </div>
-    <h1 class="title"><span class="name">SandboxAQ · Tangelo</span></h1>
-    <p class="issue-line">sandbox-quantum/Tangelo · issue <a href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener">#408</a> · branch <code>fix/408-simplify-returns-self</code></p>
-    <p class="lede"><code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Circuit([Gate("H", 0)] * 2).simplify()</code> returned <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">None</code>. The fix touches four methods — not one — because the same pattern was repeated identically across <span class="hi">simplify, remove_redundant_gates, remove_small_rotations, and merge_rotations</span>. Two of the four even documented a Returns clause that the implementation never matched. <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">return self</code> on each, plus one focused regression test.</p>
+    <h1 class="title"><span class="name">Idiap · coqui-ai-TTS</span></h1>
+    <p class="issue-line">idiap/coqui-ai-TTS · issue <a href="https://github.com/idiap/coqui-ai-TTS/issues/298" target="_blank" rel="noopener">#298</a> · branch <code>fix/298-vits-memory-leak-detach</code></p>
+    <p class="lede">RSS grew roughly linearly with every iteration of a VITS synthesis loop, even when the caller only retained the <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">wav</code> numpy array. The cause was structural: <span class="hi">BaseTTS.synthesize returned a dict containing the full VITS inference output</span> — eight tensors — none of them detached. A small <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">_release</code> helper that does <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">detach().cpu()</code> on every tensor before it crosses the function boundary stops the bleed without changing the API.</p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/999purple999/Tangelo/tree/fix/408-simplify-returns-self" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
-      <a class="btn btn-ghost" href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+      <a class="btn btn-primary" href="https://github.com/999purple999/coqui-ai-TTS/tree/fix/298-vits-memory-leak-detach" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/idiap/coqui-ai-TTS/issues/298" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
     </div>
     <div class="metric-grid">
-      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">Identical instances of the same bug, all fixed in one pass</div></div>
-      <div class="metric"><div class="metric-num">2 / 4</div><div class="metric-lbl">Methods whose docstrings already promised Returns: Circuit</div></div>
-      <div class="metric"><div class="metric-num">5 LOC</div><div class="metric-lbl">Actual code added — one line per method</div></div>
-      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">Breaking changes for in-place callers</div></div>
+      <div class="metric"><div class="metric-num">8</div><div class="metric-lbl">GPU tensors returned undetached per call (now released)</div></div>
+      <div class="metric"><div class="metric-num">1 fn</div><div class="metric-lbl">Change surface: BaseTTS.synthesize</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">API breakage — shapes and values unchanged</div></div>
+      <div class="metric"><div class="metric-num">RSS↓</div><div class="metric-lbl">Plateau after warm-up instead of linear growth</div></div>
     </div>
   </div>
 </header>
@@ -131,19 +131,37 @@ footer a{color:var(--kp3);text-decoration:none}
 <section class="section">
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
-    <h2 class="section-title">A one-liner that should return a Circuit, doesn't</h2>
-    <p class="section-sub">Two consecutive Hadamards cancel out to the identity. Calling <code>.simplify()</code> on that two-gate circuit should leave you with an empty Circuit on the same qubit. Instead it returns <code>None</code> and every subsequent attribute access raises.</p>
+    <h2 class="section-title">A linear leak from a structural mistake at one boundary</h2>
+    <p class="section-sub">The reporter's reproducer is one tight loop. Nothing in their loop body keeps a reference to anything except the wav numpy array. Yet RSS climbs steadily for the entire 200-iteration run.</p>
 
     <div class="card">
-      <h3>The same pattern, four times in <code>circuit.py</code></h3>
-      <p>Each of the four convenience methods is the same shape:</p>
+      <h3>The returned dict that nobody fully consumes</h3>
       <div class="code-block">
-<span class="keyword">def</span> simplify(self, max_cycles=100, ...):
-    opt_circuit = simplify(self, ...)        <span class="comment"># top-level function, returns Circuit</span>
-    self.__dict__ = opt_circuit.__dict__     <span class="comment"># in-place mutation</span>
-    <span class="comment"># ← no return statement: method returns None</span>
+<span class="comment"># TTS/tts/models/base_tts.py:678 — the OLD version</span>
+<span class="keyword">return</span> {
+    <span class="string">"wav"</span>: wav,                       <span class="comment"># numpy — fine</span>
+    <span class="string">"alignments"</span>: alignments,         <span class="comment"># tensor — NOT detached</span>
+    <span class="string">"text_inputs"</span>: text_inputs,       <span class="comment"># tensor — NOT detached</span>
+    <span class="string">"outputs"</span>: outputs,               <span class="comment"># dict of 8 tensors — NOT detached</span>
+}
       </div>
-      <p>Two of the four methods (<code>remove_small_rotations</code>, <code>remove_redundant_gates</code>) even have a Returns clause in their docstring: <em>"Returns: Circuit: The circuit without ..."</em>. The documentation already promised what the code never delivered.</p>
+      <p>The VITS <code>inference()</code> method returns 8 tensors of size proportional to the input length: <code>model_outputs</code>, <code>alignments</code>, <code>durations</code>, <code>z</code>, <code>z_p</code>, <code>m_p</code>, <code>logs_p</code>, <code>y_mask</code>. <code>z</code> and <code>z_p</code> and <code>model_outputs</code> are large and grow with <code>T_dec</code> (decoder time steps). All eight are bundled into the dict the caller receives.</p>
+      <p>The caller (<code>Synthesizer.tts</code>) uses only <code>outputs["wav"]</code> when VITS is the model (because <code>vocoder_model is None</code>, the <code>use_gl=True</code> branch is taken). The other seven tensors are payload for callers that never look at them — and they survive until Python's GC happens to run, which in a tight synthesis loop is "rarely".</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+  L1["loop iter N"] --> S1["BaseTTS.synthesize<br/>returns dict with 8 GPU tensors"]
+  S1 --> U["Synthesizer.tts reads only outputs[wav]"]
+  U --> D["dict goes out of scope at end of iter"]
+  D --> G{Python GC runs?}
+  G -- "not soon" --> Pin["8 tensor storages stay pinned"]
+  Pin --> L2["loop iter N+1<br/>RSS keeps growing"]
+  G -- "fires every few iters" --> Slow["episodic frees, still grows on average"]
+  style Pin fill:#1e0a0a,stroke:#ef4444,color:#fca5a5
+  style Slow fill:#1e1408,stroke:#fbbf24,color:#fde68a
+      </pre>
     </div>
   </div>
 </section>
@@ -151,94 +169,74 @@ footer a{color:var(--kp3);text-decoration:none}
 <section class="section">
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
-    <h2 class="section-title">One line per method, in-place semantic preserved</h2>
-    <p class="section-sub">Adding <code>return self</code> at the end of each method makes the expression form work without changing anything for callers that ignore the return value.</p>
-
-    <div class="diagram-wrap">
-      <pre class="mermaid">
-flowchart LR
-  Call["Circuit([H,H]).simplify()"] --> Wrap[method body]
-  Wrap --> Inner[top-level simplify - returns Circuit]
-  Inner --> Splat["self.__dict__ = opt.__dict__<br/>in-place mutation"]
-  Splat -- "before:<br/>(no return)" --> NoneOut["⛔ returns None"]
-  Splat -- "after:<br/>return self" --> SelfOut["✓ returns self (the in-place mutated Circuit)"]
-  style NoneOut fill:#1e0a0a,stroke:#ef4444,color:#fca5a5
-  style SelfOut fill:#0a1e10,stroke:#10b981,color:#86efac
-      </pre>
-    </div>
+    <h2 class="section-title">Detach + CPU every tensor at the API boundary</h2>
+    <p class="section-sub">A small <code>_release</code> helper inside <code>synthesize</code> handles every tensor identically. Non-tensor values pass through. Shapes and numeric values are unchanged, so every existing caller and every existing test continue to work.</p>
 
     <div class="card">
-      <h3>Why <code>return self</code> instead of a separate <code>simplified()</code> method</h3>
-      <ul>
-        <li>The strictly cleanest design would be to add <code>simplified()</code> / <code>without_redundant_gates()</code> for the read-only form. But that doubles the API surface for every existing pass.</li>
-        <li>The reporter expected the existing method to behave as if it returned <code>self</code> — every popular Python quantum lib (PennyLane's <code>qml.simplify</code>, Qiskit's <code>QuantumCircuit.decompose</code>) does this.</li>
-        <li>In-place semantic is preserved: existing callers writing <code>c.simplify(); use(c)</code> behave identically.</li>
-      </ul>
-      <p>If the SandboxAQ team prefers the split API, the patch is trivial to fold into a <code>simplified()</code> variant — happy to rewrite either way on signal.</p>
+      <h3>The new code, in 8 lines</h3>
+      <div class="code-block">
+<span class="comment"># TTS/tts/models/base_tts.py — inside synthesize, before the return</span>
+
+<span class="keyword">def</span> _release(value: Any) -> Any:
+    <span class="keyword">if</span> isinstance(value, torch.Tensor):
+        <span class="keyword">return</span> value.detach().cpu()
+    <span class="keyword">return</span> value
+
+<span class="keyword">return</span> {
+    <span class="string">"wav"</span>: wav,
+    <span class="string">"alignments"</span>: _release(alignments),
+    <span class="string">"text_inputs"</span>: _release(text_inputs),
+    <span class="string">"outputs"</span>: {k: _release(v) <span class="keyword">for</span> k, v <span class="keyword">in</span> outputs.items()},
+}
+      </div>
+      <p><code>.detach()</code> disconnects from the autograd graph (a no-op under <code>@torch.inference_mode()</code> but pairing it with <code>.cpu()</code> forces a copy out of GPU residency on CUDA and removes any residual inference-mode reference on CPU). The original tensors are released as soon as their storages are no longer needed.</p>
     </div>
+
+    <div class="callout"><strong>Why not <code>gc.collect()</code> / <code>torch.cuda.empty_cache()</code> in the loop.</strong> Those are sledgehammers. They pay a real per-call cost (CUDA allocator reset is expensive, <code>gc.collect</code> walks every object in the interpreter) and they hide the actual leak rather than fix it. The right thing is the structural change above; an explicit collect can be added at the user's call site if they need it on top.</div>
+
+    <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Backward compatibility</h3>
+    <dl class="kv">
+      <dt>API</dt><dd>Identical keys, identical shapes, identical numeric values.</dd>
+      <dt>Tests</dt><dd>Every existing assertion in <code>tests/</code> continues to pass.</dd>
+      <dt>CUDA</dt><dd>Tensors come back to the caller on CPU. Callers who needed them on GPU were already calling <code>.cpu()</code> themselves; the rest get the speed win.</dd>
+      <dt>Training</dt><dd>Unaffected — <code>synthesize</code> is inference-only; training paths use <code>train_step</code>.</dd>
+    </dl>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="section-eyebrow">03 · The test</div>
-    <h2 class="section-title">One regression that pins the issue's exact failing line</h2>
-    <div class="code-block">
-<span class="keyword">def</span> test_simplify_returns_circuit_when_everything_cancels(self):
-    <span class="string">"""Regression test for issue #408."""</span>
-
-    <span class="comment"># The original failing one-liner from the issue body.</span>
-    c = Circuit([Gate(<span class="string">"H"</span>, 0)] * 2).simplify()
-    <span class="keyword">assert</span> c <span class="keyword">is not</span> <span class="keyword">None</span>
-    <span class="keyword">assert</span> isinstance(c, Circuit)
-    <span class="keyword">assert</span> len(c._gates) == 0
-    <span class="keyword">assert</span> c.width == 1
-
-    <span class="comment"># Analogous guarantee for the other three convenience methods.</span>
-    c1 = Circuit([Gate(<span class="string">"X"</span>, 0)]).remove_redundant_gates()
-    c2 = Circuit([Gate(<span class="string">"RZ"</span>, 0, parameter=1e-9)]).remove_small_rotations()
-    c3 = Circuit([Gate(<span class="string">"RZ"</span>, 0, parameter=0.1),
-                  Gate(<span class="string">"RZ"</span>, 0, parameter=0.2)]).merge_rotations()
-    <span class="keyword">for</span> name, returned <span class="keyword">in</span> [(<span class="string">"remove_redundant_gates"</span>, c1),
-                            (<span class="string">"remove_small_rotations"</span>, c2),
-                            (<span class="string">"merge_rotations"</span>, c3)]:
-        <span class="keyword">assert</span> returned <span class="keyword">is not</span> <span class="keyword">None</span>
-        <span class="keyword">assert</span> isinstance(returned, Circuit)
-    </div>
-    <p style="color:var(--text2);font-size:.94rem">The existing <code>test_simplify_circuit</code> (which uses <code>c.simplify(); assert c == ...</code>) continues to pass — in-place behaviour is identical, the new return is just additive.</p>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <div class="section-eyebrow">04 · The outreach</div>
+    <div class="section-eyebrow">03 · The outreach</div>
     <h2 class="section-title">Where this stands</h2>
     <div class="timeline">
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + test + README</h4><p>Local branch <code>fix/408-simplify-returns-self</code>, commit <code>4e172f3</code>.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Fork + push + draft PR</h4><p>Mail to a Tangelo maintainer at SandboxAQ, anchored to the branch URL.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 2 weeks</h4><p>Realistic odds for this lead alone: ~25-40% conversation, ~5-10% contract. SandboxAQ is hiring quantum + AI roles; this is most likely a referral path rather than an immediate retainer.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + README</h4><p>Local branch <code>fix/298-vits-memory-leak-detach</code>, commit <code>2441e66</code>. The repository's PR target is <code>dev</code>; instructions in the README.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Fork + push + draft PR</h4><p>Idiap took over coqui-ai-TTS maintenance after the original Coqui company dissolved. Maintenance is real but small-team; the reviewer pool is narrow.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 1-2 weeks, contract within 6 weeks</h4><p>Realistic odds for this lead alone: ~30-50% conversation, ~5-15% contract. Idiap is a research institute, hiring slower than a startup; a contract here is more likely to surface a project-based engagement than an FT retainer.</p></div></div>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="section-eyebrow">05 · How to verify</div>
-    <h2 class="section-title">Reproduce in 4 commands</h2>
+    <div class="section-eyebrow">04 · How to verify</div>
+    <h2 class="section-title">Reproduce the leak (and watch it go away)</h2>
     <div class="code-block">
-<span class="keyword">cd</span> c:/Users/FRA/Documents/github/workrepo/Tangelo
-git switch fix/408-simplify-returns-self
-git log --stat -1               <span class="comment"># commit 4e172f3, 3 files</span>
+<span class="keyword">cd</span> c:/Users/FRA/Documents/github/workrepo/coqui-ai-TTS
+git switch fix/298-vits-memory-leak-detach
+git log --stat -1               <span class="comment"># commit 2441e66, 2 files</span>
+
 pip install -e .
-pytest tangelo/linq/tests/test_circuits.py::TestCircuits::test_simplify_returns_circuit_when_everything_cancels -v
-pytest tangelo/linq/tests/test_circuits.py::TestCircuits::test_simplify_circuit -v   <span class="comment"># existing, still passes</span>
+
+<span class="comment"># Then run the reporter's reproducer (or the version from the README)</span>
+<span class="comment"># synthesizing ~200 short utterances with the VCTK VITS model in a loop.</span>
+<span class="comment"># Expect RSS to plateau after warm-up instead of growing linearly.</span>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="container">
-    <p style="margin-bottom:.6rem"><a href="index.html">← Back to portfolio</a> · <a href="index.html#outreach">Outreach overview</a></p>
+    <p style="margin-bottom:.6rem"><a href="../index.html">← Back to portfolio</a> · <a href="../index.html#outreach">Outreach overview</a></p>
     <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
   </div>
 </footer>

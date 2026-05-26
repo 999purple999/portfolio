@@ -1,12 +1,14 @@
 # Private outreach material — never push
 upwork-profile.*
 upwork-profile-*.md
+upwork/
 cold-emails.md
 cold-emails-*.md
 COLD_OUTREACH_OVERVIEW.md
 WORK_HUNT_PLAN.md
 workrepo-analysis-rag.md
 PUBLISH_PLAYBOOK.md
+STRATEGY_COLD_FORGE_V2.md
 
 # Editor & OS noise
 .DS_Store

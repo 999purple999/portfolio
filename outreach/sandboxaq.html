@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Simula / Osmocom · pysim #2 · Francesco · 999purple999</title>
-<meta name="description" content="Starter implementation for pysim issue #2 — decoding APDUs from MBIM PCAP captures. New pyshark_mbim.py adapter mirroring the existing pyshark_gsmtap.py pattern.">
+<title>SandboxAQ · Tangelo #408 · Francesco · 999purple999</title>
+<meta name="description" content="Fix for Tangelo issue #408 — Circuit.simplify() returns NoneType. One fix for four identical convenience methods.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,8 +76,6 @@ section.section{padding:80px 0;border-top:1px solid var(--border)}
 .kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
 .callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
 .callout strong{color:var(--kp3)}
-.callout.warn{border-left-color:var(--gold);background:rgba(251,191,36,.06)}
-.callout.warn strong{color:var(--gold)}
 .timeline{display:grid;gap:1rem;margin:1.6rem 0}
 .timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
 .timeline-row:last-child{border-bottom:none}
@@ -93,128 +91,121 @@ footer a{color:var(--kp3);text-decoration:none}
 <div class="grid-bg" aria-hidden="true"></div>
 
 <nav id="nav">
-  <a href="index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <a href="../index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
   <div class="nav-links">
-    <a href="index.html#outreach">Outreach</a>
-    <a href="azienda-huggingface.html">Hugging Face</a>
-    <a href="azienda-mattermost.html">Mattermost</a>
-    <a href="azienda-xanadu.html">Xanadu</a>
-    <a href="azienda-sandboxaq.html">SandboxAQ</a>
-    <a href="azienda-idiap.html">Idiap</a>
-    <a href="https://github.com/999purple999/pysim/tree/feature/2-mbim-apdu-source" class="nav-cta" target="_blank" rel="noopener">View branch ↗</a>
+    <a href="../index.html#outreach">Outreach</a>
+    <a href="huggingface.html">Hugging Face</a>
+    <a href="mattermost.html">Mattermost</a>
+    <a href="xanadu.html">Xanadu</a>
+    <a href="idiap.html">Idiap</a>
+    <a href="osmocom.html">Simula</a>
+    <a href="https://github.com/999purple999/Tangelo/tree/fix/408-simplify-returns-self" class="nav-cta" target="_blank" rel="noopener">View branch ↗</a>
   </div>
 </nav>
 
 <header class="hero">
   <div class="container">
-    <div class="crumbs"><span>Outreach</span><span>Simula / Osmocom pysim</span><span>Starter #2</span></div>
+    <div class="crumbs"><span>Outreach</span><span>SandboxAQ / Tangelo</span><span>Fix #408</span></div>
     <div class="status-row">
-      <span class="pill pill-blue"><span class="pill-dot"></span>Starter implementation · feature branch</span>
-      <span class="pill pill-purple">+270 LOC including docs</span>
-      <span class="pill pill-amber">Open items called out explicitly</span>
+      <span class="pill pill-green"><span class="pill-dot"></span>Code ready · PR-shaped</span>
+      <span class="pill pill-blue">1 regression test</span>
+      <span class="pill pill-purple">+25 / −8 LOC</span>
+      <span class="pill pill-amber">Awaiting push + draft PR</span>
     </div>
-    <h1 class="title"><span class="name">Simula / Osmocom · pysim</span></h1>
-    <p class="issue-line">simula/pysim · issue <a href="https://github.com/simula/pysim/issues/2" target="_blank" rel="noopener">#2</a> (mirror of upstream <a href="https://gitea.osmocom.org/sim-card/pysim" target="_blank" rel="noopener">osmocom pysim</a>) · branch <code>feature/2-mbim-apdu-source</code></p>
-    <p class="lede">The reporter asked whether pysim can decode APDUs from a Wireshark capture of their cellular modem talking to an eSIM over MBIM. <span class="hi">pysim already has the same shape</span> for GSMTAP (<code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">pyshark_gsmtap.py</code>) and Osmocom RSPRO (<code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">pyshark_rspro.py</code>). MBIM slots straight into that pattern. This branch ships the starter implementation as <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">pyshark_mbim.py</code>.</p>
+    <h1 class="title"><span class="name">SandboxAQ · Tangelo</span></h1>
+    <p class="issue-line">sandbox-quantum/Tangelo · issue <a href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener">#408</a> · branch <code>fix/408-simplify-returns-self</code></p>
+    <p class="lede"><code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Circuit([Gate("H", 0)] * 2).simplify()</code> returned <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">None</code>. The fix touches four methods — not one — because the same pattern was repeated identically across <span class="hi">simplify, remove_redundant_gates, remove_small_rotations, and merge_rotations</span>. Two of the four even documented a Returns clause that the implementation never matched. <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">return self</code> on each, plus one focused regression test.</p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/999purple999/pysim/tree/feature/2-mbim-apdu-source" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
-      <a class="btn btn-ghost" href="https://github.com/simula/pysim/issues/2" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+      <a class="btn btn-primary" href="https://github.com/999purple999/Tangelo/tree/fix/408-simplify-returns-self" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
     </div>
     <div class="metric-grid">
-      <div class="metric"><div class="metric-num">+1</div><div class="metric-lbl">New ApduSource subclass: PysharkMbimPcap</div></div>
-      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">Lines touched in the existing GSMTAP / RSPRO adapters</div></div>
-      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">Open items called out in the README for follow-up</div></div>
-      <div class="metric"><div class="metric-num">2 nets</div><div class="metric-lbl">Wireshark field-naming conventions normalised in _hex_field</div></div>
+      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">Identical instances of the same bug, all fixed in one pass</div></div>
+      <div class="metric"><div class="metric-num">2 / 4</div><div class="metric-lbl">Methods whose docstrings already promised Returns: Circuit</div></div>
+      <div class="metric"><div class="metric-num">5 LOC</div><div class="metric-lbl">Actual code added — one line per method</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">Breaking changes for in-place callers</div></div>
     </div>
   </div>
 </header>
 
 <section class="section">
   <div class="container">
-    <div class="section-eyebrow">01 · The ask</div>
-    <h2 class="section-title">"Could pysim help decode APDUs from my MBIM capture?"</h2>
-    <p class="section-sub">The reporter was tinkering with the embedded eSIM in their modem, captured the USB traffic with Wireshark, and noticed MBIM frames carrying what looked like raw SIM APDUs. They couldn't find a way to decode them in Wireshark itself and asked the obvious question.</p>
+    <div class="section-eyebrow">01 · The problem</div>
+    <h2 class="section-title">A one-liner that should return a Circuit, doesn't</h2>
+    <p class="section-sub">Two consecutive Hadamards cancel out to the identity. Calling <code>.simplify()</code> on that two-gate circuit should leave you with an empty Circuit on the same qubit. Instead it returns <code>None</code> and every subsequent attribute access raises.</p>
 
     <div class="card">
-      <h3>Why this is real work, not just a question</h3>
-      <p>pysim already has a clean abstraction for "pcap dialect → APDU stream":</p>
+      <h3>The same pattern, four times in <code>circuit.py</code></h3>
+      <p>Each of the four convenience methods is the same shape:</p>
       <div class="code-block">
-pySim/apdu_source/
-├── __init__.py        <span class="comment"># ApduSource ABC</span>
-├── gsmtap.py          <span class="comment"># raw UDP + GSMTAP framing</span>
-├── pyshark_gsmtap.py  <span class="comment"># pyshark over a GSMTAP pcap</span>
-└── pyshark_rspro.py   <span class="comment"># pyshark over Osmocom RemSim Server proxy frames</span>
+<span class="keyword">def</span> simplify(self, max_cycles=100, ...):
+    opt_circuit = simplify(self, ...)        <span class="comment"># top-level function, returns Circuit</span>
+    self.__dict__ = opt_circuit.__dict__     <span class="comment"># in-place mutation</span>
+    <span class="comment"># ← no return statement: method returns None</span>
       </div>
-      <p>Adding <code>pyshark_mbim.py</code> slots straight into that pattern. The MBIM service ID for SIM access (<code>MS_UICC_LOW_LEVEL_ACCESS</code>, UUID <code>c2f6588e-f037-4bc9-8665-f4d44bd09367</code>) and the relevant CIDs (<code>UICC_APDU = 4</code>, <code>UICC_RESET = 6</code>, …) are stable across vendors, so the dissector path is well-defined.</p>
+      <p>Two of the four methods (<code>remove_small_rotations</code>, <code>remove_redundant_gates</code>) even have a Returns clause in their docstring: <em>"Returns: Circuit: The circuit without ..."</em>. The documentation already promised what the code never delivered.</p>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="section-eyebrow">02 · The starter</div>
-    <h2 class="section-title">A new ApduSource that reads MBIM PCAPs through pyshark</h2>
-    <p class="section-sub">The new file is intentionally close in shape to <code>pyshark_gsmtap.py</code> so a follow-up PR can refactor the shared scaffolding without churn.</p>
+    <div class="section-eyebrow">02 · The fix</div>
+    <h2 class="section-title">One line per method, in-place semantic preserved</h2>
+    <p class="section-sub">Adding <code>return self</code> at the end of each method makes the expression form work without changing anything for callers that ignore the return value.</p>
 
     <div class="diagram-wrap">
       <pre class="mermaid">
 flowchart LR
-  Pcap[pcap file - MBIM traffic] --> Filter["pyshark.FileCapture<br/>display_filter='mbim'"]
-  Filter --> Loop[for each MBIM frame]
-  Loop --> Service{service_id == UICC_LLA UUID?}
-  Service -- no --> Skip[skip frame]
-  Service -- yes --> Cid{mbim.cid}
-  Cid -- "UICC_APDU (4)" --> Apdu[_hex_field uicc_apdu_command]
-  Apdu --> Parse["ApduCommands.parse_cmd_bytes<br/>(shared with GSMTAP adapter)"]
-  Cid -- "UICC_RESET (6)" --> Atr[_hex_field uicc_atr]
-  Atr --> Reset["CardReset(atr_bytes)"]
-  Cid -- "other (OPEN/CLOSE_CHANNEL, ...)" --> Debug[debug-log, skip]
+  Call["Circuit([H,H]).simplify()"] --> Wrap[method body]
+  Wrap --> Inner[top-level simplify - returns Circuit]
+  Inner --> Splat["self.__dict__ = opt.__dict__<br/>in-place mutation"]
+  Splat -- "before:<br/>(no return)" --> NoneOut["⛔ returns None"]
+  Splat -- "after:<br/>return self" --> SelfOut["✓ returns self (the in-place mutated Circuit)"]
+  style NoneOut fill:#1e0a0a,stroke:#ef4444,color:#fca5a5
+  style SelfOut fill:#0a1e10,stroke:#10b981,color:#86efac
       </pre>
     </div>
 
     <div class="card">
-      <h3>The hot path, abbreviated</h3>
-      <div class="code-block">
-<span class="keyword">class</span> _PysharkMbim(ApduSource):
-    <span class="keyword">def</span> _parse_packet(self, p) -> Optional[PacketType]:
-        <span class="keyword">if</span> <span class="string">"mbim"</span> <span class="keyword">not in</span> p:
-            <span class="keyword">return</span> <span class="keyword">None</span>
-        mbim = p[<span class="string">"mbim"</span>]
-
-        service = _hex_field(mbim, <span class="string">"service_id"</span>, <span class="string">"uuid_service_id"</span>)
-        <span class="keyword">if</span> service <span class="keyword">and</span> service.lower() != MBIM_SERVICE_UICC_LLA.replace(<span class="string">"-"</span>, <span class="string">""</span>).lower():
-            <span class="keyword">return</span> <span class="keyword">None</span>
-
-        cid = int(mbim.get_field(<span class="string">"cid"</span>))
-        <span class="keyword">if</span> cid == MBIM_CID_UICC_APDU:
-            apdu_hex = _hex_field(mbim, <span class="string">"uicc_apdu_command"</span>, <span class="string">"uicc_apdu"</span>, <span class="string">"apdu"</span>)
-            <span class="keyword">return</span> ApduCommands.parse_cmd_bytes(h2b(apdu_hex))
-        <span class="keyword">if</span> cid == MBIM_CID_UICC_RESET:
-            atr_hex = _hex_field(mbim, <span class="string">"uicc_atr"</span>, <span class="string">"atr"</span>)
-            <span class="keyword">if</span> atr_hex:
-                <span class="keyword">return</span> CardReset(h2b(atr_hex))
-            <span class="keyword">return</span> <span class="keyword">None</span>
-        logger.debug(<span class="string">"MBIM SIM frame with CID %d ignored by starter parser"</span>, cid)
-        <span class="keyword">return</span> <span class="keyword">None</span>
-      </div>
-      <p>The <code>_hex_field</code> helper normalises Wireshark's two output conventions (colon-separated hex vs bare hex; <code>use_json=True</code> vs the default XML mode) so a capture from either toolchain decodes without per-version glue at the call site.</p>
+      <h3>Why <code>return self</code> instead of a separate <code>simplified()</code> method</h3>
+      <ul>
+        <li>The strictly cleanest design would be to add <code>simplified()</code> / <code>without_redundant_gates()</code> for the read-only form. But that doubles the API surface for every existing pass.</li>
+        <li>The reporter expected the existing method to behave as if it returned <code>self</code> — every popular Python quantum lib (PennyLane's <code>qml.simplify</code>, Qiskit's <code>QuantumCircuit.decompose</code>) does this.</li>
+        <li>In-place semantic is preserved: existing callers writing <code>c.simplify(); use(c)</code> behave identically.</li>
+      </ul>
+      <p>If the SandboxAQ team prefers the split API, the patch is trivial to fold into a <code>simplified()</code> variant — happy to rewrite either way on signal.</p>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="section-eyebrow">03 · Open items called out explicitly</div>
-    <h2 class="section-title">Honest scope, not a half-baked promise</h2>
-    <div class="card">
-      <ol>
-        <li><strong>ATR extraction from UICC_RESET responses.</strong> A successful reset frame carries the new ATR; the parser stubs it (<code>CardReset(h2b(atr_hex))</code>) when the field is present, but no real reset trace was on hand to validate.</li>
-        <li><strong>APDU fragmentation across MBIM frames.</strong> Modems are free to split APDUs longer than ~256 bytes across multiple <code>UICC_APDU</code> messages. The starter assumes single-frame APDUs because every MBIM capture the issue's reproducer pcap contains is in that regime; a follow-up should add the reassembly state machine.</li>
-        <li><strong>LiveCapture variant for <code>tshark -i wwanX</code>.</strong> Adding <code>PysharkMbimLive</code> is one ~10-line subclass once the file variant is exercised against real captures.</li>
-        <li><strong>OPEN_CHANNEL / CLOSE_CHANNEL frames.</strong> Currently logged at DEBUG. They are metadata for higher-level callers and only matter once the consuming code wants to track logical channels.</li>
-      </ol>
+    <div class="section-eyebrow">03 · The test</div>
+    <h2 class="section-title">One regression that pins the issue's exact failing line</h2>
+    <div class="code-block">
+<span class="keyword">def</span> test_simplify_returns_circuit_when_everything_cancels(self):
+    <span class="string">"""Regression test for issue #408."""</span>
+
+    <span class="comment"># The original failing one-liner from the issue body.</span>
+    c = Circuit([Gate(<span class="string">"H"</span>, 0)] * 2).simplify()
+    <span class="keyword">assert</span> c <span class="keyword">is not</span> <span class="keyword">None</span>
+    <span class="keyword">assert</span> isinstance(c, Circuit)
+    <span class="keyword">assert</span> len(c._gates) == 0
+    <span class="keyword">assert</span> c.width == 1
+
+    <span class="comment"># Analogous guarantee for the other three convenience methods.</span>
+    c1 = Circuit([Gate(<span class="string">"X"</span>, 0)]).remove_redundant_gates()
+    c2 = Circuit([Gate(<span class="string">"RZ"</span>, 0, parameter=1e-9)]).remove_small_rotations()
+    c3 = Circuit([Gate(<span class="string">"RZ"</span>, 0, parameter=0.1),
+                  Gate(<span class="string">"RZ"</span>, 0, parameter=0.2)]).merge_rotations()
+    <span class="keyword">for</span> name, returned <span class="keyword">in</span> [(<span class="string">"remove_redundant_gates"</span>, c1),
+                            (<span class="string">"remove_small_rotations"</span>, c2),
+                            (<span class="string">"merge_rotations"</span>, c3)]:
+        <span class="keyword">assert</span> returned <span class="keyword">is not</span> <span class="keyword">None</span>
+        <span class="keyword">assert</span> isinstance(returned, Circuit)
     </div>
-    <div class="callout warn"><strong>Why no in-tree test yet.</strong> The existing pyshark adapters (<code>pyshark_gsmtap.py</code>, <code>pyshark_rspro.py</code>) ship without their own unit tests for the same reason: a meaningful test needs an actual pcap to exercise tshark, and that means committing a binary fixture and running a <code>tshark</code> subprocess in CI. Happy to ship a small fixture pcap + <code>tests/apdu_source/test_pyshark_mbim.py</code> in a follow-up if the maintainer wants it.</div>
+    <p style="color:var(--text2);font-size:.94rem">The existing <code>test_simplify_circuit</code> (which uses <code>c.simplify(); assert c == ...</code>) continues to pass — in-place behaviour is identical, the new return is just additive.</p>
   </div>
 </section>
 
@@ -223,9 +214,9 @@ flowchart LR
     <div class="section-eyebrow">04 · The outreach</div>
     <h2 class="section-title">Where this stands</h2>
     <div class="timeline">
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + README</h4><p>Local branch <code>feature/2-mbim-apdu-source</code>, commit <code>4fa939c</code>. The repository's canonical home is on Osmocom's gitea (<code>gitea.osmocom.org/sim-card/pysim</code>); the simula/pysim GitHub mirror is where issue #2 was filed.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Send the patch upstream via the osmocom mailing list (<code>simtrace@lists.osmocom.org</code>)</h4><p>Osmocom takes patches on gitea or on the list; mailing list is more responsive for a sole maintainer (Harald Welte).</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 1 week, contract within 6 weeks</h4><p>Realistic odds for this lead alone: ~25-40% conversation (osmocom is small but responsive), ~5% contract (it's a non-profit). The more likely win condition is a referral to sysmocom, the commercial entity behind osmocom, who do contract embedded / cellular infrastructure work.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + test + README</h4><p>Local branch <code>fix/408-simplify-returns-self</code>, commit <code>4e172f3</code>.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Fork + push + draft PR</h4><p>Mail to a Tangelo maintainer at SandboxAQ, anchored to the branch URL.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 2 weeks</h4><p>Realistic odds for this lead alone: ~25-40% conversation, ~5-10% contract. SandboxAQ is hiring quantum + AI roles; this is most likely a referral path rather than an immediate retainer.</p></div></div>
     </div>
   </div>
 </section>
@@ -233,32 +224,21 @@ flowchart LR
 <section class="section">
   <div class="container">
     <div class="section-eyebrow">05 · How to verify</div>
-    <h2 class="section-title">Point it at a real MBIM pcap</h2>
+    <h2 class="section-title">Reproduce in 4 commands</h2>
     <div class="code-block">
-<span class="keyword">cd</span> c:/Users/FRA/Documents/github/workrepo/pysim
-git switch feature/2-mbim-apdu-source
-git log --stat -1               <span class="comment"># commit 4fa939c, 2 files</span>
-
-pip install pyshark              <span class="comment"># plus system dependency tshark / wireshark</span>
-
-<span class="keyword">python</span> - &lt;&lt;'PY'
-<span class="keyword">from</span> pySim.apdu_source.pyshark_mbim <span class="keyword">import</span> PysharkMbimPcap
-src = PysharkMbimPcap(<span class="string">"path/to/mbim_capture.pcap"</span>)
-<span class="keyword">while</span> <span class="keyword">True</span>:
-    <span class="keyword">try</span>:
-        pkt = src.read_packet()
-    <span class="keyword">except</span> StopIteration:
-        <span class="keyword">break</span>
-    <span class="keyword">if</span> pkt <span class="keyword">is not</span> <span class="keyword">None</span>:
-        print(pkt)
-PY
+<span class="keyword">cd</span> c:/Users/FRA/Documents/github/workrepo/Tangelo
+git switch fix/408-simplify-returns-self
+git log --stat -1               <span class="comment"># commit 4e172f3, 3 files</span>
+pip install -e .
+pytest tangelo/linq/tests/test_circuits.py::TestCircuits::test_simplify_returns_circuit_when_everything_cancels -v
+pytest tangelo/linq/tests/test_circuits.py::TestCircuits::test_simplify_circuit -v   <span class="comment"># existing, still passes</span>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="container">
-    <p style="margin-bottom:.6rem"><a href="index.html">← Back to portfolio</a> · <a href="index.html#outreach">Outreach overview</a></p>
+    <p style="margin-bottom:.6rem"><a href="../index.html">← Back to portfolio</a> · <a href="../index.html#outreach">Outreach overview</a></p>
     <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
   </div>
 </footer>

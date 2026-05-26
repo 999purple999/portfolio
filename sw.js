@@ -1,15 +1,15 @@
 // W5 PWA service worker — static cache + stale-while-revalidate for data.
-const VERSION = 'v3-' + '2026-05-24';
+const VERSION = 'v4-' + '2026-05-26';
 const CACHE = `portfolio-${VERSION}`;
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
-  './hero.js',
-  './i18n.js',
-  './dashboard.js',
-  './dashboard-data.js',
+  './assets/css/style.css',
+  './assets/js/app.js',
+  './assets/js/hero.js',
+  './assets/js/i18n.js',
+  './assets/js/dashboard.js',
+  './assets/js/dashboard-data.js',
   './manifest.webmanifest',
 ];
 

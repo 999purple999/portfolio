@@ -126,8 +126,8 @@
 
 <section id="outreach" class="section">
   <div class="container">
-    <h2 class="section-title reveal">9 fixes on real upstream repos <span class="hi">shipped</span></h2>
-    <p class="section-sub reveal delay-1">Nine issues across nine open-source projects, all actioned the same week. <strong>Six draft PRs open upstream</strong> on huggingface.js, mattermost-plugin-calls, PennyLane, Tangelo, coqui-ai-TTS, and Joplin (the Joplin PR ships with an 11-case jest test suite, all green). <strong>Six cold mails sent</strong> to the actual maintainers (verified GitHub commit emails, never scraped). <strong>One public technical comment</strong> posted on the ComfyUI bug thread (@rattus128 tagged). <strong>One silent contribution</strong> against pysim via fork + mailing-list-aware mail. Every page below documents the bug, the fix shape, the trade-offs, and the maintainer the case landed in front of.</p>
+    <h2 class="section-title reveal">10 fixes on real upstream repos <span class="hi">shipped</span></h2>
+    <p class="section-sub reveal delay-1">Ten issues across ten open-source projects, all actioned the same week. <strong>Seven draft PRs open upstream</strong> on huggingface.js, mattermost-plugin-calls, PennyLane, Tangelo, coqui-ai-TTS, Joplin, and Bitwarden. Joplin ships with an 11-case jest test suite (all green); Bitwarden ships with the existing importer test corrected + a new regression guard, 43/43 tests pass and the fix lands in `libs/importer/` shared by all four Bitwarden clients (browser, desktop, cli, web). <strong>Six cold mails sent</strong> to the actual maintainers (verified GitHub commit emails, never scraped). <strong>One public technical comment</strong> posted on the ComfyUI bug thread (@rattus128 tagged). <strong>One silent contribution</strong> against pysim via fork + mailing-list-aware mail. Every page below documents the bug, the fix shape, the trade-offs, and the maintainer the case landed in front of.</p>
 
     <div class="projects-grid">
 
@@ -269,7 +269,27 @@
         </div>
       </article>
 
-      <article class="project reveal delay-7" data-tilt>
+      <article class="project featured reveal" data-tilt>
+        <div class="project-rank">#10 · Bitwarden · Draft PR #20867 · 43/43 tests PASS · 4 clients fixed</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issue #20694 · marked good-first-issue by @djsmith85 · PR open with verified tests
+        </div>
+        <h3 class="project-title">Bitwarden</h3>
+        <p class="project-claim">1Password 1pux import silently dropped every archived entry. Fixed across all 4 clients.</p>
+        <p class="project-body">Real fix for bitwarden/clients #20694. `OnePassword1PuxImporter` had an early-return that skipped every item exported with `state: "archived"` from 1Password, contradicting the help-center docs that promise everything is imported. The existing unit test explicitly enforced the buggy behaviour. The fix removes the early-return, lets archived items flow through the import pipeline, and stamps `cipher.archivedDate = new Date()` so `isArchived` returns true — Bitwarden's canonical archive marker. The fix lands in `libs/importer/` shared by browser / desktop / cli / web (exactly the labels on the issue), so one change, four clients fixed. Old test renamed and corrected; new regression guard added that asserts active items stay unarchived.</p>
+        <ul class="project-tech">
+          <li>TypeScript</li><li>jest</li><li>E2EE password manager</li>
+          <li>43 unit tests · all pass</li><li>+34 / -7 LOC</li><li>4 clients impacted</li>
+        </ul>
+        <div class="project-links">
+          <a href="https://github.com/bitwarden/clients/pull/20867" target="_blank" rel="noopener">PR #20867 ↗</a>
+          <a href="https://github.com/999purple999/clients/tree/fix/20694-1pux-import-preserves-archived" target="_blank" rel="noopener">Branch ↗</a>
+          <a href="https://github.com/bitwarden/clients/issues/20694" target="_blank" rel="noopener">Issue #20694 ↗</a>
+        </div>
+      </article>
+
+      <article class="project featured-2 reveal" data-tilt>
         <div class="project-rank">#09 · Joplin · Draft PR #15544 · 11/11 tests PASS</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>

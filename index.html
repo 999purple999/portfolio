@@ -126,13 +126,13 @@
 
 <section id="outreach" class="section">
   <div class="container">
-    <h2 class="section-title reveal"><span data-i18n="outreach.title">8 fixes on real upstream repos</span> <span class="hi" data-i18n="outreach.title_b">ready to ship</span></h2>
-    <p class="section-sub reveal delay-1" data-i18n="outreach.sub">Eight issues across eight different open-source projects. Five with code ready for an immediate draft PR, one with a deliberate design proposal (because a drive-by patch would silently break three other systems), one with a code-review angle on a bug that turned out to already be fixed upstream, one with a feature starter. Every page below documents what was done, the trade-offs taken, and what the maintainer needs to do next. Branches live in <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">workrepo/</code> — not pushed publicly until a maintainer says go.</p>
+    <h2 class="section-title reveal">8 fixes on real upstream repos <span class="hi">shipped</span></h2>
+    <p class="section-sub reveal delay-1">Eight issues across eight open-source projects, all actioned the same week. <strong>Five draft PRs open upstream</strong> on huggingface.js, mattermost-plugin-calls, PennyLane, Tangelo, coqui-ai-TTS. <strong>Six cold mails sent</strong> to the actual maintainers (verified GitHub commit emails, never scraped). <strong>One public technical comment</strong> posted on the ComfyUI bug thread (@rattus128 tagged). <strong>One silent contribution</strong> against pysim via fork + mailing-list-aware mail. Every page below documents the bug, the fix shape, the trade-offs, and the maintainer the case landed in front of.</p>
 
     <div class="projects-grid">
 
       <article class="project featured reveal" data-tilt>
-        <div class="project-rank" data-i18n="outreach.hf_rank">#01 · code ready</div>
+        <div class="project-rank">#01 · Draft PR #2194 open · Mail sent</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Issue #1979 · PR-shaped branch
@@ -146,12 +146,13 @@
         </ul>
         <div class="project-links">
           <a href="outreach/huggingface.html" data-i18n="outreach.hf_link_page">View the case →</a>
+          <a href="https://github.com/huggingface/huggingface.js/pull/2194" target="_blank" rel="noopener">PR #2194 ↗</a>
           <a href="https://github.com/huggingface/huggingface.js/issues/1979" target="_blank" rel="noopener" data-i18n="outreach.hf_link_issue">Issue #1979 ↗</a>
         </div>
       </article>
 
       <article class="project featured-2 reveal delay-1" data-tilt>
-        <div class="project-rank" data-i18n="outreach.mm_rank">#02 · code ready</div>
+        <div class="project-rank">#02 · Draft PR #1192 open · Mail sent</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Issue #1143 · PR-shaped branch
@@ -165,12 +166,13 @@
         </ul>
         <div class="project-links">
           <a href="outreach/mattermost.html" data-i18n="outreach.mm_link_page">View the case →</a>
+          <a href="https://github.com/mattermost/mattermost-plugin-calls/pull/1192" target="_blank" rel="noopener">PR #1192 ↗</a>
           <a href="https://github.com/mattermost/mattermost-plugin-calls/issues/1143" target="_blank" rel="noopener" data-i18n="outreach.mm_link_issue">Issue #1143 ↗</a>
         </div>
       </article>
 
       <article class="project reveal delay-2" data-tilt>
-        <div class="project-rank" data-i18n="outreach.cf_rank">#03 · design proposal</div>
+        <div class="project-rank">#03 · Public comment posted on #14076</div>
         <div class="project-badge private">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           <span data-i18n="outreach.cf_badge">Issue #14076 · proposal-only, no code yet</span>
@@ -189,7 +191,7 @@
       </article>
 
       <article class="project reveal delay-3" data-tilt>
-        <div class="project-rank" data-i18n="outreach.op_rank">#04 · code review</div>
+        <div class="project-rank">#04 · Mail sent · Code-review angle</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Issue #5523 · post-merge follow-up
@@ -208,7 +210,7 @@
       </article>
 
       <article class="project reveal delay-4" data-tilt>
-        <div class="project-rank" data-i18n="outreach.xa_rank">#05 · code ready</div>
+        <div class="project-rank">#05 · Draft PR #9532 open · Mail sent</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Issue #7807 · PR-shaped branch
@@ -222,12 +224,13 @@
         </ul>
         <div class="project-links">
           <a href="outreach/xanadu.html" data-i18n="outreach.xa_link_page">View the case →</a>
+          <a href="https://github.com/PennyLaneAI/pennylane/pull/9532" target="_blank" rel="noopener">PR #9532 ↗</a>
           <a href="https://github.com/PennyLaneAI/pennylane/issues/7807" target="_blank" rel="noopener" data-i18n="outreach.xa_link_issue">Issue #7807 ↗</a>
         </div>
       </article>
 
       <article class="project reveal delay-5" data-tilt>
-        <div class="project-rank" data-i18n="outreach.sb_rank">#06 · code ready</div>
+        <div class="project-rank">#06 · Silent draft PR #419 (no mail, low buyer-fit)</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Issue #408 · PR-shaped branch
@@ -241,12 +244,13 @@
         </ul>
         <div class="project-links">
           <a href="outreach/sandboxaq.html" data-i18n="outreach.sb_link_page">View the case →</a>
+          <a href="https://github.com/sandbox-quantum/Tangelo/pull/419" target="_blank" rel="noopener">PR #419 ↗</a>
           <a href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener" data-i18n="outreach.sb_link_issue">Issue #408 ↗</a>
         </div>
       </article>
 
       <article class="project reveal delay-6" data-tilt>
-        <div class="project-rank" data-i18n="outreach.id_rank">#07 · code ready</div>
+        <div class="project-rank">#07 · Draft PR #577 open · Mail sent</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Issue #298 · PR-shaped branch
@@ -260,17 +264,18 @@
         </ul>
         <div class="project-links">
           <a href="outreach/idiap.html" data-i18n="outreach.id_link_page">View the case →</a>
+          <a href="https://github.com/idiap/coqui-ai-TTS/pull/577" target="_blank" rel="noopener">PR #577 ↗</a>
           <a href="https://github.com/idiap/coqui-ai-TTS/issues/298" target="_blank" rel="noopener" data-i18n="outreach.id_link_issue">Issue #298 ↗</a>
         </div>
       </article>
 
       <article class="project reveal delay-7" data-tilt>
-        <div class="project-rank" data-i18n="outreach.si_rank">#08 · feature starter</div>
+        <div class="project-rank">#08 · Mail sent · Branch on fork (mailing-list workflow)</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Issue #2 · feature starter on dedicated branch
         </div>
-        <h3 class="project-title">Simula / Osmocom · pysim</h3>
+        <h3 class="project-title">Osmocom · pysim</h3>
         <p class="project-claim" data-i18n="outreach.si_claim">Decoding APDUs from MBIM PCAPs — a new ApduSource that slots into the pattern that already exists.</p>
         <p class="project-body" data-i18n="outreach.si_body">Issue #2 asked whether pysim can decode APDUs from a Wireshark capture of a cellular modem talking to an eSIM over MBIM. pysim already had pyshark_gsmtap.py and pyshark_rspro.py adapters; MBIM slots straight in. The new pyshark_mbim.py filters by the MS_UICC_LOW_LEVEL_ACCESS service UUID, reads mbim.cid, and routes APDU payloads into the shared ApduCommands pipeline. Open items (ATR from UICC_RESET, APDU fragmentation, LiveCapture variant) are called out explicitly in the README rather than shipped half-baked.</p>
         <ul class="project-tech">
@@ -279,6 +284,7 @@
         </ul>
         <div class="project-links">
           <a href="outreach/osmocom.html" data-i18n="outreach.si_link_page">View the case →</a>
+          <a href="https://github.com/999purple999/pysim/tree/feature/2-mbim-apdu-source" target="_blank" rel="noopener">Branch on fork ↗</a>
           <a href="https://github.com/simula/pysim/issues/2" target="_blank" rel="noopener" data-i18n="outreach.si_link_issue">Issue #2 ↗</a>
         </div>
       </article>

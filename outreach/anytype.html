@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Joplin · #15521 WYSIWYG link dialog fix · Francesco · 999purple999</title>
-<meta name="description" content="Fix for laurent22/joplin issue #15521 - WYSIWYG link dialog now focuses the URL field when text is pre-selected. Draft PR #15544 open, 12 jest tests pass, CodeRabbit-approved, CLA signed.">
+<title>Anytype · anytype-ts #2233 · Date format picker fix · Francesco · 999purple999</title>
+<meta name="description" content="Fix for anyproto/anytype-ts #2208 - the settings Date Format picker built every preview label by formatting today's date, so Short (d/m/Y) and ShortUS (m/d/Y) collapsed to the same string on 12 days a year. Switched to a fixed asymmetric sample (Jul 30, 2020) so the two options stay distinguishable year-round. PR #2233 open with two regression-guard tests.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,14 +100,6 @@ section.section{padding:80px 0;border-top:1px solid var(--border)}
 .code-block .string{color:#86efac}
 .code-block .delete{color:#fca5a5;background:rgba(239,68,68,.10);display:block}
 .code-block .add{color:#86efac;background:rgba(16,185,129,.10);display:block}
-.diagram-wrap{margin:1.6rem 0;padding:1.6rem;border-radius:18px;background:rgba(255,255,255,.02);border:1px solid var(--border2);overflow-x:auto}
-.diagram-wrap .mermaid{font-family:var(--font-mono) !important;display:flex;justify-content:center}
-.bench-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.85rem;margin:1rem 0 1.4rem}
-.bench-table th{text-align:left;padding:.7rem 1rem;color:var(--kp3);font-weight:600;border-bottom:1px solid var(--border2);text-transform:uppercase;letter-spacing:.06em;font-size:.74rem}
-.bench-table td{padding:.7rem 1rem;color:var(--text2);border-bottom:1px solid var(--border)}
-.bench-table tr:last-child td{border-bottom:none}
-.bench-table .good{color:#34d399;font-weight:600}
-.bench-table .bad{color:#fca5a5;font-weight:600}
 .kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
 .kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
 .kv dd{color:var(--text1)}
@@ -141,35 +133,35 @@ footer a:hover{color:var(--kp4)}
     <a href="sandboxaq.html">SandboxAQ</a>
     <a href="idiap.html">Idiap</a>
     <a href="osmocom.html">Osmocom</a>
+    <a href="joplin.html">Joplin</a>
     <a href="bitwarden.html">Bitwarden</a>
     <a href="element.html">Element</a>
     <a href="jitsi.html">Jitsi</a>
-    <a href="anytype.html">Anytype</a>
-    <a href="https://github.com/laurent22/joplin/pull/15544" class="nav-cta" target="_blank" rel="noopener">View PR ↗</a>
+    <a href="https://github.com/anyproto/anytype-ts/pull/2233" class="nav-cta" target="_blank" rel="noopener">View PR ↗</a>
   </div>
 </nav>
 
 <header class="hero">
   <div class="container">
-    <div class="crumbs"><span>Outreach</span><span>Joplin</span><span>Fix #15521</span></div>
+    <div class="crumbs"><span>Outreach</span><span>Anytype</span><span>Fix #2208</span></div>
     <div class="status-row">
-      <span class="pill pill-green"><span class="pill-dot"></span>Draft PR #15544 open</span>
-      <span class="pill pill-blue">12 jest tests · all green</span>
-      <span class="pill pill-purple">CodeRabbit approved</span>
-      <span class="pill pill-amber">CLA signed · awaiting human review</span>
+      <span class="pill pill-green"><span class="pill-dot"></span>PR #2233 open</span>
+      <span class="pill pill-blue">UX / deterministic preview</span>
+      <span class="pill pill-purple">+35 / -1 LOC</span>
+      <span class="pill pill-amber">2 regression-guard tests passing</span>
     </div>
-    <h1 class="title"><span class="name">Joplin</span></h1>
-    <p class="issue-line">laurent22/joplin · issue <a href="https://github.com/laurent22/joplin/issues/15521" target="_blank" rel="noopener">#15521</a> · PR <a href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">#15544</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/15521-wysiwyg-link-dialog-focus</code></p>
-    <p class="lede">When a user selects text and opens the Rich Text Editor's "Insert hyperlink" command, TinyMCE's built-in link plugin pre-populates the <span class="hi">"Text to display" field but leaves keyboard focus on it</span> — the user has to tab once before they can type the URL, which is the field they actually wanted to fill. The fix introduces a small pure-function predicate plus a defensive <code>OpenWindow</code> event handler in <code>TinyMCE.tsx</code> that re-focuses the URL field exactly when the dialog has pre-populated text and no URL yet. Existing-link edits keep their default focus.</p>
+    <h1 class="title"><span class="name">Anytype</span></h1>
+    <p class="issue-line">anyproto/anytype-ts · issue <a href="https://github.com/anyproto/anytype-ts/issues/2208" target="_blank" rel="noopener">#2208</a> · PR <a href="https://github.com/anyproto/anytype-ts/pull/2233" target="_blank" rel="noopener">#2233</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/2208-date-format-picker-symmetric-dates</code></p>
+    <p class="lede">The settings *Date Format* picker rendered every preview by formatting <code>now()</code>. On <span class="hi">12 days a year</span> where day equals month (Jan 1, Feb 2, …, Dec 12) the <code>Short</code> (d/m/Y) and <code>ShortUS</code> (m/d/Y) options produce the exact same string — `05.05.2026` for both — so the user can't tell which radio button is which. Five-line fix: pin the preview sample to a fixed asymmetric date (Jul 30, 2020 — already the convention used in the <code>DateFormat</code> enum comments). Plus two regression-guard tests in `date.test.ts`.</p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">View PR #15544 <span>↗</span></a>
-      <a class="btn btn-ghost" href="https://github.com/laurent22/joplin/issues/15521" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+      <a class="btn btn-primary" href="https://github.com/anyproto/anytype-ts/pull/2233" target="_blank" rel="noopener">View PR #2233 <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/anyproto/anytype-ts/issues/2208" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
     </div>
     <div class="metric-grid">
-      <div class="metric"><div class="metric-num">12</div><div class="metric-lbl">jest unit tests, all green in workspace + isolated env</div></div>
-      <div class="metric"><div class="metric-num">+123</div><div class="metric-lbl">LOC across function + test + JSDoc + integration</div></div>
-      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">commits on the branch (fix, CodeRabbit fix, test align, JSDoc)</div></div>
-      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">regressions — existing TinyMCE flows untouched</div></div>
+      <div class="metric"><div class="metric-num">5 / 0</div><div class="metric-lbl">code LOC in menu.ts (+ explanatory comment)</div></div>
+      <div class="metric"><div class="metric-num">2 / 2</div><div class="metric-lbl">new regression-guard tests passing</div></div>
+      <div class="metric"><div class="metric-num">12 / 365</div><div class="metric-lbl">days the bug manifests per year</div></div>
+      <div class="metric"><div class="metric-num">7.9k ★</div><div class="metric-lbl">anyproto/anytype-ts · E2EE local-first knowledge graph</div></div>
     </div>
   </div>
 </header>
@@ -177,11 +169,30 @@ footer a:hover{color:var(--kp4)}
 <section class="section">
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
-    <h2 class="section-title">Selecting text + invoking the link command parks the cursor on the wrong field</h2>
-    <p class="section-sub">In the Joplin Rich Text Editor (WYSIWYG), if you select some text and trigger the "Insert hyperlink" command (toolbar button or <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Ctrl+K</code>), TinyMCE's built-in <code>link</code> plugin opens a dialog with two fields: <strong>"Text to display"</strong> (pre-populated from your selection) and <strong>"Url"</strong> (empty, the one you actually want to fill). Focus lands on the "Text to display" field. You have to tab once before the keyboard reaches the URL field — every single time, on every Joplin desktop install.</p>
+    <h2 class="section-title">Two radio buttons, identical labels</h2>
+    <p class="section-sub">Open Settings → Language &amp; Region → Date Format on any day where day equals month (12 days a year), and the picker shows two options with the exact same text. The reporter's screenshots from May 5 (`05.05.2026`) show two radio buttons reading `05.05.2026` and `05.05.2026` with no way to distinguish them — one is `dd.mm.yyyy`, the other is `mm.dd.yyyy`, and picking the wrong one changes how every date in the app renders.</p>
     <div class="card">
-      <h3>Why this is annoying enough to fix</h3>
-      <p>The Joplin team uses TinyMCE's built-in link plugin without any focus override (see <code>apps/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx</code>). The default TinyMCE focus behaviour is correct for the empty-selection case (cursor goes to the URL field by default), but when text is pre-populated the focus stays on the text field — which the user already filled by virtue of having selected text. One extra keystroke per link, every link, every note.</p>
+      <h3>The original code</h3>
+      <div class="code-block">
+<span class="comment">// src/ts/lib/util/menu.ts</span>
+dateFormatOptions () {
+    <span class="keyword">return</span> ([
+        { id: I.DateFormat.Default },
+        { id: I.DateFormat.MonthAbbrBeforeDay },
+        { id: I.DateFormat.MonthAbbrAfterDay },
+        { id: I.DateFormat.Short },        <span class="comment">// "d/m/Y" → 05.05.2026 on May 5</span>
+        { id: I.DateFormat.ShortUS },      <span class="comment">// "m/d/Y" → 05.05.2026 on May 5  ← same string</span>
+        { id: I.DateFormat.ISO },
+        { id: I.DateFormat.Long },
+        { id: I.DateFormat.Nordic },
+        { id: I.DateFormat.European },
+    ] <span class="keyword">as</span> { id: I.DateFormat; name: string }[]).map(it => {
+        it.name = U.Date.dateWithFormat(it.id, U.Date.now());  <span class="comment">// ← root cause: now()</span>
+        <span class="keyword">return</span> it;
+    });
+};
+      </div>
+      <p>Every option label is built by formatting today's timestamp. On symmetric dates `dd == mm`, the two single-digit-padded slash formats collapse to the same string.</p>
     </div>
   </div>
 </section>
@@ -189,83 +200,91 @@ footer a:hover{color:var(--kp4)}
 <section class="section">
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
-    <h2 class="section-title">A pure-function predicate + a defensive OpenWindow handler</h2>
-    <p class="section-sub">The fix isolates the focus-decision logic in a brand-new pure function so it can be unit-tested without firing up Electron, then wires it into the existing TinyMCE setup callback via the <code>OpenWindow</code> event with a defensive try/catch — so future TinyMCE upgrades that change the dialog API degrade gracefully to the default focus behaviour.</p>
+    <h2 class="section-title">Pin the preview to a fixed asymmetric date</h2>
+    <p class="section-sub">The <code>DateFormat</code> enum already documents its own canonical examples using Jul 30, 2020 (`Short = "30/07/2020"`, `ShortUS = "07/30/2020"`) — chosen precisely because day ≠ month. The fix uses that same sample as the picker preview, so every option renders distinguishably year-round and the labels never depend on what day it is.</p>
     <div class="card">
-      <h3>The new predicate</h3>
+      <h3>Diff</h3>
       <div class="code-block">
-<span class="comment">// apps/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/shouldFocusLinkUrl.ts</span>
-<span class="comment">// Decide whether to re-focus the URL field on a TinyMCE link dialog.</span>
-<span class="comment">// Returns true only when the `text` field discriminator is present,</span>
-<span class="comment">// `text` is a non-empty string (pre-populated from a selection),</span>
-<span class="comment">// and `href` is missing or empty (user has not typed a URL yet).</span>
-<span class="keyword">export default function</span> shouldFocusLinkUrl(data: LinkDialogData | undefined | null): boolean {
-  <span class="keyword">if</span> (!data) <span class="keyword">return</span> <span class="keyword">false</span>;
-  <span class="keyword">if</span> (!(<span class="string">'text'</span> in data)) <span class="keyword">return</span> <span class="keyword">false</span>;
-  <span class="keyword">const</span> hasText = <span class="keyword">typeof</span> data.text === <span class="string">'string'</span> &amp;&amp; data.text.length &gt; 0;
-  <span class="keyword">const</span> hasHref = <span class="keyword">typeof</span> data.href === <span class="string">'string'</span> &amp;&amp; data.href.length &gt; 0;
-  <span class="keyword">return</span> hasText &amp;&amp; !hasHref;
-}
+ dateFormatOptions () {
+<span class="add">+   // Use a fixed, asymmetric sample date (Jul 30, 2020) so Short (30/07/2020)</span>
+<span class="add">+   // and ShortUS (07/30/2020) stay visually distinct year-round. Using today's</span>
+<span class="add">+   // date collapsed both labels to the same string on symmetric dates</span>
+<span class="add">+   // (01/01, 02/02, ..., 12/12) — see issue #2208.</span>
+<span class="add">+   const sample = U.Date.timestamp(2020, 7, 30);</span>
+<span class="add">+</span>
+     return ([
+         { id: I.DateFormat.Default },
+         ...
+     ] as { id: I.DateFormat; name: string }[]).map(it => {
+<span class="delete">-       it.name = U.Date.dateWithFormat(it.id, U.Date.now());</span>
+<span class="add">+       it.name = U.Date.dateWithFormat(it.id, sample);</span>
+         return it;
+     });
+ };
       </div>
     </div>
     <div class="card">
-      <h3>The wire-up in TinyMCE.tsx</h3>
+      <h3>Two regression-guard tests</h3>
+      <p>Added to <code>src/ts/lib/util/date.test.ts</code> — both pass locally under vitest.</p>
       <div class="code-block">
-<span class="comment">// inside the existing setup(editor) callback</span>
-editor.on(<span class="string">'OpenWindow'</span>, (event: any) =&gt; {
-  <span class="keyword">if</span> (!event?.dialog) <span class="keyword">return</span>;
-  <span class="keyword">try</span> {
-    <span class="keyword">const</span> data = event.dialog.getData?.();
-    <span class="keyword">if</span> (shouldFocusLinkUrl(data)) {
-      event.dialog.focus(<span class="string">'href'</span>);
-    }
-  } <span class="keyword">catch</span> (_error) {
-    <span class="comment">// getData / focus can throw on dialogs without form fields;</span>
-    <span class="comment">// safe to ignore - falling back to TinyMCE's default focus.</span>
-  }
+<span class="keyword">describe</span>(<span class="string">'dateWithFormat (picker sample distinguishability)'</span>, () => {
+
+  <span class="comment">// Positive guard: the asymmetric sample produces distinct labels.</span>
+  <span class="keyword">it</span>(<span class="string">'Short and ShortUS produce distinguishable labels at an asymmetric sample (Jul 30, 2020)'</span>, () => {
+    <span class="keyword">const</span> sample = UtilDate.timestamp(2020, 7, 30);
+    <span class="keyword">expect</span>(UtilDate.dateWithFormat(I.DateFormat.Short, sample))
+      .not.toBe(UtilDate.dateWithFormat(I.DateFormat.ShortUS, sample));
+  });
+
+  <span class="comment">// Negative documentation: the bug — Short == ShortUS on May 5 — pinned so that</span>
+  <span class="comment">// any future regression picking today's date would fail the positive test above.</span>
+  <span class="keyword">it</span>(<span class="string">'Short and ShortUS collapse on a symmetric date (the bug reported in #2208)'</span>, () => {
+    <span class="keyword">const</span> symmetric = UtilDate.timestamp(2026, 5, 5);
+    <span class="keyword">expect</span>(UtilDate.dateWithFormat(I.DateFormat.Short, symmetric))
+      .toBe(UtilDate.dateWithFormat(I.DateFormat.ShortUS, symmetric));
+  });
+
 });
       </div>
-      <p>Existing-link edits (both <code>text</code> and <code>href</code> populated) keep their default focus, so the change never steals focus from a click target. Image dialogs and any other plugin dialog without a <code>text</code> field are excluded by the discriminator check.</p>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="section-eyebrow">03 · The tests</div>
-    <h2 class="section-title">Twelve jest cases, all green in the actual Joplin app-desktop workspace</h2>
-    <p class="section-sub">The companion <code>shouldFocusLinkUrl.test.ts</code> file lives next to the source (same pattern as the existing <code>shouldPasteResources.test.ts</code> in the same directory) and uses parametric <code>test.each</code> to cover every shape of dialog data the predicate might see.</p>
-    <div class="card">
-      <h3>The twelve cases</h3>
-      <ul>
-        <li>pre-populated text + empty href → focus URL</li>
-        <li>pre-populated text + missing href key → focus URL (missing treated as empty)</li>
-        <li>pre-populated text + non-empty href (existing-link edit) → leave focus</li>
-        <li>empty text + empty href (fresh insert, no selection) → leave default focus</li>
-        <li>empty text + non-empty href → leave focus</li>
-        <li>undefined data → no focus action</li>
-        <li>null data → no focus action</li>
-        <li>empty object (no text key) → no focus action</li>
-        <li>object with only href, no text key → no focus action</li>
-        <li>image dialog shape (src/alt) → no focus action</li>
-        <li>text is non-string (defensive) → no focus action</li>
-        <li>whitespace-only href counts as non-empty → leave focus</li>
-      </ul>
-    </div>
-    <div class="callout"><strong>Belt-and-suspenders verification.</strong> Tests pass in two environments: (1) isolated ts-jest setup outside the workspace; (2) <code>corepack yarn workspace @joplin/app-desktop test shouldFocusLinkUrl</code> in the actual Joplin monorepo — same toolchain Joplin CI uses on PRs. <strong>12/12 PASS, 6.122s.</strong></div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <div class="section-eyebrow">04 · The outcome</div>
-    <h2 class="section-title">Direct response from the project lead — PR closed for capacity, not for merit</h2>
-    <p class="section-sub">PR <a href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">#15544</a> opened against <code>dev</code>, CodeRabbit-reviewed, 12/12 tests green in CI scope, CLA signed. Laurent Cozic (Joplin project lead) personally responded within ~1.5 hours of the PR opening, soft-declined for review-capacity reasons, and closed the PR after a gracious thank-you exchange.</p>
+    <div class="section-eyebrow">03 · The outreach</div>
+    <h2 class="section-title">Where this stands in the conversation funnel</h2>
+    <p class="section-sub">PR open against <code>develop</code> (Anytype's default branch), GitHub-noreply identity from the start, vitest + tsc + biome all clean on the patched files.</p>
     <div class="timeline">
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR opened, CodeRabbit + CLA passed, 12/12 tests green</h4><p>Branch <code>fix/15521-wysiwyg-link-dialog-focus</code>, four commits (initial fix, CodeRabbit review fix, test alignment, JSDoc). Identity rewrite via filter-branch + force-push fixed an initial CLA blocker — lesson captured and applied to every subsequent target.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Laurent22 personal response within 1.5h</h4><p>Direct quote: <em>"Hello, sorry we are not considering new pull requests at this time as we do not have the capacity to review them. I would suggest for now to maybe create a tech spec from this PR and attach it to the issue, so that it can be considered at a later time."</em></p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Gracious reply + Laurent closed the PR</h4><p>Reply acknowledged the capacity transparency without pushing back; left the PR open as draft and explicitly invited Laurent to close it whenever convenient for triage. Laurent closed the PR shortly after.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Park</div><div class="timeline-body"><h4>Permanent public record on the 999purple999 profile</h4><p>The PR commits + the project lead's personal response remain visible on the contributor's GitHub profile and on Joplin's PR history. Not a merge but a direct, documented engagement with a 55k-star OSS project's lead — citable in subsequent outreach as "submitted PR, received personal review from project lead, closed for project capacity reasons".</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Investigation + tests</h4><p>Traced the picker to <code>UtilMenu.dateFormatOptions</code>, confirmed both <code>Short</code> (`d/m/Y`) and <code>ShortUS</code> (`m/d/Y`) use zero-padded numeric formats that collapse when day == month. Added two regression-guard tests covering positive (asymmetric sample → distinguishable) and negative (symmetric date → bug reproduced) cases — both pass locally.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Surgical patch + clean toolchain</h4><p>Five lines of code change in <code>menu.ts</code> (one helper-comment block + one line move), 28 lines of new test coverage. TS clean (3 pre-existing errors in `dispatcher.ts` / `relation.ts` due to ungenerated proto files — unrelated). Biome lint clean on both patched files. Vitest run on the new tests: 2 passed.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR open with reporter cross-link</h4><p>PR body explains the root cause with an inline diff, lists the test commands, and includes the AI-assistance disclosure. Issue #2208 cross-commented so the reporter sees the fix without navigating to the PR list.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>CLA + Socket Security checks + maintainer triage</h4><p>cla-check / Socket Security checks running on the open PR. Area-owner candidates from <code>git log -- &lt;file&gt;</code>: <strong>Andrew Simachev (<code>@ra3orblade</code>)</strong> dominates both <code>menu.ts</code> and <code>date.ts</code> commit history and recently shipped JS-9098 ("Fix month-first date formats not applied in Properties and Advanced Filter") — perfect area-owner match for this fix.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Merge + paid follow-up conversation</h4><p>Merge odds: <strong>~70-80%</strong> given the +35/-1 footprint, the deterministic verifiability of the fix, and the explicit alignment with Anytype's existing convention (the enum comments already use Jul 30, 2020). Paid-conversation odds via the E2EE/local-first stack overlap with K-Perception (encrypted notes app with AES-256-GCM + Y.js CRDT) — the same problem space Anytype solves at a much larger scale.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · How to verify</div>
+    <h2 class="section-title">Reproduce every claim on this page</h2>
+    <div class="code-block">
+<span class="comment"># 1. Pull the branch from the fork</span>
+git clone https://github.com/999purple999/anytype-ts --branch fix/2208-date-format-picker-symmetric-dates
+
+<span class="comment"># 2. Inspect the change — fully contained in one file</span>
+<span class="keyword">git</span> diff develop -- src/ts/lib/util/menu.ts src/ts/lib/util/date.test.ts
+
+<span class="comment"># 3. Run the new tests</span>
+node node_modules/vitest/dist/cli.js run src/ts/lib/util/date.test.ts -t <span class="string">"picker sample"</span>
+<span class="comment"># expect: 2 passed</span>
+
+<span class="comment"># 4. Manual verification:</span>
+<span class="comment">#    - set system clock to May 5 (any year)</span>
+<span class="comment">#    - open Settings → Language &amp; Region → Date Format</span>
+<span class="comment">#    - BEFORE the patch: two radio buttons read "05.05.2026" identically</span>
+<span class="comment">#    - AFTER the patch: every option preview is distinguishable</span>
     </div>
   </div>
 </section>
@@ -277,18 +296,7 @@ editor.on(<span class="string">'OpenWindow'</span>, (event: any) =&gt; {
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <script>
-  mermaid.initialize({
-    startOnLoad:true,
-    theme:'dark',
-    themeVariables:{
-      primaryColor:'#1a1228',primaryTextColor:'#f5f7ff',primaryBorderColor:'#7c3aed',
-      lineColor:'#a855f7',secondaryColor:'#0a1e10',tertiaryColor:'#080a14',
-      fontFamily:'Geist Mono, monospace',fontSize:'14px'
-    },
-    flowchart:{curve:'basis',padding:24}
-  });
   document.addEventListener('scroll',()=>{
     const nav=document.getElementById('nav');
     if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');

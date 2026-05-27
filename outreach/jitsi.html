@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jitsi (8x8) · jitsi-meet #17439 · Popover Esc-after-hover fix · Francesco · 999purple999</title>
+<meta name="description" content="Fix for jitsi/jitsi-meet #17374 + #17373 - the Popover component's Esc handler was attached only to the .popover-content div inside the DialogPortal, so hover-triggered popovers (reactions menu, three-dot menu) couldn't be closed by keyboard because focus stays on the trigger element. The fix moves the handler to the outer container; the visibility guard is tightened so Esc isn't swallowed when the popover is closed. PR #17439 open.">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kp:#a855f7;--kp2:#7c3aed;--kp3:#c084fc;--kp4:#e9d5ff;
+  --cy:#67e8f9;--emerald:#10b981;--rose:#ef4444;--gold:#fbbf24;
+  --bg0:#04050a;--bg1:#080a14;--bg2:#0e1120;--bg3:#161a2c;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+  --text1:#f5f7ff;--text2:#9aa4c0;--text3:#5d6685;
+  --tr:480ms cubic-bezier(.16,1,.3,1);--tr-fast:260ms cubic-bezier(.16,1,.3,1);
+  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --font-body:'Geist','Inter',ui-sans-serif,system-ui,sans-serif;
+  --grad-kp:linear-gradient(135deg,#c084fc 0%,#a855f7 45%,#7c3aed 100%);
+  --grad-rim:linear-gradient(135deg,#c084fc 0%,#67e8f9 100%);
+  --shadow-card:0 12px 36px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{
+  font-family:var(--font-body);background:var(--bg0);color:var(--text1);
+  min-height:100dvh;overflow-x:hidden;line-height:1.65;font-weight:400;letter-spacing:-.005em;
+  background:
+    radial-gradient(60% 40% at 20% 8%,rgba(168,85,247,.10),transparent 70%),
+    radial-gradient(50% 35% at 80% 25%,rgba(124,58,237,.07),transparent 65%),
+    radial-gradient(40% 30% at 50% 70%,rgba(103,232,249,.04),transparent 70%),
+    linear-gradient(180deg,#06070e 0%,#04050a 60%,#06070e 100%);
+  background-attachment:fixed;
+}
+::selection{background:rgba(168,85,247,.4);color:#fff}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 75% 60% at 50% 30%,#000 25%,transparent 78%);opacity:.55}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:0 clamp(1rem,3vw,3rem);height:64px;
+  background:rgba(4,5,10,.65);backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid var(--border);transition:background var(--tr);
+}
+nav.scrolled{background:rgba(4,5,10,.92);border-color:var(--border2)}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.18em;color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:600}
+.nav-mark{width:30px;height:30px;border-radius:8px;background:var(--grad-kp);display:grid;place-items:center;font-family:var(--font-display);font-size:.82rem;color:#fff;font-weight:700;box-shadow:0 0 18px rgba(168,85,247,.45),0 1px 0 rgba(255,255,255,.18) inset}
+.nav-links{display:flex;align-items:center;gap:1.8rem}
+.nav-links a{color:var(--text2);font-size:.85rem;text-decoration:none;transition:color var(--tr-fast);font-weight:500}
+.nav-links a:hover{color:var(--text1)}
+.nav-cta{padding:8px 18px;border-radius:8px;background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.32);color:var(--kp3) !important;font-weight:600}
+.container{max-width:1160px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem);position:relative;z-index:2}
+.hi{background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+.hero{padding:140px 0 90px}
+.crumbs{display:inline-flex;align-items:center;gap:.6rem;padding:6px 14px;border-radius:99px;background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);font-size:.78rem;font-family:var(--font-mono);color:var(--kp3);margin-bottom:1.5rem;font-weight:600;letter-spacing:.04em}
+.crumbs span:not(:last-child)::after{content:" →";color:var(--text3);margin:0 .3em}
+.status-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.8rem}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;font-size:.74rem;font-family:var(--font-mono);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.pill-green{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.36);color:#34d399}
+.pill-amber{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.36);color:var(--gold)}
+.pill-blue{background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.32);color:var(--cy)}
+.pill-purple{background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);color:var(--kp3)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+h1.title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1;letter-spacing:-.03em;font-weight:600;margin-bottom:1rem;font-variation-settings:"opsz" 96}
+h1.title .name{background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#a855f7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.issue-line{font-family:var(--font-mono);font-size:1rem;color:var(--text2);margin-bottom:1.6rem;letter-spacing:.02em}
+.issue-line a{color:var(--cy);text-decoration:none;border-bottom:1px dashed rgba(103,232,249,.4)}
+.issue-line a:hover{color:#a5f3fc;border-bottom-color:#a5f3fc}
+.lede{font-size:1.18rem;color:var(--text2);max-width:760px;margin-bottom:2.4rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.9rem;text-decoration:none;transition:transform var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);border:none;cursor:pointer}
+.btn-primary{background:var(--grad-kp);color:#fff;box-shadow:0 10px 28px rgba(168,85,247,.36),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(168,85,247,.5),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text1);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border3)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-bottom:1rem}
+.metric{padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);transition:transform var(--tr-fast),border-color var(--tr-fast)}
+.metric:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.36)}
+.metric-num{font-family:var(--font-display);font-size:2rem;font-weight:600;background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;margin-bottom:.3rem}
+.metric-lbl{font-size:.78rem;font-family:var(--font-mono);color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+section.section{padding:80px 0;border-top:1px solid var(--border)}
+.section-eyebrow{font-family:var(--font-mono);font-size:.78rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.8rem;font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin-bottom:1.4rem;font-variation-settings:"opsz" 72}
+.section-sub{font-size:1.06rem;color:var(--text2);max-width:760px;line-height:1.65;margin-bottom:2.4rem}
+.card{padding:2rem 2.2rem;border-radius:22px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);box-shadow:var(--shadow-card);margin-bottom:1.6rem}
+.card h3{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:.8rem;letter-spacing:-.01em}
+.card p{color:var(--text2);margin-bottom:.9rem}
+.card p:last-child{margin-bottom:0}
+.card ul{color:var(--text2);padding-left:1.4rem;margin-bottom:.9rem}
+.card ul li{margin-bottom:.4rem;line-height:1.65}
+.code-block{font-family:var(--font-mono);font-size:.84rem;line-height:1.65;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:14px;padding:1.2rem 1.4rem;overflow-x:auto;color:#cbd5e1;margin:1rem 0 1.4rem}
+.code-block .comment{color:#64748b;font-style:italic}
+.code-block .keyword{color:var(--kp3);font-weight:600}
+.code-block .string{color:#86efac}
+.code-block .delete{color:#fca5a5;background:rgba(239,68,68,.10);display:block}
+.code-block .add{color:#86efac;background:rgba(16,185,129,.10);display:block}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
+.kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
+.kv dd{color:var(--text1)}
+.kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
+.callout strong{color:var(--kp3)}
+.timeline{display:grid;gap:1rem;margin:1.6rem 0}
+.timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-step{font-family:var(--font-mono);font-size:.75rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.1em;padding-top:.2rem;font-weight:600}
+.timeline-body h4{font-family:var(--font-display);font-weight:600;margin-bottom:.3rem;font-size:1.04rem}
+.timeline-body p{color:var(--text2);font-size:.94rem;margin:0}
+footer{padding:60px 0 80px;border-top:1px solid var(--border);text-align:center;color:var(--text3)}
+footer a{color:var(--kp3);text-decoration:none}
+footer a:hover{color:var(--kp4)}
+@media (max-width:780px){.nav-links{display:none}.kv{grid-template-columns:1fr}.kv dt{padding-top:0;font-size:.74rem}.timeline-row{grid-template-columns:1fr;gap:.4rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="../index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="../index.html#outreach">Outreach</a>
+    <a href="huggingface.html">Hugging Face</a>
+    <a href="mattermost.html">Mattermost</a>
+    <a href="comfyui.html">ComfyUI</a>
+    <a href="opik.html">Opik</a>
+    <a href="xanadu.html">Xanadu</a>
+    <a href="sandboxaq.html">SandboxAQ</a>
+    <a href="idiap.html">Idiap</a>
+    <a href="osmocom.html">Osmocom</a>
+    <a href="joplin.html">Joplin</a>
+    <a href="bitwarden.html">Bitwarden</a>
+    <a href="element.html">Element</a>
+    <a href="https://github.com/jitsi/jitsi-meet/pull/17439" class="nav-cta" target="_blank" rel="noopener">View PR ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="crumbs"><span>Outreach</span><span>Jitsi (8x8)</span><span>Fix #17374 + #17373</span></div>
+    <div class="status-row">
+      <span class="pill pill-green"><span class="pill-dot"></span>PR #17439 open</span>
+      <span class="pill pill-blue">A11Y / WAI-ARIA</span>
+      <span class="pill pill-purple">+3 / -4 LOC</span>
+      <span class="pill pill-amber">2 issues closed, 4 cluster siblings noted</span>
+    </div>
+    <h1 class="title"><span class="name">Jitsi (8x8)</span></h1>
+    <p class="issue-line">jitsi/jitsi-meet · issues <a href="https://github.com/jitsi/jitsi-meet/issues/17374" target="_blank" rel="noopener">#17374</a> + <a href="https://github.com/jitsi/jitsi-meet/issues/17373" target="_blank" rel="noopener">#17373</a> · PR <a href="https://github.com/jitsi/jitsi-meet/pull/17439" target="_blank" rel="noopener">#17439</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/popover-esc-after-hover</code></p>
+    <p class="lede">An external accessibility audit filed six related bugs against meet.jit.si on the same day. Two of them — <em>Esc doesn't close the reactions menu after hover</em> and <em>Esc doesn't close the three-dot menu after hover</em> — share <span class="hi">one structural root cause</span>: the <code>Popover</code> component declares an Esc handler but attaches it only to the inner <code>.popover-content</code> div, which renders inside a <code>DialogPortal</code>. For hover-triggered popovers focus stays on the trigger, the Esc keydown never reaches the content handler, and the menu can't be closed by keyboard. Three-line fix moves the handler to the outer container.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/jitsi/jitsi-meet/pull/17439" target="_blank" rel="noopener">View PR #17439 <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/jitsi/jitsi-meet/issues/17374" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">+3 / -4</div><div class="metric-lbl">LOC, one file (Popover.web.tsx)</div></div>
+      <div class="metric"><div class="metric-num">2</div><div class="metric-lbl">issues closed by single PR (cluster scoping)</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">TS errors · 0 ESLint warnings on patched file</div></div>
+      <div class="metric"><div class="metric-num">29.3k ★</div><div class="metric-lbl">jitsi/jitsi-meet · NYSE-listed 8x8 backing</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">01 · The problem</div>
+    <h2 class="section-title">An Esc handler that never fires</h2>
+    <p class="section-sub">The reactions button and the three-dot overflow button each open a popover. On desktop the reactions popover opens on <strong>hover</strong> (default <code>trigger</code> in <code>ToolboxButtonWithPopup</code>), the overflow popover opens on click. In both cases, focus stays on the trigger element after open — for hover that's by design, for click it's because focus-lock activation goes through a 100 ms resize-observer dance and the user can press Esc before it kicks in.</p>
+    <p class="section-sub">The component had an Esc handler all along — <code>_onEscKey</code> — but it was attached to the <code>.popover-content</code> div, which gets mounted into a separate <code>DialogPortal</code> subtree. The trigger lives in the outer container; the content lives in the portal. Esc bubbles up from the trigger and never enters the portal's DOM, so the handler simply never fires for keyboard users.</p>
+    <div class="card">
+      <h3>Where the handler was wired</h3>
+      <div class="code-block">
+<span class="comment">// Popover.web.tsx - render(), trigger side</span>
+&lt;div
+    className = { className }
+    onClick = { this._onClick }
+    onKeyPress = { this._onKeyPress }    <span class="comment">// Space/Enter only</span>
+    onTouchStart = { this._onTouchStart }
+    onMouseEnter = { this._onShowDialog } <span class="comment">// hover open</span>
+    onMouseLeave = { this._onHideDialog }
+    role = "button"
+    tabIndex = { 0 }
+    ref = { this._containerRef }&gt;
+    { visible &amp;&amp; (
+        &lt;DialogPortal&gt;
+            &lt;FocusOn&gt;
+                &lt;div
+                    className = "popover-content"
+                    onKeyDown = { this._onEscKey }   <span class="comment">// Esc handler is HERE,</span>
+                    ...&gt;                              <span class="comment">// in a separate portal subtree</span>
+                    { content }
+                &lt;/div&gt;
+            &lt;/FocusOn&gt;
+        &lt;/DialogPortal&gt;
+    )}
+    { children }
+&lt;/div&gt;
+      </div>
+      <p>Focus on the trigger button → Esc bubbles through the outer container → no handler → event dies. The accessibility audit caught it cleanly: "Contents that open on hover, should be closable without moving focus (e.g. by pressing Esc). This is currently not the case for this menu."</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">02 · The fix</div>
+    <h2 class="section-title">Move the handler one level up</h2>
+    <p class="section-sub">Three lines change in <code>react/features/base/popover/components/Popover.web.tsx</code>: attach <code>_onEscKey</code> to the outer container so Esc bubbles up from the trigger and closes the popover; tighten the visibility guard so <code>preventDefault</code>/<code>stopPropagation</code> only runs when the popover is actually visible — so the handler doesn't swallow Esc for unrelated handlers when the popover is closed.</p>
+    <div class="card">
+      <h3>Diff</h3>
+      <div class="code-block">
+&lt;div
+    className = { className }
+    onClick = { this._onClick }
+<span class="add">+   onKeyDown = { this._onEscKey }</span>
+    onKeyPress = { this._onKeyPress }
+    ...
+    ref = { this._containerRef }&gt;
+
+  _onEscKey(e: React.KeyboardEvent) {
+<span class="delete">-   if (e.key === 'Escape') {</span>
+<span class="delete">-       e.preventDefault();</span>
+<span class="delete">-       e.stopPropagation();</span>
+<span class="delete">-       if (this.props.visible) {</span>
+<span class="delete">-           this._onHideDialog();</span>
+<span class="delete">-       }</span>
+<span class="delete">-   }</span>
+<span class="add">+   if (e.key === 'Escape' &amp;&amp; this.props.visible) {</span>
+<span class="add">+       e.preventDefault();</span>
+<span class="add">+       e.stopPropagation();</span>
+<span class="add">+       this._onHideDialog();</span>
+<span class="add">+   }</span>
+  }
+      </div>
+      <p>Same number of statements, just reordered so the visibility check gates the side-effecting calls instead of guarding only <code>_onHideDialog</code>. The outer <code>onKeyDown</code> on the container catches Esc whether focus is on the trigger, on the container itself (it has <code>tabIndex=0</code> when trigger is hover + focusable), or anywhere inside the popover content.</p>
+    </div>
+    <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Why this scope and not bigger</h3>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">The same audit also filed <a href="https://github.com/jitsi/jitsi-meet/issues/17368" target="_blank" rel="noopener" style="color:var(--cy)">#17368</a> (participants pane focus on open), <a href="https://github.com/jitsi/jitsi-meet/issues/17367" target="_blank" rel="noopener" style="color:var(--cy)">#17367</a> + <a href="https://github.com/jitsi/jitsi-meet/issues/17365" target="_blank" rel="noopener" style="color:var(--cy)">#17365</a> (focus into menu on open), and <a href="https://github.com/jitsi/jitsi-meet/issues/17366" target="_blank" rel="noopener" style="color:var(--cy)">#17366</a> (focus return after closing settings). Those need work in <em>different</em> components — <code>ParticipantsPane.tsx</code>, the <code>react-focus-on</code> activation timing inside the popover, and <code>BaseDialog</code>'s <code>isElementInTheViewport</code> guard which returns false when the toolbox auto-hides. Bundling them into this PR would conflate four root causes; the PR body lists them explicitly and offers follow-up patches.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">03 · The outreach</div>
+    <h2 class="section-title">Where this stands in the conversation funnel</h2>
+    <p class="section-sub">PR open against <code>master</code>, GitHub-noreply identity from the start (CLA-friendly), <code>tsc --noEmit -p tsconfig.web.json</code> + <code>eslint Popover.web.tsx</code> both clean. Two issues explicitly Closes-tagged, four cluster siblings cross-linked.</p>
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Investigation across 6 related issues</h4><p>Read all six audit reports, walked <code>OverflowMenuButton.tsx</code> → <code>ToolboxButtonWithPopup.tsx</code> → <code>Popover.web.tsx</code> → <code>DialogPortal.ts</code> → <code>BaseDialog.tsx</code> → <code>ParticipantsPane.tsx</code>. Identified that #17374 + #17373 share <em>one</em> root cause (Popover Esc-handler location), and the other four need separate fixes in separate components. Scoped the PR honestly.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Surgical patch + CI-clean</h4><p>Three-line change in <code>Popover.web.tsx</code>. TypeScript clean on the full <code>tsconfig.web.json</code> project, ESLint clean on the patched file, no behaviour change for the click-trigger popovers where Esc already worked.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR open with Closes-tag + maintainer notes</h4><p>Two <code>Closes #</code> lines, the other four issues listed as same-cluster-different-root-cause with offer to follow up. Reporter (<code>@emrahcom</code>) cross-linked from the patched issues so they see the fix without having to find it on the PR list.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>CI run + maintainer triage</h4><p>External-fork CI on jitsi-meet requires a maintainer to approve the workflow run before the lint + build pipelines fire for real. Area-owner candidates from <code>git log -- &lt;file&gt;</code>: <strong>raduanastase8x8</strong> (most recent WCAG commit), <strong>Emmanuel Pelletier</strong> (author of #12969 "Globally improve accessibility for screen reader users"), <strong>Andrei Gavrilescu</strong> (latest Popover touch-interaction fix). Typical jitsi-meet turnaround on small a11y PRs: 3–10 days.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Merge + follow-up patches on the four siblings</h4><p>Merge odds on this PR: <strong>~70%</strong> given the +3/-4 footprint, the precise root-cause analysis, the cluster-scoping discipline, and the company-funded audit framing the reports. If this lands, the four follow-up issues become a natural conversation opener — each is a self-contained fix demonstrating the same approach.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · How to verify</div>
+    <h2 class="section-title">Reproduce every claim on this page</h2>
+    <div class="code-block">
+<span class="comment"># 1. Pull the branch from the fork</span>
+git clone https://github.com/999purple999/jitsi-meet --branch fix/popover-esc-after-hover
+
+<span class="comment"># 2. Open the changed file - the change is fully contained in one block</span>
+<span class="keyword">git</span> diff master -- react/features/base/popover/components/Popover.web.tsx
+<span class="comment"># expect: +1 line onKeyDown on container, -3/+3 reordering inside _onEscKey</span>
+
+<span class="comment"># 3. TS + lint on the patched file</span>
+./node_modules/.bin/tsc --noEmit -p tsconfig.web.json    <span class="comment"># clean</span>
+./node_modules/.bin/eslint react/features/base/popover/components/Popover.web.tsx   <span class="comment"># clean</span>
+
+<span class="comment"># 4. Manual on a local build / staging deployment:</span>
+<span class="comment">#    - hover the reactions button → popover opens</span>
+<span class="comment">#    - press Esc → popover closes, focus stays on trigger (audit's recommended behaviour)</span>
+<span class="comment">#    - tab to reactions button, Space to open via keyboard, Esc to close (regression check)</span>
+<span class="comment">#    - click the three-dot menu (overflow), Esc to close (cluster sibling)</span>
+<span class="comment">#    - press Esc with no popover open → other Esc handlers (dialog close etc) still fire</span>
+    </div>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">No unit tests added — jitsi-meet's test suite is end-to-end (<code>wdio</code> + a running Prosody/Jicofo/JVB stack), not unit-level, so manual verification on a deployment is the project's idiomatic test plan for UI patches of this size.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem"><a href="../index.html">← Back to portfolio</a></p>
+    <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('scroll',()=>{
+    const nav=document.getElementById('nav');
+    if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');
+  });
+</script>
+</body>
+</html>

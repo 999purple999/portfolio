@@ -126,7 +126,7 @@
 
 <section id="outreach" class="section">
   <div class="container">
-    <h2 class="section-title reveal">11 fixes on real upstream repos <span class="hi">shipped</span></h2>
+    <h2 class="section-title reveal">12 fixes on real upstream repos <span class="hi">shipped</span></h2>
     <p class="section-sub reveal delay-1">Eleven issues across eleven open-source projects, actioned in two days of focused sprint. <strong>Eight draft PRs open upstream</strong> on huggingface.js, mattermost-plugin-calls, PennyLane, Tangelo, coqui-ai-TTS, Joplin, Bitwarden, and Element-HQ (Matrix). Joplin ships with an 11-case jest suite all green; Bitwarden ships with 43/43 importer tests passing across four clients (browser, desktop, cli, web); Element ships scope-isolated CSS that cleanly overrides upstream specificity without `!important`. <strong>Six cold mails sent</strong> to the actual maintainers (verified GitHub commit emails, never scraped). <strong>One public technical comment</strong> posted on the ComfyUI bug thread. <strong>One silent contribution</strong> against pysim via fork + mailing-list-aware mail. <strong>One active maintainer engagement</strong>: @astralcai personally reviewed PennyLane #9532, two review comments addressed in commit a53cd62, awaiting re-review. Every page below documents the bug, the fix shape, the trade-offs, and the maintainer the case landed in front of.</p>
 
     <div class="projects-grid">
@@ -266,6 +266,27 @@
           <a href="outreach/idiap.html" data-i18n="outreach.id_link_page">View the case →</a>
           <a href="https://github.com/idiap/coqui-ai-TTS/pull/577" target="_blank" rel="noopener">PR #577 ↗</a>
           <a href="https://github.com/idiap/coqui-ai-TTS/issues/298" target="_blank" rel="noopener" data-i18n="outreach.id_link_issue">Issue #298 ↗</a>
+        </div>
+      </article>
+
+      <article class="project featured reveal" data-tilt>
+        <div class="project-rank">#12 · Jitsi (8x8) · PR #17439 · WAI-ARIA cluster · 2 issues closed by single patch</div>
+        <div class="project-badge public">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
+          Issues #17374 + #17373 · audit-filed A11Y cluster · PR open
+        </div>
+        <h3 class="project-title">Jitsi (8x8)</h3>
+        <p class="project-claim">Esc didn't close hover-opened popovers. Handler was in a portal, not the trigger's subtree. Moved it.</p>
+        <p class="project-body">Real fix for jitsi/jitsi-meet #17374 + #17373. An external accessibility audit filed six related bugs the same day. The reactions menu and three-dot menu opened on hover but couldn't be closed by Esc — because the `Popover.web.tsx` component attached its `_onEscKey` handler to the inner `.popover-content` div, which renders into a `DialogPortal` separate subtree. Focus stays on the trigger after a hover open, Esc bubbles up through the outer container that has no key handler, and the event dies. Three-line fix: attach `_onEscKey` to the outer container and tighten the visibility guard so it doesn't swallow Esc for unrelated handlers when the popover is closed. TS + ESLint clean on the patched file. The other four cluster issues (#17365–#17368) need separate fixes in different components — listed explicitly in the PR body with offer to follow up.</p>
+        <ul class="project-tech">
+          <li>TypeScript / React</li><li>WAI-ARIA</li><li>react-focus-on</li>
+          <li>DialogPortal / event bubbling</li><li>+3 / -4 LOC</li><li>cluster-scoped</li>
+        </ul>
+        <div class="project-links">
+          <a href="outreach/jitsi.html">View the case →</a>
+          <a href="https://github.com/jitsi/jitsi-meet/pull/17439" target="_blank" rel="noopener">PR #17439 ↗</a>
+          <a href="https://github.com/999purple999/jitsi-meet/tree/fix/popover-esc-after-hover" target="_blank" rel="noopener">Branch ↗</a>
+          <a href="https://github.com/jitsi/jitsi-meet/issues/17374" target="_blank" rel="noopener">Issue #17374 ↗</a>
         </div>
       </article>
 

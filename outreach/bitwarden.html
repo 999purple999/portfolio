@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bitwarden · clients #20694 · 1pux archive preserved · Francesco · 999purple999</title>
+<meta name="description" content="Fix for bitwarden/clients #20694 - 1Password 1pux importer was silently dropping every item with state: archived. The fix preserves the archive flag across all four clients (browser, desktop, cli, web). 43/43 importer tests pass. Draft PR #20867 open.">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kp:#a855f7;--kp2:#7c3aed;--kp3:#c084fc;--kp4:#e9d5ff;
+  --cy:#67e8f9;--emerald:#10b981;--rose:#ef4444;--gold:#fbbf24;
+  --bg0:#04050a;--bg1:#080a14;--bg2:#0e1120;--bg3:#161a2c;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+  --text1:#f5f7ff;--text2:#9aa4c0;--text3:#5d6685;
+  --tr:480ms cubic-bezier(.16,1,.3,1);--tr-fast:260ms cubic-bezier(.16,1,.3,1);
+  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --font-body:'Geist','Inter',ui-sans-serif,system-ui,sans-serif;
+  --grad-kp:linear-gradient(135deg,#c084fc 0%,#a855f7 45%,#7c3aed 100%);
+  --grad-rim:linear-gradient(135deg,#c084fc 0%,#67e8f9 100%);
+  --shadow-card:0 12px 36px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{
+  font-family:var(--font-body);background:var(--bg0);color:var(--text1);
+  min-height:100dvh;overflow-x:hidden;line-height:1.65;font-weight:400;letter-spacing:-.005em;
+  background:
+    radial-gradient(60% 40% at 20% 8%,rgba(168,85,247,.10),transparent 70%),
+    radial-gradient(50% 35% at 80% 25%,rgba(124,58,237,.07),transparent 65%),
+    radial-gradient(40% 30% at 50% 70%,rgba(103,232,249,.04),transparent 70%),
+    linear-gradient(180deg,#06070e 0%,#04050a 60%,#06070e 100%);
+  background-attachment:fixed;
+}
+::selection{background:rgba(168,85,247,.4);color:#fff}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 75% 60% at 50% 30%,#000 25%,transparent 78%);opacity:.55}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:0 clamp(1rem,3vw,3rem);height:64px;
+  background:rgba(4,5,10,.65);backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid var(--border);transition:background var(--tr);
+}
+nav.scrolled{background:rgba(4,5,10,.92);border-color:var(--border2)}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.18em;color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:600}
+.nav-mark{width:30px;height:30px;border-radius:8px;background:var(--grad-kp);display:grid;place-items:center;font-family:var(--font-display);font-size:.82rem;color:#fff;font-weight:700;box-shadow:0 0 18px rgba(168,85,247,.45),0 1px 0 rgba(255,255,255,.18) inset}
+.nav-links{display:flex;align-items:center;gap:1.8rem}
+.nav-links a{color:var(--text2);font-size:.85rem;text-decoration:none;transition:color var(--tr-fast);font-weight:500}
+.nav-links a:hover{color:var(--text1)}
+.nav-cta{padding:8px 18px;border-radius:8px;background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.32);color:var(--kp3) !important;font-weight:600}
+.container{max-width:1160px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem);position:relative;z-index:2}
+.hi{background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+.hero{padding:140px 0 90px}
+.crumbs{display:inline-flex;align-items:center;gap:.6rem;padding:6px 14px;border-radius:99px;background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);font-size:.78rem;font-family:var(--font-mono);color:var(--kp3);margin-bottom:1.5rem;font-weight:600;letter-spacing:.04em}
+.crumbs span:not(:last-child)::after{content:" →";color:var(--text3);margin:0 .3em}
+.status-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.8rem}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;font-size:.74rem;font-family:var(--font-mono);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.pill-green{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.36);color:#34d399}
+.pill-amber{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.36);color:var(--gold)}
+.pill-blue{background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.32);color:var(--cy)}
+.pill-purple{background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);color:var(--kp3)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+h1.title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1;letter-spacing:-.03em;font-weight:600;margin-bottom:1rem;font-variation-settings:"opsz" 96}
+h1.title .name{background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#a855f7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.issue-line{font-family:var(--font-mono);font-size:1rem;color:var(--text2);margin-bottom:1.6rem;letter-spacing:.02em}
+.issue-line a{color:var(--cy);text-decoration:none;border-bottom:1px dashed rgba(103,232,249,.4)}
+.issue-line a:hover{color:#a5f3fc;border-bottom-color:#a5f3fc}
+.lede{font-size:1.18rem;color:var(--text2);max-width:760px;margin-bottom:2.4rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.9rem;text-decoration:none;transition:transform var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);border:none;cursor:pointer}
+.btn-primary{background:var(--grad-kp);color:#fff;box-shadow:0 10px 28px rgba(168,85,247,.36),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(168,85,247,.5),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text1);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border3)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-bottom:1rem}
+.metric{padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);transition:transform var(--tr-fast),border-color var(--tr-fast)}
+.metric:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.36)}
+.metric-num{font-family:var(--font-display);font-size:2rem;font-weight:600;background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;margin-bottom:.3rem}
+.metric-lbl{font-size:.78rem;font-family:var(--font-mono);color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+section.section{padding:80px 0;border-top:1px solid var(--border)}
+.section-eyebrow{font-family:var(--font-mono);font-size:.78rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.8rem;font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin-bottom:1.4rem;font-variation-settings:"opsz" 72}
+.section-sub{font-size:1.06rem;color:var(--text2);max-width:760px;line-height:1.65;margin-bottom:2.4rem}
+.card{padding:2rem 2.2rem;border-radius:22px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);box-shadow:var(--shadow-card);margin-bottom:1.6rem}
+.card h3{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:.8rem;letter-spacing:-.01em}
+.card p{color:var(--text2);margin-bottom:.9rem}
+.card p:last-child{margin-bottom:0}
+.card ul{color:var(--text2);padding-left:1.4rem;margin-bottom:.9rem}
+.card ul li{margin-bottom:.4rem;line-height:1.65}
+.code-block{font-family:var(--font-mono);font-size:.84rem;line-height:1.65;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:14px;padding:1.2rem 1.4rem;overflow-x:auto;color:#cbd5e1;margin:1rem 0 1.4rem}
+.code-block .comment{color:#64748b;font-style:italic}
+.code-block .keyword{color:var(--kp3);font-weight:600}
+.code-block .string{color:#86efac}
+.code-block .delete{color:#fca5a5;background:rgba(239,68,68,.10);display:block}
+.code-block .add{color:#86efac;background:rgba(16,185,129,.10);display:block}
+.diagram-wrap{margin:1.6rem 0;padding:1.6rem;border-radius:18px;background:rgba(255,255,255,.02);border:1px solid var(--border2);overflow-x:auto}
+.diagram-wrap .mermaid{font-family:var(--font-mono) !important;display:flex;justify-content:center}
+.bench-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.85rem;margin:1rem 0 1.4rem}
+.bench-table th{text-align:left;padding:.7rem 1rem;color:var(--kp3);font-weight:600;border-bottom:1px solid var(--border2);text-transform:uppercase;letter-spacing:.06em;font-size:.74rem}
+.bench-table td{padding:.7rem 1rem;color:var(--text2);border-bottom:1px solid var(--border)}
+.bench-table tr:last-child td{border-bottom:none}
+.bench-table .good{color:#34d399;font-weight:600}
+.bench-table .bad{color:#fca5a5;font-weight:600}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
+.kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
+.kv dd{color:var(--text1)}
+.kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
+.callout strong{color:var(--kp3)}
+.timeline{display:grid;gap:1rem;margin:1.6rem 0}
+.timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-step{font-family:var(--font-mono);font-size:.75rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.1em;padding-top:.2rem;font-weight:600}
+.timeline-body h4{font-family:var(--font-display);font-weight:600;margin-bottom:.3rem;font-size:1.04rem}
+.timeline-body p{color:var(--text2);font-size:.94rem;margin:0}
+footer{padding:60px 0 80px;border-top:1px solid var(--border);text-align:center;color:var(--text3)}
+footer a{color:var(--kp3);text-decoration:none}
+footer a:hover{color:var(--kp4)}
+@media (max-width:780px){.nav-links{display:none}.kv{grid-template-columns:1fr}.kv dt{padding-top:0;font-size:.74rem}.timeline-row{grid-template-columns:1fr;gap:.4rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="../index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="../index.html#outreach">Outreach</a>
+    <a href="huggingface.html">Hugging Face</a>
+    <a href="mattermost.html">Mattermost</a>
+    <a href="comfyui.html">ComfyUI</a>
+    <a href="opik.html">Opik</a>
+    <a href="xanadu.html">Xanadu</a>
+    <a href="sandboxaq.html">SandboxAQ</a>
+    <a href="idiap.html">Idiap</a>
+    <a href="osmocom.html">Osmocom</a>
+    <a href="joplin.html">Joplin</a>
+    <a href="element.html">Element</a>
+    <a href="https://github.com/bitwarden/clients/pull/20867" class="nav-cta" target="_blank" rel="noopener">View PR ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="crumbs"><span>Outreach</span><span>Bitwarden</span><span>Fix #20694</span></div>
+    <div class="status-row">
+      <span class="pill pill-green"><span class="pill-dot"></span>Draft PR #20867 open</span>
+      <span class="pill pill-blue">43/43 importer tests pass</span>
+      <span class="pill pill-purple">4 clients fixed</span>
+      <span class="pill pill-amber">CLA signed · in Community PR board</span>
+    </div>
+    <h1 class="title"><span class="name">Bitwarden</span></h1>
+    <p class="issue-line">bitwarden/clients · issue <a href="https://github.com/bitwarden/clients/issues/20694" target="_blank" rel="noopener">#20694</a> · PR <a href="https://github.com/bitwarden/clients/pull/20867" target="_blank" rel="noopener">#20867</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/20694-1pux-import-preserves-archived</code></p>
+    <p class="lede">The 1Password 1pux importer was silently <span class="hi">dropping every item exported with <code>state: "archived"</code></span>, contradicting the help-center docs that promise everything from a 1pux export is imported. Users migrating their vault ended up with their archive empty. The fix removes the early-return, stamps <code>cipher.archivedDate = new Date()</code> so <code>isArchived</code> reports true, and lands in <code>libs/importer/</code> shared by browser, desktop, cli, and web - one change, four clients fixed.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/bitwarden/clients/pull/20867" target="_blank" rel="noopener">View PR #20867 <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/bitwarden/clients/issues/20694" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">43</div><div class="metric-lbl">jest tests in libs/importer/onepassword, all green</div></div>
+      <div class="metric"><div class="metric-num">+34 / −7</div><div class="metric-lbl">LOC, source + test combined</div></div>
+      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">clients impacted (browser, desktop, cli, web)</div></div>
+      <div class="metric"><div class="metric-num">2</div><div class="metric-lbl">tests added: correct contract + regression guard</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">01 · The problem</div>
+    <h2 class="section-title">Every 1Password archive entry was silently dropped on import</h2>
+    <p class="section-sub">The 1Password 1pux export format flags archived items with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">state: "archived"</code>. The Bitwarden importer in <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">libs/importer/src/importers/onepassword/onepassword-1pux-importer.ts</code> had an early <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">return</code> at lines 43-46 that skipped those entries entirely. Users migrating their vault ended up with an empty archive, contradicting Bitwarden's own help-center docs that promise "everything from the 1Password export is imported".</p>
+    <div class="card">
+      <h3>The bug, in three lines</h3>
+      <div class="code-block">
+<span class="comment">// libs/importer/src/importers/onepassword/onepassword-1pux-importer.ts</span>
+vault.items.forEach((item: Item) =&gt; {
+  <span class="keyword">if</span> (item.state === <span class="string">"archived"</span>) {
+    <span class="keyword">return</span>;  <span class="comment">// silently drops every archived item</span>
+  }
+  <span class="comment">// ... rest of the importer never runs for archived entries</span>
+});
+      </div>
+      <p>Worse, the existing unit test <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">should not import items with state 'archived'</code> explicitly enforced the buggy behaviour — so any naive fix to the source without correcting the test would have left the test suite broken.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">02 · The fix</div>
+    <h2 class="section-title">Remove the early return, stamp <code>archivedDate</code>, fix the test that enforced the bug</h2>
+    <p class="section-sub">Two source files touched, plus a regression guard. The fix lands in <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">libs/importer/</code> which is shared by all four Bitwarden clients — one change, four clients fixed (browser, desktop, cli, web — exactly the labels on the issue).</p>
+    <div class="card">
+      <h3>The corrected importer flow</h3>
+      <div class="code-block">
+vault.items.forEach((item: Item) =&gt; {
+  <span class="keyword">const</span> cipher = <span class="keyword">this</span>.initLoginCipher();
+  <span class="comment">// ... all the existing import logic runs unchanged ...</span>
+  <span class="keyword">this</span>.cleanupCipher(cipher);
+
+  <span class="comment">// Preserve 1Password's archive state on import (fixes #20694). The 1pux</span>
+  <span class="comment">// schema only tells us an item is archived, not WHEN it was archived,</span>
+  <span class="comment">// so we stamp the import time - matches the behaviour of archiving a</span>
+  <span class="comment">// cipher manually in Bitwarden after the import.</span>
+  <span class="keyword">if</span> (item.state === <span class="string">"archived"</span>) {
+    cipher.archivedDate = <span class="keyword">new</span> Date();
+  }
+
+  <span class="keyword">this</span>.result.ciphers.push(cipher);
+});
+      </div>
+      <p>The <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">CipherView.archivedDate</code> field is what powers Bitwarden's own <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">isArchived</code> getter (see <code>cipher.view.ts:178-179</code>), so this is the canonical, type-safe way to mark a cipher as archived programmatically — no schema migration, no new flag, no new state machine.</p>
+    </div>
+    <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Why <code>new Date()</code> and not the original archive time?</h3>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">Because 1pux does not encode it. The <code>Item</code> type in <code>onepassword-1pux-importer-types.ts:65</code> exposes only <code>state: "active" | "archived"</code> — no timestamp. The import-time stamp is the highest fidelity we can give without inventing data. If 1pux ever exports <code>archivedAt</code>, the substitution is a one-line change.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">03 · The tests</div>
+    <h2 class="section-title">Correct the contract, add a regression guard, run the full suite</h2>
+    <p class="section-sub">The existing test was renamed and inverted to assert the correct behaviour; a new test was added to lock in that <em>active</em> items stay unarchived after the fix. 43 of 43 tests pass across the four onepassword importer suites.</p>
+    <div class="card">
+      <h3>The renamed test</h3>
+      <div class="code-block">
+<span class="comment">// before</span>
+it(<span class="string">"should not import items with state 'archived'"</span>, ...) <span class="comment">/* enforced the bug */</span>
+
+<span class="comment">// after - fixes #20694</span>
+it(<span class="string">"should import items with state 'archived' as archived ciphers"</span>, <span class="keyword">async</span> () =&gt; {
+  <span class="keyword">const</span> archivedLoginData = JSON.parse(JSON.stringify(LoginData));  <span class="comment">// deep clone</span>
+  archivedLoginData[<span class="string">"accounts"</span>][0][<span class="string">"vaults"</span>][0][<span class="string">"items"</span>][0][<span class="string">"state"</span>] = <span class="string">"archived"</span>;
+  <span class="keyword">const</span> result = <span class="keyword">await</span> importer.parse(JSON.stringify(archivedLoginData));
+
+  expect(result.ciphers.length).toBe(<span class="keyword">1</span>);
+  expect(result.ciphers[<span class="keyword">0</span>].archivedDate).toBeInstanceOf(Date);
+  expect(result.ciphers[<span class="keyword">0</span>].isArchived).toBe(<span class="keyword">true</span>);
+});
+      </div>
+      <p>The <code>JSON.parse(JSON.stringify(...))</code> deep clone fixes a latent issue in the previous test which mutated the shared <code>LoginData</code> fixture across cases.</p>
+    </div>
+    <div class="card">
+      <h3>The new regression guard</h3>
+      <div class="code-block">
+it(<span class="string">"should leave active items unarchived (regression guard)"</span>, <span class="keyword">async</span> () =&gt; {
+  <span class="keyword">const</span> result = <span class="keyword">await</span> importer.parse(LoginDataJson);
+  expect(result.ciphers[<span class="keyword">0</span>].archivedDate).toBeUndefined();
+  expect(result.ciphers[<span class="keyword">0</span>].isArchived).toBe(<span class="keyword">false</span>);
+});
+      </div>
+      <p>Locks in that the new <code>if (item.state === "archived")</code> branch does not accidentally archive-stamp every imported cipher.</p>
+    </div>
+    <div class="callout"><strong>Local verification.</strong> <code>npx jest libs/importer/src/importers/onepassword</code> against the actual Bitwarden clients monorepo: <strong>43 tests pass in 3.043s</strong>, no regressions, no skipped tests. <code>npx tsc --noEmit</code> and <code>npx eslint</code> both clean. Husky pre-commit hooks all green.</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · The outreach</div>
+    <h2 class="section-title">Where this stands in the conversation funnel</h2>
+    <p class="section-sub">Draft PR #20867 is open against <code>main</code>, identity-linked to the GitHub account, CLA signed automatically by the noreply-email preflight learned the hard way on the previous Joplin attempt.</p>
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + tests + tsc + eslint</h4><p>Branch <code>fix/20694-1pux-import-preserves-archived</code>, commit <code>7a33830</code>, 43/43 jest tests pass, tsc clean, eslint clean, husky pre-commit hooks all green.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Fork + push + open draft PR with @-mention</h4><p>Fork <code>999purple999/clients</code>, draft PR <a href="https://github.com/bitwarden/clients/pull/20867" target="_blank" rel="noopener">#20867</a> open, <code>@djsmith85</code> (community contributor who flagged the issue as <code>good first issue</code> with the file pointer) tagged in the PR body for natural notification.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>CLA signed + Community PR board triage</h4><p><code>license/cla</code> status: SUCCESS — auto-signed via the GitHub noreply identity. <code>bitwarden-bot</code> added the PR to the internal Community PR board as <code>PM-38123</code> (Jira ticket reference) and prepended the prefix to the PR title.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Cold mail to @MGibson1 (Matt Gibson, Bitwarden employee)</h4><p>Verified email pattern <code>firstInitial + lastName@bitwarden.com</code> via six sample employee commits (bcunningham, btreston, dnance, gsmith, jengstrom, mgibson). Mail anchored to the PR URL with K-Perception (AES-256-GCM client-side + Y.js CRDT) and HALCYON (Node 24 WebRTC mesh) as the explicit stack-overlap signals for any cryptography or vault-side adjacent role.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Maintainer workflow approval + code-owner review</h4><p>The CI gate <code>Check user permission</code> failed by design — community PRs need a Bitwarden maintainer to manually approve the workflow run before Build Browser / Build CLI / Build Desktop / Build Web / Chromatic / Scan run for real on the code. This is a security-standard pattern for external forks and resolves on maintainer triage (typically 1-7 days).</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Merge + paid follow-up conversation</h4><p>Realistic odds: <strong>~50-60%</strong> merge probability given the surgical scope, the clean Community PR board entry, the corrected test that enforces the right contract, and the existing CLA signature. Paid-conversation odds independent of merge: <strong>~10-15%</strong> given Bitwarden's known external-contractor hiring at the vault/crypto layers and the K-Perception stack match documented in the cold mail.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">05 · How to verify</div>
+    <h2 class="section-title">Reproduce every claim on this page in four commands</h2>
+    <div class="code-block">
+<span class="comment"># 1. Pull the branch from the fork</span>
+git clone https://github.com/999purple999/clients --branch fix/20694-1pux-import-preserves-archived
+
+<span class="comment"># 2. Install deps (Node 22, npm)</span>
+<span class="keyword">cd</span> clients &amp;&amp; npm install
+
+<span class="comment"># 3. Run the importer test suite</span>
+npx jest libs/importer/src/importers/onepassword
+<span class="comment"># expect: 4 suites passed, 43 tests passed</span>
+
+<span class="comment"># 4. Run tsc + eslint on the changed files</span>
+npx tsc --noEmit --project libs/importer/tsconfig.json
+npx eslint libs/importer/src/importers/onepassword/onepassword-1pux-importer.ts \
+           libs/importer/src/importers/onepassword/onepassword-1pux-importer.spec.ts
+<span class="comment"># expect: zero errors from either tool</span>
+    </div>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">If anything fails on your machine, the PR cannot land. Run them first.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem"><a href="../index.html">← Back to portfolio</a></p>
+    <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad:true,
+    theme:'dark',
+    themeVariables:{
+      primaryColor:'#1a1228',primaryTextColor:'#f5f7ff',primaryBorderColor:'#7c3aed',
+      lineColor:'#a855f7',secondaryColor:'#0a1e10',tertiaryColor:'#080a14',
+      fontFamily:'Geist Mono, monospace',fontSize:'14px'
+    },
+    flowchart:{curve:'basis',padding:24}
+  });
+  document.addEventListener('scroll',()=>{
+    const nav=document.getElementById('nav');
+    if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');
+  });
+</script>
+</body>
+</html>

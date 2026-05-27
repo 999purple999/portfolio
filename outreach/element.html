@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Element (Matrix) · element-web #33494 · light-theme link fix · Francesco · 999purple999</title>
+<meta name="description" content="Fix for element-hq/element-web #33494 - the inline link inside the non-urgent toast was invisible on light theme because the container hard-codes a dark background while the link inherits the theme's dark primary text. The fix scopes a #fff override to the container, no leak elsewhere. Draft PR #33632 open.">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kp:#a855f7;--kp2:#7c3aed;--kp3:#c084fc;--kp4:#e9d5ff;
+  --cy:#67e8f9;--emerald:#10b981;--rose:#ef4444;--gold:#fbbf24;
+  --bg0:#04050a;--bg1:#080a14;--bg2:#0e1120;--bg3:#161a2c;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+  --text1:#f5f7ff;--text2:#9aa4c0;--text3:#5d6685;
+  --tr:480ms cubic-bezier(.16,1,.3,1);--tr-fast:260ms cubic-bezier(.16,1,.3,1);
+  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --font-body:'Geist','Inter',ui-sans-serif,system-ui,sans-serif;
+  --grad-kp:linear-gradient(135deg,#c084fc 0%,#a855f7 45%,#7c3aed 100%);
+  --grad-rim:linear-gradient(135deg,#c084fc 0%,#67e8f9 100%);
+  --shadow-card:0 12px 36px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{
+  font-family:var(--font-body);background:var(--bg0);color:var(--text1);
+  min-height:100dvh;overflow-x:hidden;line-height:1.65;font-weight:400;letter-spacing:-.005em;
+  background:
+    radial-gradient(60% 40% at 20% 8%,rgba(168,85,247,.10),transparent 70%),
+    radial-gradient(50% 35% at 80% 25%,rgba(124,58,237,.07),transparent 65%),
+    radial-gradient(40% 30% at 50% 70%,rgba(103,232,249,.04),transparent 70%),
+    linear-gradient(180deg,#06070e 0%,#04050a 60%,#06070e 100%);
+  background-attachment:fixed;
+}
+::selection{background:rgba(168,85,247,.4);color:#fff}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 75% 60% at 50% 30%,#000 25%,transparent 78%);opacity:.55}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:0 clamp(1rem,3vw,3rem);height:64px;
+  background:rgba(4,5,10,.65);backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid var(--border);transition:background var(--tr);
+}
+nav.scrolled{background:rgba(4,5,10,.92);border-color:var(--border2)}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.18em;color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:600}
+.nav-mark{width:30px;height:30px;border-radius:8px;background:var(--grad-kp);display:grid;place-items:center;font-family:var(--font-display);font-size:.82rem;color:#fff;font-weight:700;box-shadow:0 0 18px rgba(168,85,247,.45),0 1px 0 rgba(255,255,255,.18) inset}
+.nav-links{display:flex;align-items:center;gap:1.8rem}
+.nav-links a{color:var(--text2);font-size:.85rem;text-decoration:none;transition:color var(--tr-fast);font-weight:500}
+.nav-links a:hover{color:var(--text1)}
+.nav-cta{padding:8px 18px;border-radius:8px;background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.32);color:var(--kp3) !important;font-weight:600}
+.container{max-width:1160px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem);position:relative;z-index:2}
+.hi{background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+.hero{padding:140px 0 90px}
+.crumbs{display:inline-flex;align-items:center;gap:.6rem;padding:6px 14px;border-radius:99px;background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);font-size:.78rem;font-family:var(--font-mono);color:var(--kp3);margin-bottom:1.5rem;font-weight:600;letter-spacing:.04em}
+.crumbs span:not(:last-child)::after{content:" →";color:var(--text3);margin:0 .3em}
+.status-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.8rem}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;font-size:.74rem;font-family:var(--font-mono);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.pill-green{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.36);color:#34d399}
+.pill-amber{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.36);color:var(--gold)}
+.pill-blue{background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.32);color:var(--cy)}
+.pill-purple{background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);color:var(--kp3)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+h1.title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1;letter-spacing:-.03em;font-weight:600;margin-bottom:1rem;font-variation-settings:"opsz" 96}
+h1.title .name{background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#a855f7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.issue-line{font-family:var(--font-mono);font-size:1rem;color:var(--text2);margin-bottom:1.6rem;letter-spacing:.02em}
+.issue-line a{color:var(--cy);text-decoration:none;border-bottom:1px dashed rgba(103,232,249,.4)}
+.issue-line a:hover{color:#a5f3fc;border-bottom-color:#a5f3fc}
+.lede{font-size:1.18rem;color:var(--text2);max-width:760px;margin-bottom:2.4rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.9rem;text-decoration:none;transition:transform var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);border:none;cursor:pointer}
+.btn-primary{background:var(--grad-kp);color:#fff;box-shadow:0 10px 28px rgba(168,85,247,.36),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(168,85,247,.5),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text1);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border3)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-bottom:1rem}
+.metric{padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);transition:transform var(--tr-fast),border-color var(--tr-fast)}
+.metric:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.36)}
+.metric-num{font-family:var(--font-display);font-size:2rem;font-weight:600;background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;margin-bottom:.3rem}
+.metric-lbl{font-size:.78rem;font-family:var(--font-mono);color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+section.section{padding:80px 0;border-top:1px solid var(--border)}
+.section-eyebrow{font-family:var(--font-mono);font-size:.78rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.8rem;font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin-bottom:1.4rem;font-variation-settings:"opsz" 72}
+.section-sub{font-size:1.06rem;color:var(--text2);max-width:760px;line-height:1.65;margin-bottom:2.4rem}
+.card{padding:2rem 2.2rem;border-radius:22px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);box-shadow:var(--shadow-card);margin-bottom:1.6rem}
+.card h3{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:.8rem;letter-spacing:-.01em}
+.card p{color:var(--text2);margin-bottom:.9rem}
+.card p:last-child{margin-bottom:0}
+.card ul{color:var(--text2);padding-left:1.4rem;margin-bottom:.9rem}
+.card ul li{margin-bottom:.4rem;line-height:1.65}
+.code-block{font-family:var(--font-mono);font-size:.84rem;line-height:1.65;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:14px;padding:1.2rem 1.4rem;overflow-x:auto;color:#cbd5e1;margin:1rem 0 1.4rem}
+.code-block .comment{color:#64748b;font-style:italic}
+.code-block .keyword{color:var(--kp3);font-weight:600}
+.code-block .string{color:#86efac}
+.code-block .delete{color:#fca5a5;background:rgba(239,68,68,.10);display:block}
+.code-block .add{color:#86efac;background:rgba(16,185,129,.10);display:block}
+.diagram-wrap{margin:1.6rem 0;padding:1.6rem;border-radius:18px;background:rgba(255,255,255,.02);border:1px solid var(--border2);overflow-x:auto}
+.diagram-wrap .mermaid{font-family:var(--font-mono) !important;display:flex;justify-content:center}
+.bench-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.85rem;margin:1rem 0 1.4rem}
+.bench-table th{text-align:left;padding:.7rem 1rem;color:var(--kp3);font-weight:600;border-bottom:1px solid var(--border2);text-transform:uppercase;letter-spacing:.06em;font-size:.74rem}
+.bench-table td{padding:.7rem 1rem;color:var(--text2);border-bottom:1px solid var(--border)}
+.bench-table tr:last-child td{border-bottom:none}
+.bench-table .good{color:#34d399;font-weight:600}
+.bench-table .bad{color:#fca5a5;font-weight:600}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
+.kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
+.kv dd{color:var(--text1)}
+.kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
+.callout strong{color:var(--kp3)}
+.timeline{display:grid;gap:1rem;margin:1.6rem 0}
+.timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-step{font-family:var(--font-mono);font-size:.75rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.1em;padding-top:.2rem;font-weight:600}
+.timeline-body h4{font-family:var(--font-display);font-weight:600;margin-bottom:.3rem;font-size:1.04rem}
+.timeline-body p{color:var(--text2);font-size:.94rem;margin:0}
+footer{padding:60px 0 80px;border-top:1px solid var(--border);text-align:center;color:var(--text3)}
+footer a{color:var(--kp3);text-decoration:none}
+footer a:hover{color:var(--kp4)}
+@media (max-width:780px){.nav-links{display:none}.kv{grid-template-columns:1fr}.kv dt{padding-top:0;font-size:.74rem}.timeline-row{grid-template-columns:1fr;gap:.4rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="../index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="../index.html#outreach">Outreach</a>
+    <a href="huggingface.html">Hugging Face</a>
+    <a href="mattermost.html">Mattermost</a>
+    <a href="comfyui.html">ComfyUI</a>
+    <a href="opik.html">Opik</a>
+    <a href="xanadu.html">Xanadu</a>
+    <a href="sandboxaq.html">SandboxAQ</a>
+    <a href="idiap.html">Idiap</a>
+    <a href="osmocom.html">Osmocom</a>
+    <a href="joplin.html">Joplin</a>
+    <a href="bitwarden.html">Bitwarden</a>
+    <a href="https://github.com/element-hq/element-web/pull/33632" class="nav-cta" target="_blank" rel="noopener">View PR ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="crumbs"><span>Outreach</span><span>Element (Matrix)</span><span>Fix #33494</span></div>
+    <div class="status-row">
+      <span class="pill pill-green"><span class="pill-dot"></span>Draft PR #33632 open</span>
+      <span class="pill pill-blue">Scope-isolated CSS</span>
+      <span class="pill pill-purple">+10 / -0 LOC</span>
+      <span class="pill pill-amber">@t3chguy tagged · CLA signed</span>
+    </div>
+    <h1 class="title"><span class="name">Element (Matrix)</span></h1>
+    <p class="issue-line">element-hq/element-web · issue <a href="https://github.com/element-hq/element-web/issues/33494" target="_blank" rel="noopener">#33494</a> · PR <a href="https://github.com/element-hq/element-web/pull/33632" target="_blank" rel="noopener">#33632</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/33494-non-urgent-toast-link-light-theme</code></p>
+    <p class="lede">The <code>requests</code> inline link inside the <code>Your server isn't responding to some requests</code> non-urgent toast was <span class="hi">invisible on light theme</span> because the container hard-codes a dark background ("in all themes" per the comment) while the link inherits the theme-aware <code>--cpd-color-text-primary</code> token, which resolves dark on light theme — collapsing the link into the toast background. The fix scopes a <code>color: #fff</code> override to the container and the specific <code>AccessibleButton_kind_link_inline</code> selector, with specificity (0,4,0) that cleanly overrides the upstream rule (0,2,0) — no <code>!important</code>, no leak to any other inline link in the app.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/element-hq/element-web/pull/33632" target="_blank" rel="noopener">View PR #33632 <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/element-hq/element-web/issues/33494" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">+10 / 0</div><div class="metric-lbl">LOC, comment included, one file touched</div></div>
+      <div class="metric"><div class="metric-num">1</div><div class="metric-lbl">file changed: _NonUrgentToastContainer.pcss</div></div>
+      <div class="metric"><div class="metric-num">0,4,0</div><div class="metric-lbl">selector specificity (overrides upstream 0,2,0 cleanly)</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">leaks: scope-isolated to the non-urgent toast container</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">01 · The problem</div>
+    <h2 class="section-title">A theme-aware link inside a theme-locked container</h2>
+    <p class="section-sub">The non-urgent toast container at <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">apps/web/res/css/structures/_NonUrgentToastContainer.pcss</code> intentionally hard-codes its background and base text colour, with an explicit comment that those values stay the same in every theme. But the inline <code>requests</code> link inside it is rendered via <code>AccessibleButton kind="link_inline"</code>, whose colour rule pulls from the theme-aware Compound design token <code>--cpd-color-text-primary</code>. On light theme that token resolves dark — and dark text on the toast's hard-coded dark background is invisible.</p>
+    <div class="card">
+      <h3>What the bug looks like in the existing CSS</h3>
+      <div class="code-block">
+<span class="comment">/* _NonUrgentToastContainer.pcss - the container says theme-locked */</span>
+.mx_NonUrgentToastContainer_toast {
+  <span class="comment">/* We don't use variables on the colours because we want it to be the same */</span>
+  <span class="comment">/* in all themes. */</span>
+  background-color: #17191c;
+  color: #fff;
+}
+
+<span class="comment">/* _AccessibleButton.pcss - the inline link says theme-aware */</span>
+&amp;.mx_AccessibleButton_kind_link,
+&amp;.mx_AccessibleButton_kind_link_inline {
+  color: var(--cpd-color-text-primary);  <span class="comment">/* resolves dark on light theme */</span>
+}
+      </div>
+      <p>The two CSS contracts disagree. The container intends to stay dark always; the link intends to follow the theme. On light theme, the disagreement collapses the link into the background.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">02 · The fix</div>
+    <h2 class="section-title">Pin the inline link colour inside the container, scope-isolated</h2>
+    <p class="section-sub">Ten lines of PostCSS added directly to <code>_NonUrgentToastContainer.pcss</code> — same file that already declares "we want it to be the same in all themes". The override is scoped to <code>.mx_NonUrgentToastContainer_toast</code> and the specific <code>link_inline</code> kind, so it cannot leak to any other inline link in the app.</p>
+    <div class="card">
+      <h3>The added block</h3>
+      <div class="code-block">
+.mx_NonUrgentToastContainer_toast {
+  <span class="comment">/* ... existing rules unchanged ... */</span>
+  background-color: #17191c;
+  color: #fff;
+
+  <span class="comment">/* Inline links inherit `--cpd-color-text-primary` from</span>
+  <span class="comment"> * `_AccessibleButton.pcss`, which is theme-dependent - on light</span>
+  <span class="comment"> * theme that is a dark colour, which is invisible against this</span>
+  <span class="comment"> * container's hard-coded dark background. Pin the link colour to</span>
+  <span class="comment"> * white so it stays readable in both themes, matching the</span>
+  <span class="comment"> * container's intentional theme-independence noted above. */</span>
+  .mx_AccessibleButton.mx_AccessibleButton_kind_link_inline {
+    color: #fff;
+  }
+}
+      </div>
+      <p>Selector specificity: <code>.mx_NonUrgentToastContainer .mx_NonUrgentToastContainer_toast .mx_AccessibleButton.mx_AccessibleButton_kind_link_inline</code> is <strong>(0,4,0)</strong>, which cleanly overrides the upstream <code>&amp;.mx_AccessibleButton_kind_link_inline</code> at <strong>(0,2,0)</strong> — no <code>!important</code> needed, no fight.</p>
+    </div>
+    <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Why not fix the link rule itself?</h3>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">Because <code>--cpd-color-text-primary</code> is correct for the vast majority of contexts (theme-aware text). The bug is local to this one container that explicitly opted out of theme-awareness — fixing the global rule would regress every other inline link. Scoping the override to the container is the minimum-blast-radius fix.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">03 · The outreach</div>
+    <h2 class="section-title">Where this stands in the conversation funnel</h2>
+    <p class="section-sub">Draft PR #33632 open against <code>develop</code>, CLA form filled and license/cla check passing, GitHub-noreply identity from the start to avoid the rewrite-history dance.</p>
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + push to fork</h4><p>Commit <code>5e60d43</code>, ten-line PostCSS scoped override, full explanatory comment in the diff itself. Authored against the GitHub noreply email pattern so the CLA check passed without a force-push detour.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Draft PR with @-mention to @t3chguy</h4><p>Michael Telatynski is the most recent committer on the changed file — tagged in the PR body so he gets the natural notification. CLA Assistant marked <code>license/cla — Contributor License Agreement is signed</code>.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Cold mail to michaeltelatynski@element.io</h4><p>Mail anchored to the PR URL with the explicit stack-overlap signals: K-Perception (closed-beta notes app with AES-256-GCM client-side + Y.js CRDT collaboration on encrypted blobs — the same E2EE+real-time-collab problem Matrix solves) and HALCYON (Node 24 WebRTC mesh, GPL-3, 65+ green vitest + Playwright tests — adjacent to Element Call). Backup recipient if the address bounces: <code>florianduros@element.io</code> (verified via public commit).</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Workflow approval + reviewer assignment</h4><p>Community PR workflows require a maintainer to manually approve the run (security gate against malicious CI invocations from external forks). Once approved, the CSS lint / Playwright visual tests / build pipelines run for real on the change. Typical Element-web turnaround: 2-10 days depending on the area maintainer's backlog.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Merge + paid follow-up conversation</h4><p>Merge odds: <strong>~60-70%</strong> given the surgical scope, the clear root-cause analysis, the @-mention to the file's most recent committer, and zero behaviour change outside the targeted container. Paid-conversation odds: <strong>~10-15%</strong> on the explicit Matrix/E2EE stack overlap signal — Element-HQ historically hires for E2EE / cross-signing / device verification / Element Call, all areas where K-Perception and HALCYON portfolio map directly.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · How to verify</div>
+    <h2 class="section-title">Reproduce every claim on this page</h2>
+    <div class="code-block">
+<span class="comment"># 1. Pull the branch from the fork</span>
+git clone https://github.com/999purple999/element-web --branch fix/33494-non-urgent-toast-link-light-theme
+
+<span class="comment"># 2. Open the changed file - the change is fully contained in one block</span>
+<span class="keyword">cat</span> element-web/apps/web/res/css/structures/_NonUrgentToastContainer.pcss
+<span class="comment"># expect: existing rules + the new .mx_AccessibleButton_kind_link_inline { color: #fff; } block</span>
+
+<span class="comment"># 3. Run the visual check against the issue screenshot:</span>
+<span class="comment">#    - go offline / disconnect from the homeserver</span>
+<span class="comment">#    - change notification settings for a room</span>
+<span class="comment">#    - the "your server isn't responding to some requests" toast appears</span>
+<span class="comment">#    - in light theme: the "requests" link is now white-on-dark and clearly visible</span>
+<span class="comment">#    - in dark theme: behaviour unchanged (the link was already visible)</span>
+    </div>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">No new unit tests added — the change is a visual style override with no logic surface. Playwright visual regression tests will pick up the change automatically in CI once a maintainer approves the workflow run.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem"><a href="../index.html">← Back to portfolio</a></p>
+    <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad:true,
+    theme:'dark',
+    themeVariables:{
+      primaryColor:'#1a1228',primaryTextColor:'#f5f7ff',primaryBorderColor:'#7c3aed',
+      lineColor:'#a855f7',secondaryColor:'#0a1e10',tertiaryColor:'#080a14',
+      fontFamily:'Geist Mono, monospace',fontSize:'14px'
+    },
+    flowchart:{curve:'basis',padding:24}
+  });
+  document.addEventListener('scroll',()=>{
+    const nav=document.getElementById('nav');
+    if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');
+  });
+</script>
+</body>
+</html>

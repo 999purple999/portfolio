@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tuta Mail · tutanota #10881 · Linux click-to-update notification GC race · Francesco · 999purple999</title>
+<meta name="description" content="Fix for tutao/tutanota #10844 - the Linux click-to-update notification handler intermittently dropped because DesktopNotifier.showOneShot discarded the Dismisser returned by the notification factory. The JS-side electron.Notification was eligible for V8 garbage collection before the user click could land. GTK does not strongly retain the JS wrapper, so the bug surfaced on Linux only. Fix mirrors the retention pattern from showCountedUserNotification: keep the dismisser in a Set, wrap the click handler so it dismisses the OS notification and releases the reference after the user-supplied callback runs.">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kp:#a855f7;--kp2:#7c3aed;--kp3:#c084fc;--kp4:#e9d5ff;
+  --cy:#67e8f9;--emerald:#10b981;--rose:#ef4444;--gold:#fbbf24;
+  --bg0:#04050a;--bg1:#080a14;--bg2:#0e1120;--bg3:#161a2c;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+  --text1:#f5f7ff;--text2:#9aa4c0;--text3:#5d6685;
+  --tr:480ms cubic-bezier(.16,1,.3,1);--tr-fast:260ms cubic-bezier(.16,1,.3,1);
+  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --font-body:'Geist','Inter',ui-sans-serif,system-ui,sans-serif;
+  --grad-kp:linear-gradient(135deg,#c084fc 0%,#a855f7 45%,#7c3aed 100%);
+  --grad-rim:linear-gradient(135deg,#c084fc 0%,#67e8f9 100%);
+  --shadow-card:0 12px 36px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{
+  font-family:var(--font-body);background:var(--bg0);color:var(--text1);
+  min-height:100dvh;overflow-x:hidden;line-height:1.65;font-weight:400;letter-spacing:-.005em;
+  background:
+    radial-gradient(60% 40% at 20% 8%,rgba(168,85,247,.10),transparent 70%),
+    radial-gradient(50% 35% at 80% 25%,rgba(124,58,237,.07),transparent 65%),
+    radial-gradient(40% 30% at 50% 70%,rgba(103,232,249,.04),transparent 70%),
+    linear-gradient(180deg,#06070e 0%,#04050a 60%,#06070e 100%);
+  background-attachment:fixed;
+}
+::selection{background:rgba(168,85,247,.4);color:#fff}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 75% 60% at 50% 30%,#000 25%,transparent 78%);opacity:.55}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:0 clamp(1rem,3vw,3rem);height:64px;
+  background:rgba(4,5,10,.65);backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid var(--border);transition:background var(--tr);
+}
+nav.scrolled{background:rgba(4,5,10,.92);border-color:var(--border2)}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.18em;color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:600}
+.nav-mark{width:30px;height:30px;border-radius:8px;background:var(--grad-kp);display:grid;place-items:center;font-family:var(--font-display);font-size:.82rem;color:#fff;font-weight:700;box-shadow:0 0 18px rgba(168,85,247,.45),0 1px 0 rgba(255,255,255,.18) inset}
+.nav-links{display:flex;align-items:center;gap:1.8rem}
+.nav-links a{color:var(--text2);font-size:.85rem;text-decoration:none;transition:color var(--tr-fast);font-weight:500}
+.nav-links a:hover{color:var(--text1)}
+.nav-cta{padding:8px 18px;border-radius:8px;background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.32);color:var(--kp3) !important;font-weight:600}
+.container{max-width:1160px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem);position:relative;z-index:2}
+.hi{background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+.hero{padding:140px 0 90px}
+.crumbs{display:inline-flex;align-items:center;gap:.6rem;padding:6px 14px;border-radius:99px;background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);font-size:.78rem;font-family:var(--font-mono);color:var(--kp3);margin-bottom:1.5rem;font-weight:600;letter-spacing:.04em}
+.crumbs span:not(:last-child)::after{content:" →";color:var(--text3);margin:0 .3em}
+.status-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.8rem}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;font-size:.74rem;font-family:var(--font-mono);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.pill-green{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.36);color:#34d399}
+.pill-amber{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.36);color:var(--gold)}
+.pill-blue{background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.32);color:var(--cy)}
+.pill-purple{background:rgba(168,85,247,.10);border:1px solid rgba(168,85,247,.30);color:var(--kp3)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+h1.title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1;letter-spacing:-.03em;font-weight:600;margin-bottom:1rem;font-variation-settings:"opsz" 96}
+h1.title .name{background:linear-gradient(135deg,#f5f7ff 0%,#c084fc 60%,#a855f7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.issue-line{font-family:var(--font-mono);font-size:1rem;color:var(--text2);margin-bottom:1.6rem;letter-spacing:.02em}
+.issue-line a{color:var(--cy);text-decoration:none;border-bottom:1px dashed rgba(103,232,249,.4)}
+.issue-line a:hover{color:#a5f3fc;border-bottom-color:#a5f3fc}
+.lede{font-size:1.18rem;color:var(--text2);max-width:760px;margin-bottom:2.4rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.9rem;text-decoration:none;transition:transform var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);border:none;cursor:pointer}
+.btn-primary{background:var(--grad-kp);color:#fff;box-shadow:0 10px 28px rgba(168,85,247,.36),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(168,85,247,.5),0 1px 0 rgba(255,255,255,.16) inset}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text1);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border3)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-bottom:1rem}
+.metric{padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);transition:transform var(--tr-fast),border-color var(--tr-fast)}
+.metric:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.36)}
+.metric-num{font-family:var(--font-display);font-size:2rem;font-weight:600;background:var(--grad-rim);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em;margin-bottom:.3rem}
+.metric-lbl{font-size:.78rem;font-family:var(--font-mono);color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+section.section{padding:80px 0;border-top:1px solid var(--border)}
+.section-eyebrow{font-family:var(--font-mono);font-size:.78rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.8rem;font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin-bottom:1.4rem;font-variation-settings:"opsz" 72}
+.section-sub{font-size:1.06rem;color:var(--text2);max-width:760px;line-height:1.65;margin-bottom:2.4rem}
+.card{padding:2rem 2.2rem;border-radius:22px;background:linear-gradient(160deg,rgba(168,85,247,.05),rgba(255,255,255,.02));border:1px solid var(--border2);box-shadow:var(--shadow-card);margin-bottom:1.6rem}
+.card h3{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:.8rem;letter-spacing:-.01em}
+.card p{color:var(--text2);margin-bottom:.9rem}
+.card p:last-child{margin-bottom:0}
+.card ul{color:var(--text2);padding-left:1.4rem;margin-bottom:.9rem}
+.card ul li{margin-bottom:.4rem;line-height:1.65}
+.code-block{font-family:var(--font-mono);font-size:.84rem;line-height:1.65;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:14px;padding:1.2rem 1.4rem;overflow-x:auto;color:#cbd5e1;margin:1rem 0 1.4rem}
+.code-block .comment{color:#64748b;font-style:italic}
+.code-block .keyword{color:var(--kp3);font-weight:600}
+.code-block .string{color:#86efac}
+.code-block .delete{color:#fca5a5;background:rgba(239,68,68,.10);display:block}
+.code-block .add{color:#86efac;background:rgba(16,185,129,.10);display:block}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
+.kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
+.kv dd{color:var(--text1)}
+.kv dd code{font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em}
+.callout{padding:1.4rem 1.6rem;border-radius:14px;border-left:3px solid var(--kp);background:rgba(168,85,247,.06);margin:1.4rem 0;color:var(--text1);font-size:.96rem;line-height:1.65}
+.callout strong{color:var(--kp3)}
+.timeline{display:grid;gap:1rem;margin:1.6rem 0}
+.timeline-row{display:grid;grid-template-columns:120px 1fr;gap:1.4rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-step{font-family:var(--font-mono);font-size:.75rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.1em;padding-top:.2rem;font-weight:600}
+.timeline-body h4{font-family:var(--font-display);font-weight:600;margin-bottom:.3rem;font-size:1.04rem}
+.timeline-body p{color:var(--text2);font-size:.94rem;margin:0}
+footer{padding:60px 0 80px;border-top:1px solid var(--border);text-align:center;color:var(--text3)}
+footer a{color:var(--kp3);text-decoration:none}
+footer a:hover{color:var(--kp4)}
+@media (max-width:780px){.nav-links{display:none}.kv{grid-template-columns:1fr}.kv dt{padding-top:0;font-size:.74rem}.timeline-row{grid-template-columns:1fr;gap:.4rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<nav id="nav">
+  <a href="../index.html" class="nav-logo"><span class="nav-mark">F</span><span>999PURPLE999</span></a>
+  <div class="nav-links">
+    <a href="../index.html#outreach">Outreach</a>
+    <a href="huggingface.html">Hugging Face</a>
+    <a href="mattermost.html">Mattermost</a>
+    <a href="comfyui.html">ComfyUI</a>
+    <a href="opik.html">Opik</a>
+    <a href="xanadu.html">Xanadu</a>
+    <a href="sandboxaq.html">SandboxAQ</a>
+    <a href="idiap.html">Idiap</a>
+    <a href="osmocom.html">Osmocom</a>
+    <a href="joplin.html">Joplin</a>
+    <a href="bitwarden.html">Bitwarden</a>
+    <a href="element.html">Element</a>
+    <a href="jitsi.html">Jitsi</a>
+    <a href="anytype.html">Anytype (1st)</a>
+    <a href="anytype-2.html">Anytype (2nd)</a>
+    <a href="https://github.com/tutao/tutanota/pull/10881" class="nav-cta" target="_blank" rel="noopener">View PR ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="crumbs"><span>Outreach</span><span>Tuta Mail</span><span>Fix #10844</span></div>
+    <div class="status-row">
+      <span class="pill pill-green"><span class="pill-dot"></span>PR #10881 open</span>
+      <span class="pill pill-blue">GC race · Linux only</span>
+      <span class="pill pill-purple">+71 / -2 LOC</span>
+      <span class="pill pill-amber">core maintainer confirmed bug</span>
+    </div>
+    <h1 class="title"><span class="name">Tuta Mail</span></h1>
+    <p class="issue-line">tutao/tutanota · issue <a href="https://github.com/tutao/tutanota/issues/10844" target="_blank" rel="noopener">#10844</a> · PR <a href="https://github.com/tutao/tutanota/pull/10881" target="_blank" rel="noopener">#10881</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix-oneshot-notification-click-linux</code></p>
+    <p class="lede">The Linux click-to-update notification kept dropping its click handler. The core maintainer (<a href="https://github.com/charlag" target="_blank" rel="noopener" style="color:var(--cy)">@charlag</a>, Willow) called it "sometimes works, sometimes not, slightly infuriating" on the issue. Root cause: <code>DesktopNotifier.showOneShot</code> discarded the <code>Dismisser</code> returned by the notification factory, so the JS-side <code>electron.Notification</code> became eligible for V8 garbage collection as soon as the call returned. GTK does not strongly retain the JS wrapper across the click round-trip, which is why the bug surfaced on <span class="hi">Linux only</span> while macOS and Windows kept working. The fix mirrors the retention pattern already used by <code>showCountedUserNotification</code> in the same file.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/tutao/tutanota/pull/10881" target="_blank" rel="noopener">View PR #10881 <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/tutao/tutanota/issues/10844" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">+71 / -2</div><div class="metric-lbl">LOC across DesktopNotifier.ts + DesktopNotifierTest.ts</div></div>
+      <div class="metric"><div class="metric-num">2</div><div class="metric-lbl">new regression tests · 4 pre-existing tests preserved</div></div>
+      <div class="metric"><div class="metric-num">3</div><div class="metric-lbl">platforms · Linux fixed, macOS and Windows unchanged</div></div>
+      <div class="metric"><div class="metric-num">7.6k ★</div><div class="metric-lbl">tutao/tutanota · E2EE mail · GPL-3 · Hannover, DE</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">01 · The problem</div>
+    <h2 class="section-title">The dismisser was discarded the moment showOneShot returned</h2>
+    <p class="section-sub">Tuta Mail desktop ships an Electron auto-updater that posts an OS notification when a new build is available. The notification has a click handler that triggers <code>quitAndInstall</code>. On Linux this handler intermittently stopped firing: the notification appeared, the user clicked, nothing happened. Switching to <code>Settings → Desktop → Update</code> worked as a manual fallback, but the notification path was broken. The bug had been live long enough for the core maintainer to comment that it was "slightly infuriating".</p>
+    <div class="card">
+      <h3>The original showOneShot</h3>
+      <div class="code-block">
+<span class="comment">// src/applications/common/desktop/notifications/DesktopNotifier.ts</span>
+<span class="keyword">async</span> showOneShot(props: { title: string; body?: string; icon?: NativeImage; onClick?: () =&gt; <span class="keyword">unknown</span> }): Promise&lt;<span class="keyword">void</span>&gt; {
+    <span class="keyword">const</span> params = { title: props.title, body: props.body, icon: ..., group: <span class="string">"oneshot"</span> }
+    <span class="keyword">const</span> factory = <span class="keyword">await</span> <span class="keyword">this</span>.notificationFactory.getAsync()
+    <span class="keyword">if</span> (!factory.isSupported()) <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">"Notifications are not supported"</span>)
+
+    <span class="keyword">const</span> onClick = props.onClick ?? noOp
+    <span class="keyword">await</span> <span class="keyword">this</span>.initPromise.promise
+
+    factory.makeNotification(params, onClick);  <span class="comment">// ← return value (Dismisser) DISCARDED</span>
+}
+      </div>
+      <p>The factory returns a <code>Dismisser</code>: a closure that retains a reference to the underlying <code>electron.Notification</code>. <code>showOneShot</code> threw that closure away. As soon as the method returned, the only reference to the Notification object went out of scope. V8's mark-and-sweep was then free to collect it before the user could click.</p>
+      <p>The macOS Cocoa bridge and the Windows Toast binding both retain the JS wrapper through their native objects, so the JS-side collection had no observable effect on those platforms. GTK on Linux behaves differently: the click round-trip from the OS back to the JS handler relies on the JS wrapper still being alive when the click event lands. Once V8 collected the wrapper, the click event had nowhere to go and was silently dropped. The bug surfaced as "sometimes works, sometimes not" because the outcome depended on GC timing relative to the user click.</p>
+      <p>The asymmetry that made the root cause obvious was right there in the same file. <code>showCountedUserNotification</code>, which handles badge-counted notifications for mail arrivals, already retained its dismisser in <code>notificationDismissersPerUser</code>. Badge-counted clicks never failed. One-shot clicks failed on Linux. Two functions in the same file, one retained the closure, the other discarded it.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">02 · The fix</div>
+    <h2 class="section-title">Mirror the retention pattern from the function next door</h2>
+    <p class="section-sub">The fix is structural: keep the dismisser alive in a <code>Set</code> on the <code>DesktopNotifier</code> instance until the user interacts with the notification, then release it. Wrap the user-supplied <code>onClick</code> so the click handler also tears down the OS notification through the retained closure. No public API change. No behavior change on macOS or Windows. The retention path on Linux is the only thing that moves.</p>
+    <div class="card">
+      <h3>Diff</h3>
+      <div class="code-block">
+ <span class="keyword">export class</span> DesktopNotifier {
+     <span class="keyword">private readonly</span> initPromise: DeferredObject&lt;<span class="keyword">void</span>&gt; = defer()
+     <span class="keyword">private readonly</span> notificationDismissersPerUser: Map&lt;<span class="keyword">string</span>, Dismisser[]&gt; = <span class="keyword">new</span> Map()
+<span class="add">+    // Retains dismissers for one-shot notifications until the user clicks</span>
+<span class="add">+    // one. Without this the JS-side electron.Notification can be collected</span>
+<span class="add">+    // before the click event fires, which on Linux/GTK intermittently kills</span>
+<span class="add">+    // the click handler (issue #10844).</span>
+<span class="add">+    private readonly oneShotDismissers: Set&lt;Dismisser&gt; = new Set()</span>
+
+     <span class="keyword">async</span> showOneShot(props: { ... }): Promise&lt;<span class="keyword">void</span>&gt; {
+         <span class="keyword">const</span> params = { ... }
+         <span class="keyword">const</span> factory = <span class="keyword">await</span> <span class="keyword">this</span>.notificationFactory.getAsync()
+         <span class="keyword">if</span> (!factory.isSupported()) <span class="keyword">throw new</span> Error(<span class="string">"Notifications are not supported"</span>)
+
+<span class="delete">-        const onClick = props.onClick ?? noOp</span>
+<span class="add">+        const userOnClick = props.onClick ?? noOp</span>
+
+         <span class="keyword">await this</span>.initPromise.promise
+
+<span class="delete">-        factory.makeNotification(params, onClick)</span>
+<span class="add">+        // Retain the dismisser so the underlying electron.Notification cannot</span>
+<span class="add">+        // be collected before the click event fires. When the click lands we</span>
+<span class="add">+        // run the user handler, then dismiss the OS notification through the</span>
+<span class="add">+        // retained closure and release the reference so the set stays bounded.</span>
+<span class="add">+        let dismisser: Dismisser | undefined</span>
+<span class="add">+        const onClick = () =&gt; {</span>
+<span class="add">+            try {</span>
+<span class="add">+                userOnClick()</span>
+<span class="add">+            } finally {</span>
+<span class="add">+                if (dismisser !== undefined) {</span>
+<span class="add">+                    this.oneShotDismissers.delete(dismisser)</span>
+<span class="add">+                    const toDismiss = dismisser</span>
+<span class="add">+                    dismisser = undefined</span>
+<span class="add">+                    toDismiss()</span>
+<span class="add">+                }</span>
+<span class="add">+            }</span>
+<span class="add">+        }</span>
+<span class="add">+        dismisser = factory.makeNotification(params, onClick)</span>
+<span class="add">+        this.oneShotDismissers.add(dismisser)</span>
+     }
+ }
+      </div>
+      <p><code>try { userOnClick() } finally { cleanup }</code> guards against a throwing user handler leaking the retention. The temporary <code>toDismiss</code> local is there so that even if the dismisser itself were to re-enter the click path (it does not, but defense in depth), the <code>oneShotDismissers</code> Set is no longer holding the closure when <code>toDismiss()</code> fires.</p>
+    </div>
+    <div class="card">
+      <h3>Two regression tests, GREEN-RED-GREEN locally</h3>
+      <p>Pre-PR torture run with the existing <code>@tutao/otest</code> + <code>testdouble</code> harness, mirrored into a standalone <code>tsx</code> runner that bypasses the wasm/Rust build prerequisites on Windows. The new tests fail against unpatched <code>master</code> with "Unsatisfied verification on test double: <code>close()</code> wanted 1 time, no invocations" and pass with the fix.</p>
+      <ul>
+        <li><strong>showOneShot retains the notification and closes it when the user clicks</strong>. After a simulated click, the user-supplied handler fired AND <code>close()</code> was called once via the retained dismisser. Before the fix <code>close()</code> was never called because the dismisser was discarded.</li>
+        <li><strong>showOneShot retains dismissers independently for concurrent notifications</strong>. Three one-shots in flight at once, click each, each handler fires, each notification is dismissed exactly once.</li>
+      </ul>
+      <p>The four existing <code>DesktopNotifierTest</code> cases (start-gating, grouped notification badge, clearUserNotifications scoping, unsupported-factory short-circuit) continue to pass unmodified. Lint clean. Prettier clean.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">03 · The process</div>
+    <h2 class="section-title">From maintainer comment to PR in one session</h2>
+    <p class="section-sub">The ethical gate read all four comments on #10844 before any code was touched. The two desktop-area maintainers (ganthern, charlag) had already triaged the bug and confirmed it. No community contributor was in flight with a fix. Path clear, scope bounded, fix surgical.</p>
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Picked the issue where a core maintainer admitted personal annoyance</h4><p>Issue #10844 had ganthern offering the Settings workaround, charlag (Willow, top Tuta reviewer) replying "For me it is inconsistent, sometimes it works, sometimes not, slightly infuriating", and the reporter confirming a version-regression hypothesis. A bug a core maintainer is personally annoyed by carries strong merge incentive once a clean fix lands. Bounded Electron Notification scope. Linux-specific, but the fix is platform-agnostic.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Root cause via static analysis · GC race identified</h4><p>Traced the flow from <code>ElectronUpdater.notifyAndInstall</code> through <code>DesktopNotifier.showOneShot</code> down to <code>ElectronNotificationFactory.makeNotification</code>. The factory returns a <code>Dismisser</code> closure that retains the <code>electron.Notification</code> reference. <code>showOneShot</code> discarded it. The asymmetry with the working <code>showCountedUserNotification</code> path in the same file made it concrete.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Pre-PR Torture L1 to L5 · failing test first, then fix</h4><p>Two regression tests added before the fix. Confirmed RED locally (mock <code>close()</code> never invoked). Applied the retention fix in 27 lines. Re-ran the same harness, GREEN 7/7 (2 new + 5 mirrored pre-existing). Lint clean. Prettier reformatted both files. PR description self-reviewed for the em-dash anti-pattern.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR opened against master with charlag context cited</h4><p>The PR body opens with the maintainer's own "sometimes works, sometimes not, slightly infuriating" quote so the reviewer recognizes their own characterization. The fix walks through the GC race, references the existing retention pattern in <code>showCountedUserNotification</code> as the design precedent, and documents the bounded-leak trade-off explicitly. No CLA gate on tutao/tutanota for external contributors (verified against recent merged PRs by qureshi96 and hrb-hub).</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>First clean merge with Tuta · relationship anchor for a German E2EE shop</h4><p>tutao GmbH is a 30-person team in Hannover building E2EE mail and calendar at <a href="https://tuta.com" target="_blank" rel="noopener" style="color:var(--cy)">tuta.com</a>. A clean merge here on a desktop-area Electron fix opens the door to follow-up PRs in the same area (notification stack, updater, IPC) and to a referenceable conversation with the team about my work on the K-Perception stack (E2EE Y.js / IndexedDB local-first), which is exactly the kind of cryptography-aware client engineering Tuta needs more of.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · How to verify</div>
+    <h2 class="section-title">Reproduce every claim on this page</h2>
+    <div class="code-block">
+<span class="comment"># 1. Pull the branch from the fork</span>
+git clone https://github.com/999purple999/tutanota --branch fix-oneshot-notification-click-linux
+
+<span class="comment"># 2. Inspect the change, fully contained in two files</span>
+<span class="keyword">git</span> diff master -- src/applications/common/desktop/notifications/DesktopNotifier.ts
+<span class="keyword">git</span> diff master -- test/tests/desktop/notifications/DesktopNotifierTest.ts
+
+<span class="comment"># 3. Static checks on the patched files</span>
+npx eslint src/applications/common/desktop/notifications/DesktopNotifier.ts test/tests/desktop/notifications/DesktopNotifierTest.ts
+npx prettier --check src/applications/common/desktop/notifications/DesktopNotifier.ts test/tests/desktop/notifications/DesktopNotifierTest.ts
+
+<span class="comment"># 4. Unit tests via the official harness (requires Rust + wasm-pack)</span>
+npm install
+cd test
+node --enable-source-maps test -f DesktopNotifier
+
+<span class="comment"># 5. Or via a standalone tsx runner on Windows (no Rust toolchain needed)</span>
+<span class="comment">#    - import DesktopNotifier + testdouble + LazyLoaded directly</span>
+<span class="comment">#    - mock NotificationFactory with createdNotifications array (see DesktopNotifierTest setup)</span>
+<span class="comment">#    - assert close() invoked once on click after retention fix</span>
+<span class="comment">#    - 7/7 PASS post-fix · 2/7 FAIL pre-fix (the two new #10844 cases)</span>
+
+<span class="comment"># 6. Manual verification on a Linux desktop build</span>
+<span class="comment">#    - Build the desktop client locally per BUILDING.md</span>
+<span class="comment">#    - Trigger the update flow against a local update server (see ElectronUpdater.ts header)</span>
+<span class="comment">#    - Click the resulting "Click to update" notification</span>
+<span class="comment">#    - BEFORE the patch: the click intermittently does nothing (GC dependent)</span>
+<span class="comment">#    - AFTER the patch: the click always triggers quitAndInstall</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem"><a href="../index.html">← Back to portfolio</a></p>
+    <p style="font-size:.84rem">Francesco Pernice Botta · Software Builder · KLab Industries · Biella, IT · <a href="mailto:klabindustries.hq@gmail.com">klabindustries.hq@gmail.com</a></p>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('scroll',()=>{
+    const nav=document.getElementById('nav');
+    if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');
+  });
+</script>
+</body>
+</html>

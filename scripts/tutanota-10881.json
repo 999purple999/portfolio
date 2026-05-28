@@ -1,0 +1,19 @@
+{
+  "rank": 15,
+  "slug": "tutanota",
+  "org": "Tuta",
+  "repo": "tutao/tutanota",
+  "repo_name": "tutanota",
+  "pr_num": 10881,
+  "branch": "fix-oneshot-notification-click-linux",
+  "issue_num": 10844,
+  "status_pill_class": "pill-green",
+  "status_pill_text": "PR #10881 open",
+  "ci_status_line": "Issue #10844 - Linux click-to-update notification - PR open",
+  "title": "Tuta Mail",
+  "claim": "Linux click-to-update notification kept dropping its click handler. JS-side electron.Notification was GC eligible before the user clicked.",
+  "body": "Real fix for tutao/tutanota #10844. The Tuta Mail desktop client on Linux had a click-to-update notification that the core maintainer himself described as 'sometimes works, sometimes not, slightly infuriating'. DesktopNotifier.showOneShot was discarding the Dismisser returned by the notification factory, so the JS-side electron.Notification was eligible for V8 garbage collection as soon as the call returned. GTK does not strongly retain the JS wrapper across the click round-trip, which is why the bug surfaced on Linux only (macOS Cocoa and Windows Toast both retain the wrapper through native bindings). The fix mirrors the retention pattern already used by showCountedUserNotification in the same file: keep the dismisser alive in a Set, wrap the click handler so it dismisses the OS notification and releases the reference after the user-provided callback runs. Two regression tests cover the new contract, all four existing DesktopNotifierTest cases continue to pass.",
+  "tech_tags": ["TypeScript", "Electron", "GTK / Linux", "otest + testdouble"],
+  "diff_size": "+71 / -2 LOC",
+  "regression_tests": "2 new regression tests, 7/7 standalone tsx run green"
+}

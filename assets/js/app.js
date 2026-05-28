@@ -45,7 +45,7 @@ if (burger && links) {
   links.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => links.classList.remove('open')));
 }
 
-// Cursor follower (desktop only) — PERF: RAF parte solo finché ring non raggiunge dot
+// Cursor follower (desktop only), PERF: RAF parte solo finché ring non raggiunge dot
 const cd = document.getElementById('cursor-dot');
 const cr = document.getElementById('cursor-ring');
 let cx = 0, cy = 0, rx = 0, ry = 0, crRaf = null;
@@ -154,9 +154,9 @@ if (new URLSearchParams(location.search).get('debug') === '1') {
     import {onLCP, onFID, onCLS, onINP} from 'https://unpkg.com/web-vitals@3?module';
     const badge = document.createElement('div');
     badge.style.cssText = 'position:fixed;bottom:12px;left:12px;z-index:9999;background:rgba(0,0,0,.85);color:#c084fc;font:11px/1.4 ui-monospace,monospace;padding:8px 12px;border-radius:8px;border:1px solid rgba(168,85,247,.3);min-width:140px';
-    badge.innerHTML = 'LCP: —<br>CLS: —<br>INP: —';
+    badge.innerHTML = 'LCP:,<br>CLS:,<br>INP:,';
     document.body.appendChild(badge);
-    const m = { LCP: '—', CLS: '—', INP: '—' };
+    const m = { LCP: ',', CLS: ',', INP: ',' };
     const upd = () => { badge.innerHTML = Object.entries(m).map(([k,v]) => k+': '+v).join('<br>'); };
     onLCP(({value}) => { m.LCP = Math.round(value)+'ms'; upd(); });
     onCLS(({value}) => { m.CLS = value.toFixed(3); upd(); });
@@ -202,13 +202,13 @@ async function exportCVPdf() {
     doc.setFontSize(14); doc.setTextColor(20, 20, 30); doc.text('PROJECTS', 16, y); y += 6;
     doc.setFontSize(10); doc.setTextColor(50, 50, 70);
     const lines = [
-      'HALCYON — Self-hosted realtime mesh voice/video. Node + WebRTC + SQLite. GPL-3.',
-      'K-Quest — Paid challenge marketplace. React + Cloudflare Workers + Stripe.',
-      'K-Perception (private) — Zero-knowledge encrypted notes. Y.js CRDT + AES-256-GCM.',
-      'KLab DSP suite (4 private) — Binaura, FXRack, StreamSauce, FRKX. C++20 + JUCE.',
-      'Privacy Warfare — Roguelite action-RPG vanilla ES, GitHub Pages.',
-      'KLab Games Arcade — 9 mini-games browser, zero dependencies.',
-      'Capsula del Tempo + SISTEMI 5B — Two PWAs for ITIS Q. Sella.',
+      'HALCYON, Self-hosted realtime mesh voice/video. Node + WebRTC + SQLite. GPL-3.',
+      'K-Quest, Paid challenge marketplace. React + Cloudflare Workers + Stripe.',
+      'K-Perception (private), Zero-knowledge encrypted notes. Y.js CRDT + AES-256-GCM.',
+      'KLab DSP suite (4 private), Binaura, FXRack, StreamSauce, FRKX. C++20 + JUCE.',
+      'Privacy Warfare, Roguelite action-RPG vanilla ES, GitHub Pages.',
+      'KLab Games Arcade, 9 mini-games browser, zero dependencies.',
+      'Capsula del Tempo + SISTEMI 5B, Two PWAs for ITIS Q. Sella.',
     ];
     lines.forEach((l) => { doc.text('• ' + l, 16, y); y += 5; });
     y += 5;

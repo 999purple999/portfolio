@@ -191,7 +191,7 @@ vault.items.forEach((item: Item) =&gt; {
   <span class="comment">// ... rest of the importer never runs for archived entries</span>
 });
       </div>
-      <p>Worse, the existing unit test <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">should not import items with state 'archived'</code> explicitly enforced the buggy behaviour — so any naive fix to the source without correcting the test would have left the test suite broken.</p>
+      <p>Worse, the existing unit test <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">should not import items with state 'archived'</code> explicitly enforced the buggy behaviour, so any naive fix to the source without correcting the test would have left the test suite broken.</p>
     </div>
   </div>
 </section>
@@ -200,7 +200,7 @@ vault.items.forEach((item: Item) =&gt; {
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
     <h2 class="section-title">Remove the early return, stamp <code>archivedDate</code>, fix the test that enforced the bug</h2>
-    <p class="section-sub">Two source files touched, plus a regression guard. The fix lands in <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">libs/importer/</code> which is shared by all four Bitwarden clients — one change, four clients fixed (browser, desktop, cli, web — exactly the labels on the issue).</p>
+    <p class="section-sub">Two source files touched, plus a regression guard. The fix lands in <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">libs/importer/</code> which is shared by all four Bitwarden clients, one change, four clients fixed (browser, desktop, cli, web, exactly the labels on the issue).</p>
     <div class="card">
       <h3>The corrected importer flow</h3>
       <div class="code-block">
@@ -220,10 +220,10 @@ vault.items.forEach((item: Item) =&gt; {
   <span class="keyword">this</span>.result.ciphers.push(cipher);
 });
       </div>
-      <p>The <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">CipherView.archivedDate</code> field is what powers Bitwarden's own <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">isArchived</code> getter (see <code>cipher.view.ts:178-179</code>), so this is the canonical, type-safe way to mark a cipher as archived programmatically — no schema migration, no new flag, no new state machine.</p>
+      <p>The <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">CipherView.archivedDate</code> field is what powers Bitwarden's own <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">isArchived</code> getter (see <code>cipher.view.ts:178-179</code>), so this is the canonical, type-safe way to mark a cipher as archived programmatically, no schema migration, no new flag, no new state machine.</p>
     </div>
     <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Why <code>new Date()</code> and not the original archive time?</h3>
-    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">Because 1pux does not encode it. The <code>Item</code> type in <code>onepassword-1pux-importer-types.ts:65</code> exposes only <code>state: "active" | "archived"</code> — no timestamp. The import-time stamp is the highest fidelity we can give without inventing data. If 1pux ever exports <code>archivedAt</code>, the substitution is a one-line change.</p>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">Because 1pux does not encode it. The <code>Item</code> type in <code>onepassword-1pux-importer-types.ts:65</code> exposes only <code>state: "active" | "archived"</code>, no timestamp. The import-time stamp is the highest fidelity we can give without inventing data. If 1pux ever exports <code>archivedAt</code>, the substitution is a one-line change.</p>
   </div>
 </section>
 
@@ -274,9 +274,9 @@ it(<span class="string">"should leave active items unarchived (regression guard)
     <div class="timeline">
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + tests + tsc + eslint</h4><p>Branch <code>fix/20694-1pux-import-preserves-archived</code>, commit <code>7a33830</code>, 43/43 jest tests pass, tsc clean, eslint clean, husky pre-commit hooks all green.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Fork + push + open draft PR with @-mention</h4><p>Fork <code>999purple999/clients</code>, draft PR <a href="https://github.com/bitwarden/clients/pull/20867" target="_blank" rel="noopener">#20867</a> open, <code>@djsmith85</code> (community contributor who flagged the issue as <code>good first issue</code> with the file pointer) tagged in the PR body for natural notification.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>CLA signed + Community PR board triage</h4><p><code>license/cla</code> status: SUCCESS — auto-signed via the GitHub noreply identity. <code>bitwarden-bot</code> added the PR to the internal Community PR board as <code>PM-38123</code> (Jira ticket reference) and prepended the prefix to the PR title.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>CLA signed + Community PR board triage</h4><p><code>license/cla</code> status: SUCCESS, auto-signed via the GitHub noreply identity. <code>bitwarden-bot</code> added the PR to the internal Community PR board as <code>PM-38123</code> (Jira ticket reference) and prepended the prefix to the PR title.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Cold mail to @MGibson1 (Matt Gibson, Bitwarden employee)</h4><p>Verified email pattern <code>firstInitial + lastName@bitwarden.com</code> via six sample employee commits (bcunningham, btreston, dnance, gsmith, jengstrom, mgibson). Mail anchored to the PR URL with K-Perception (AES-256-GCM client-side + Y.js CRDT) and HALCYON (Node 24 WebRTC mesh) as the explicit stack-overlap signals for any cryptography or vault-side adjacent role.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Maintainer workflow approval + code-owner review</h4><p>The CI gate <code>Check user permission</code> failed by design — community PRs need a Bitwarden maintainer to manually approve the workflow run before Build Browser / Build CLI / Build Desktop / Build Web / Chromatic / Scan run for real on the code. This is a security-standard pattern for external forks and resolves on maintainer triage (typically 1-7 days).</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Maintainer workflow approval + code-owner review</h4><p>The CI gate <code>Check user permission</code> failed by design, community PRs need a Bitwarden maintainer to manually approve the workflow run before Build Browser / Build CLI / Build Desktop / Build Web / Chromatic / Scan run for real on the code. This is a security-standard pattern for external forks and resolves on maintainer triage (typically 1-7 days).</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Merge + paid follow-up conversation</h4><p>Realistic odds: <strong>~50-60%</strong> merge probability given the surgical scope, the clean Community PR board entry, the corrected test that enforces the right contract, and the existing CLA signature. Paid-conversation odds independent of merge: <strong>~10-15%</strong> given Bitwarden's known external-contractor hiring at the vault/crypto layers and the K-Perception stack match documented in the cold mail.</p></div></div>
     </div>
   </div>

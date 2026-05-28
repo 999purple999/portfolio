@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Idiap · coqui-ai-TTS #298 · Francesco · 999purple999</title>
-<meta name="description" content="Fix for coqui-ai-TTS issue #298 — VITS memory leak in synthesis loop. Structural detach+CPU in BaseTTS.synthesize.">
+<meta name="description" content="Fix for coqui-ai-TTS issue #298, VITS memory leak in synthesis loop. Structural detach+CPU in BaseTTS.synthesize.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -120,7 +120,7 @@ footer a{color:var(--kp3);text-decoration:none}
     </div>
     <h1 class="title"><span class="name">Idiap · coqui-ai-TTS</span></h1>
     <p class="issue-line">idiap/coqui-ai-TTS · issue <a href="https://github.com/idiap/coqui-ai-TTS/issues/298" target="_blank" rel="noopener">#298</a> · branch <code>fix/298-vits-memory-leak-detach</code></p>
-    <p class="lede">RSS grew roughly linearly with every iteration of a VITS synthesis loop, even when the caller only retained the <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">wav</code> numpy array. The cause was structural: <span class="hi">BaseTTS.synthesize returned a dict containing the full VITS inference output</span> — eight tensors — none of them detached. A small <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">_release</code> helper that does <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">detach().cpu()</code> on every tensor before it crosses the function boundary stops the bleed without changing the API.</p>
+    <p class="lede">RSS grew roughly linearly with every iteration of a VITS synthesis loop, even when the caller only retained the <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">wav</code> numpy array. The cause was structural: <span class="hi">BaseTTS.synthesize returned a dict containing the full VITS inference output</span>, eight tensors, none of them detached. A small <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">_release</code> helper that does <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">detach().cpu()</code> on every tensor before it crosses the function boundary stops the bleed without changing the API.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/999purple999/coqui-ai-TTS/tree/fix/298-vits-memory-leak-detach" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
       <a class="btn btn-ghost" href="https://github.com/idiap/coqui-ai-TTS/issues/298" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
@@ -128,7 +128,7 @@ footer a{color:var(--kp3);text-decoration:none}
     <div class="metric-grid">
       <div class="metric"><div class="metric-num">8</div><div class="metric-lbl">GPU tensors returned undetached per call (now released)</div></div>
       <div class="metric"><div class="metric-num">1 fn</div><div class="metric-lbl">Change surface: BaseTTS.synthesize</div></div>
-      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">API breakage — shapes and values unchanged</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">API breakage, shapes and values unchanged</div></div>
       <div class="metric"><div class="metric-num">RSS↓</div><div class="metric-lbl">Plateau after warm-up instead of linear growth</div></div>
     </div>
   </div>
@@ -143,16 +143,16 @@ footer a{color:var(--kp3);text-decoration:none}
     <div class="card">
       <h3>The returned dict that nobody fully consumes</h3>
       <div class="code-block">
-<span class="comment"># TTS/tts/models/base_tts.py:678 — the OLD version</span>
+<span class="comment"># TTS/tts/models/base_tts.py:678, the OLD version</span>
 <span class="keyword">return</span> {
-    <span class="string">"wav"</span>: wav,                       <span class="comment"># numpy — fine</span>
-    <span class="string">"alignments"</span>: alignments,         <span class="comment"># tensor — NOT detached</span>
-    <span class="string">"text_inputs"</span>: text_inputs,       <span class="comment"># tensor — NOT detached</span>
-    <span class="string">"outputs"</span>: outputs,               <span class="comment"># dict of 8 tensors — NOT detached</span>
+    <span class="string">"wav"</span>: wav,                       <span class="comment"># numpy, fine</span>
+    <span class="string">"alignments"</span>: alignments,         <span class="comment"># tensor, NOT detached</span>
+    <span class="string">"text_inputs"</span>: text_inputs,       <span class="comment"># tensor, NOT detached</span>
+    <span class="string">"outputs"</span>: outputs,               <span class="comment"># dict of 8 tensors, NOT detached</span>
 }
       </div>
       <p>The VITS <code>inference()</code> method returns 8 tensors of size proportional to the input length: <code>model_outputs</code>, <code>alignments</code>, <code>durations</code>, <code>z</code>, <code>z_p</code>, <code>m_p</code>, <code>logs_p</code>, <code>y_mask</code>. <code>z</code> and <code>z_p</code> and <code>model_outputs</code> are large and grow with <code>T_dec</code> (decoder time steps). All eight are bundled into the dict the caller receives.</p>
-      <p>The caller (<code>Synthesizer.tts</code>) uses only <code>outputs["wav"]</code> when VITS is the model (because <code>vocoder_model is None</code>, the <code>use_gl=True</code> branch is taken). The other seven tensors are payload for callers that never look at them — and they survive until Python's GC happens to run, which in a tight synthesis loop is "rarely".</p>
+      <p>The caller (<code>Synthesizer.tts</code>) uses only <code>outputs["wav"]</code> when VITS is the model (because <code>vocoder_model is None</code>, the <code>use_gl=True</code> branch is taken). The other seven tensors are payload for callers that never look at them, and they survive until Python's GC happens to run, which in a tight synthesis loop is "rarely".</p>
     </div>
 
     <div class="diagram-wrap">
@@ -181,7 +181,7 @@ flowchart LR
     <div class="card">
       <h3>The new code, in 8 lines</h3>
       <div class="code-block">
-<span class="comment"># TTS/tts/models/base_tts.py — inside synthesize, before the return</span>
+<span class="comment"># TTS/tts/models/base_tts.py, inside synthesize, before the return</span>
 
 <span class="keyword">def</span> _release(value: Any) -> Any:
     <span class="keyword">if</span> isinstance(value, torch.Tensor):
@@ -205,7 +205,7 @@ flowchart LR
       <dt>API</dt><dd>Identical keys, identical shapes, identical numeric values.</dd>
       <dt>Tests</dt><dd>Every existing assertion in <code>tests/</code> continues to pass.</dd>
       <dt>CUDA</dt><dd>Tensors come back to the caller on CPU. Callers who needed them on GPU were already calling <code>.cpu()</code> themselves; the rest get the speed win.</dd>
-      <dt>Training</dt><dd>Unaffected — <code>synthesize</code> is inference-only; training paths use <code>train_step</code>.</dd>
+      <dt>Training</dt><dd>Unaffected, <code>synthesize</code> is inference-only; training paths use <code>train_step</code>.</dd>
     </dl>
   </div>
 </section>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hugging Face · huggingface.js #1979 · Francesco · 999purple999</title>
-<meta name="description" content="Fix for huggingface.js issue #1979 — sharded safetensors metadata parsing, 3 to 2 HTTP requests per shard. Production-ready branch, 3 unit tests, full README.">
+<meta name="description" content="Fix for huggingface.js issue #1979, sharded safetensors metadata parsing, 3 to 2 HTTP requests per shard. Production-ready branch, 3 unit tests, full README.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -179,7 +179,7 @@ footer a:hover{color:var(--kp4)}
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
     <h2 class="section-title">Three round-trips per shard, for data we throw away</h2>
-    <p class="section-sub">When the user calls <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">parseSafetensorsMetadata()</code> on a sharded checkpoint, the existing code walks every <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">.safetensors</code> shard listed in the index and, for each one, issues three HTTP requests. The first one — the call to <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code> — returns file size, ETag, and xet redirect information that the caller never reads when all it wants is the JSON header. It is wasted work, and on heavily sharded models the fan-out is so large that real users see the requests time out.</p>
+    <p class="section-sub">When the user calls <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">parseSafetensorsMetadata()</code> on a sharded checkpoint, the existing code walks every <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">.safetensors</code> shard listed in the index and, for each one, issues three HTTP requests. The first one, the call to <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code>, returns file size, ETag, and xet redirect information that the caller never reads when all it wants is the JSON header. It is wasted work, and on heavily sharded models the fan-out is so large that real users see the requests time out.</p>
 
     <div class="card">
       <h3>The failure shape, by the numbers</h3>
@@ -200,7 +200,7 @@ footer a:hover{color:var(--kp4)}
       <h3>Where the third request comes from</h3>
       <p>Three layers of indirection each issue their own range request:</p>
       <ul>
-        <li><strong>downloadFile()</strong> calls <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code> with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Range: bytes=0-0</code> — one round trip just to learn size + ETag + xet status, none of which we use when parsing shard headers.</li>
+        <li><strong>downloadFile()</strong> calls <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code> with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Range: bytes=0-0</code>, one round trip just to learn size + ETag + xet status, none of which we use when parsing shard headers.</li>
         <li><strong>WebBlob.slice(0, 8).arrayBuffer()</strong> issues a <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Range: bytes=0-7</code> request to read the 8-byte little-endian header length.</li>
         <li><strong>WebBlob.slice(8, 8 + len).arrayBuffer()</strong> issues a <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Range: bytes=8-N</code> request to read the JSON header body.</li>
       </ul>
@@ -227,7 +227,7 @@ flowchart LR
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
     <h2 class="section-title">A private helper that talks to the resolve URL directly</h2>
-    <p class="section-sub">A new function <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">parseSingleFileFast(path, params)</code> builds the same resolve URL <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code> would target (bucket vs model prefix, revision encoding, raw=false — every detail mirrored exactly) and then issues only two range requests against it. <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fetchAllHeaders</code> is rewired to call the fast helper for every shard. The single-file (non-sharded) entry path is left untouched, which preserves xet single-file checkpoint compatibility for the <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">XetBlob</code> reconstruction flow.</p>
+    <p class="section-sub">A new function <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">parseSingleFileFast(path, params)</code> builds the same resolve URL <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fileDownloadInfo</code> would target (bucket vs model prefix, revision encoding, raw=false, every detail mirrored exactly) and then issues only two range requests against it. <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fetchAllHeaders</code> is rewired to call the fast helper for every shard. The single-file (non-sharded) entry path is left untouched, which preserves xet single-file checkpoint compatibility for the <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">XetBlob</code> reconstruction flow.</p>
 
     <div class="card">
       <h3>The new code path, abbreviated</h3>
@@ -235,7 +235,7 @@ flowchart LR
 <span class="comment">// 1. Build the resolve URL exactly like fileDownloadInfo would</span>
 <span class="keyword">const</span> url = buildResolveUrl(repo, path, hubUrl, revision);
 
-<span class="comment">// 2. Request #1 — 8-byte little-endian header length</span>
+<span class="comment">// 2. Request #1, 8-byte little-endian header length</span>
 <span class="keyword">const</span> lenResp = <span class="keyword">await</span> fetch(url, {
   headers: { ...auth, Range: <span class="string">"bytes=0-7"</span> },
 });
@@ -246,7 +246,7 @@ flowchart LR
 <span class="keyword">const</span> len = <span class="keyword">new</span> DataView(<span class="keyword">await</span> lenResp.arrayBuffer()).getBigUint64(0, <span class="keyword">true</span>);
 <span class="keyword">if</span> (len > BigInt(MAX_HEADER_LENGTH)) <span class="keyword">throw</span> <span class="comment">/* refuse before the second request */</span>;
 
-<span class="comment">// 3. Request #2 — JSON header body</span>
+<span class="comment">// 3. Request #2, JSON header body</span>
 <span class="keyword">const</span> headerResp = <span class="keyword">await</span> fetch(url, {
   headers: { ...auth, Range: <span class="string">`bytes=8-${8 + Number(len) - 1}`</span> },
 });
@@ -280,7 +280,7 @@ flowchart LR
       <dt>200 refusal</dt><dd>A non-206 response means the server is streaming the whole shard. We drain and throw, not buffer.</dd>
       <dt>Custom fetch</dt><dd>The user-overridable <code>fetch</code> parameter (proxy / header-rewrite) is preserved end-to-end.</dd>
       <dt>Xet single-file</dt><dd>Untouched. <code>XetBlob</code> reconstruction logic continues to flow through <code>downloadFile</code>.</dd>
-      <dt>URL construction</dt><dd>Bucket vs model prefix, revision encoding, raw=false — every detail copy of <code>fileDownloadInfo</code>.</dd>
+      <dt>URL construction</dt><dd>Bucket vs model prefix, revision encoding, raw=false, every detail copy of <code>fileDownloadInfo</code>.</dd>
     </dl>
   </div>
 </section>
@@ -292,12 +292,12 @@ flowchart LR
     <p class="section-sub">The new spec file uses an in-process <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">fetch</code> stub that records every call and asserts exactly the request shape the fix promises.</p>
     <div class="card">
       <ul>
-        <li><strong>sharded path issues exactly 2 HTTP requests per shard (not 3)</strong> — instruments fetch, parses a 3-shard fake repo, asserts <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">2 × 3 = 6</code> shard requests with the correct Range headers.</li>
-        <li><strong>rejects a shard response that returns 200 (server ignored Range)</strong> — the mock returns a 1 MB 200 body, the test asserts the code throws with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">/did not honor Range/</code>.</li>
-        <li><strong>rejects an oversized header length</strong> — the mock returns 8 bytes encoding 100 MB, the test asserts the code throws with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">/header is too big/</code> before issuing the body request.</li>
+        <li><strong>sharded path issues exactly 2 HTTP requests per shard (not 3)</strong>, instruments fetch, parses a 3-shard fake repo, asserts <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">2 × 3 = 6</code> shard requests with the correct Range headers.</li>
+        <li><strong>rejects a shard response that returns 200 (server ignored Range)</strong>, the mock returns a 1 MB 200 body, the test asserts the code throws with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">/did not honor Range/</code>.</li>
+        <li><strong>rejects an oversized header length</strong>, the mock returns 8 bytes encoding 100 MB, the test asserts the code throws with <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">/header is too big/</code> before issuing the body request.</li>
       </ul>
     </div>
-    <div class="callout"><strong>Note on integration tests.</strong> The pre-existing spec file (<code>parse-safetensors-metadata.spec.ts</code>) issues real HTTP calls against <code>bigscience/bloom</code>, <code>Alignment-Lab-AI/ALAI-gemma-7b</code> and three other live repositories. Those tests exercise the new sharded path end-to-end against the production Hub. They are not run in this session (network + pnpm install ≈ 5–10 min) but they will run automatically in CI on the PR.</div>
+    <div class="callout"><strong>Note on integration tests.</strong> The pre-existing spec file (<code>parse-safetensors-metadata.spec.ts</code>) issues real HTTP calls against <code>bigscience/bloom</code>, <code>Alignment-Lab-AI/ALAI-gemma-7b</code> and three other live repositories. Those tests exercise the new sharded path end-to-end against the production Hub. They are not run in this session (network + pnpm install ≈ 5-10 min) but they will run automatically in CI on the PR.</div>
   </div>
 </section>
 
@@ -305,7 +305,7 @@ flowchart LR
   <div class="container">
     <div class="section-eyebrow">04 · The outreach</div>
     <h2 class="section-title">Where this stands in the conversation funnel</h2>
-    <p class="section-sub">The branch is committed locally and ready to push. No public PR is open yet — that is a deliberate choice that leaves the conversation initiation in Francesco's hands.</p>
+    <p class="section-sub">The branch is committed locally and ready to push. No public PR is open yet, that is a deliberate choice that leaves the conversation initiation in Francesco's hands.</p>
     <div class="timeline">
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + tests + README</h4><p>Local branch <code>fix/1979-sharded-safetensors-2hops</code>, commit <code>04a0909</code>, three unit tests written, full PR-shaped README authored.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Fork + push + open draft PR</h4><p>Two-line shell command. The fork goes onto <code>github.com/999purple999/huggingface.js</code>; the PR opens as draft so the maintainer can self-pace review.</p></div></div>

@@ -139,13 +139,13 @@ footer a{color:var(--kp3);text-decoration:none}
     </div>
     <h1 class="title"><span class="name">Opik (Comet)</span></h1>
     <p class="issue-line">comet-ml/opik · issue <a href="https://github.com/comet-ml/opik/issues/5523" target="_blank" rel="noopener">#5523</a> · related PRs <a href="https://github.com/comet-ml/opik/pull/6624" target="_blank" rel="noopener">#6624 (merged)</a>, <a href="https://github.com/comet-ml/opik/pull/6819" target="_blank" rel="noopener">#6819 (open)</a></p>
-    <p class="lede">I came in to claim issue #5523 as a free proof PR. Read the source instead and found that <span class="hi">PR #6624 had already landed the task-error fix</span>. Rather than retire the lead, I traced the same silent-swallow shape one layer deeper into <code>calculateScores</code> lines 505-509 — where a metric throw is still logged-only with no marker in <code>scoreResults</code>. That is the cold-mail angle: not "I have a PR for you", but "I read your code carefully enough to find the sibling pattern your fix didn't cover".</p>
+    <p class="lede">I came in to claim issue #5523 as a free proof PR. Read the source instead and found that <span class="hi">PR #6624 had already landed the task-error fix</span>. Rather than retire the lead, I traced the same silent-swallow shape one layer deeper into <code>calculateScores</code> lines 505-509, where a metric throw is still logged-only with no marker in <code>scoreResults</code>. That is the cold-mail angle: not "I have a PR for you", but "I read your code carefully enough to find the sibling pattern your fix didn't cover".</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/comet-ml/opik/issues/5523" target="_blank" rel="noopener">Read issue #5523 <span>↗</span></a>
       <a class="btn btn-ghost" href="https://github.com/comet-ml/opik/blob/main/sdks/typescript/src/opik/evaluation/engine/EvaluationEngine.ts" target="_blank" rel="noopener">EvaluationEngine.ts <span>↗</span></a>
     </div>
     <div class="metric-grid">
-      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">Commits delivered (intentional — no duplicate work)</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">Commits delivered (intentional, no duplicate work)</div></div>
       <div class="metric"><div class="metric-num">5 lines</div><div class="metric-lbl">The exact range of the sibling pattern (505-509)</div></div>
       <div class="metric"><div class="metric-num">1 day</div><div class="metric-lbl">Estimated work to ship the proper PR after alignment</div></div>
       <div class="metric"><div class="metric-num">100%</div><div class="metric-lbl">Stack overlap with your opik-frontend (Vite + React 18 + Tailwind)</div></div>
@@ -168,7 +168,7 @@ footer a{color:var(--kp3);text-decoration:none}
     testResults.push(testResult);          <span class="comment">// only on success</span>
   } <span class="keyword">catch</span> (error) {
     logger.error(<span class="string">`Error processing item ${datasetItem.id}`</span>);
-    <span class="comment">// NO testResult pushed — silently skipped</span>
+    <span class="comment">// NO testResult pushed, silently skipped</span>
   }
 }
       </div>
@@ -184,7 +184,7 @@ footer a{color:var(--kp3);text-decoration:none}
   <div class="container">
     <div class="section-eyebrow">02 · The sibling pattern still in the file</div>
     <h2 class="section-title">Same silent-swallow shape, one layer deeper</h2>
-    <p class="section-sub">The task-error path is now tracked. The <strong>metric-error</strong> path — what happens when a scoring metric itself throws while evaluating a successful task output — is still logged-only. Same UX failure mode #5523 was opened against, just at a different layer of the call stack.</p>
+    <p class="section-sub">The task-error path is now tracked. The <strong>metric-error</strong> path, what happens when a scoring metric itself throws while evaluating a successful task output, is still logged-only. Same UX failure mode #5523 was opened against, just at a different layer of the call stack.</p>
 
     <div class="card">
       <h3>The exact code that still swallows, in <code>calculateScores</code> lines 505-509</h3>
@@ -244,14 +244,14 @@ flowchart LR
   });
 }
       </div>
-      <p>That is the entire change at the call site. The new constant in <code>types.ts</code> is one line. <code>EvaluationResultProcessor</code> already special-cases <code>scoringFailed</code> (line 26: <code>if (!score || score.scoringFailed || typeof score.value !== "number")</code>), so the surfacing layer needs no changes — the metric error appears in the results identically to a task error.</p>
+      <p>That is the entire change at the call site. The new constant in <code>types.ts</code> is one line. <code>EvaluationResultProcessor</code> already special-cases <code>scoringFailed</code> (line 26: <code>if (!score || score.scoringFailed || typeof score.value !== "number")</code>), so the surfacing layer needs no changes, the metric error appears in the results identically to a task error.</p>
     </div>
 
     <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Design question for the maintainer</h3>
     <dl class="kv">
-      <dt>Naming</dt><dd>New <code>METRIC_ERROR_SCORE_NAME</code> constant, or reuse <code>TASK_ERROR_SCORE_NAME</code> with a discriminator field? Either is defensible — I'd default to a new constant for clarity, but the maintainer's call.</dd>
+      <dt>Naming</dt><dd>New <code>METRIC_ERROR_SCORE_NAME</code> constant, or reuse <code>TASK_ERROR_SCORE_NAME</code> with a discriminator field? Either is defensible, I'd default to a new constant for clarity, but the maintainer's call.</dd>
       <dt>Skipped metrics</dt><dd>Should the failed metric still emit a feedback score (with value 0) on the trace? Currently feedback scores are sourced from the same <code>scoreResults</code> array, so yes by default.</dd>
-      <dt>Assertion routing</dt><dd>For <code>BaseSuiteEvaluator</code> metrics, the error case routes into <code>assertionResults</code> as <code>status: "failed"</code>. Confirm that's the intended behavior — I read it as "failure to score is itself a failed assertion", which feels right.</dd>
+      <dt>Assertion routing</dt><dd>For <code>BaseSuiteEvaluator</code> metrics, the error case routes into <code>assertionResults</code> as <code>status: "failed"</code>. Confirm that's the intended behavior, I read it as "failure to score is itself a failed assertion", which feels right.</dd>
     </dl>
   </div>
 </section>
@@ -260,17 +260,17 @@ flowchart LR
   <div class="container">
     <div class="section-eyebrow">04 · The cold-mail framing</div>
     <h2 class="section-title">Diligence as the cold-outreach value, not a finished PR</h2>
-    <p class="section-sub">The mail to the Opik TS SDK maintainer leads with "I came in to take #5523, read the code, saw your fix is already in, and stuck around long enough to find the sibling pattern". That is a different sales pitch than the other three repos — it sells a code-review eye rather than a PR-ready commit. For Comet, where the team is sharp and the AI-augmented "Ollie" bot already exists internally, code-review eyes are arguably the more valuable signal anyway.</p>
+    <p class="section-sub">The mail to the Opik TS SDK maintainer leads with "I came in to take #5523, read the code, saw your fix is already in, and stuck around long enough to find the sibling pattern". That is a different sales pitch than the other three repos, it sells a code-review eye rather than a PR-ready commit. For Comet, where the team is sharp and the AI-augmented "Ollie" bot already exists internally, code-review eyes are arguably the more valuable signal anyway.</p>
 
     <div class="card">
       <h3>The CTA path</h3>
       <ul>
         <li><strong>1)</strong> I open a new issue documenting the metric-error sibling pattern, with the exact line numbers and the proposed fix shape.</li>
         <li><strong>2)</strong> If you signal interest, I send the PR within 1 day, with a vitest test against a deliberately-throwing metric to lock the behavior in.</li>
-        <li><strong>3)</strong> 15-minute call if you'd rather align on naming first — I'm in CEST, available 15:00-24:00, which is 06:00-15:00 US Pacific.</li>
+        <li><strong>3)</strong> 15-minute call if you'd rather align on naming first, I'm in CEST, available 15:00-24:00, which is 06:00-15:00 US Pacific.</li>
       </ul>
     </div>
-    <div class="callout warn"><strong>Honest framing for the buyer:</strong> this is the weakest of the four leads in terms of immediate "proof of work" — there is no committed branch. But it is also the lead with the highest <em>stack-overlap</em> match (Cloudflare Workers + React 18 + Vite + Tailwind + Playwright is the K-Quest stack, line for line). If the conversation goes anywhere, the fit on opik-frontend work is essentially 1:1.</div>
+    <div class="callout warn"><strong>Honest framing for the buyer:</strong> this is the weakest of the four leads in terms of immediate "proof of work", there is no committed branch. But it is also the lead with the highest <em>stack-overlap</em> match (Cloudflare Workers + React 18 + Vite + Tailwind + Playwright is the K-Quest stack, line for line). If the conversation goes anywhere, the fit on opik-frontend work is essentially 1:1.</div>
   </div>
 </section>
 
@@ -282,7 +282,7 @@ flowchart LR
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Source-read and sibling pattern identified</h4><p>Read <code>EvaluationEngine.ts</code>, verified #5523 fixed in <code>main</code>, located the metric-error catch at lines 505-509, drafted the fix shape.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Cold mail to a named Opik TS SDK maintainer</h4><p>Mail leads with the diligence story, ends with the dual CTA: file the issue + open PR on signal, OR 15-minute call to align on naming first.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">If green-light</div><div class="timeline-body"><h4>Issue + PR within 1-2 days</h4><p>One new constant, three lines added to the catch block, one vitest test. Estimated half a working day end-to-end.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 1 week, contract within 6 weeks</h4><p>Realistic odds from this lead alone: ~20-40% conversation, ~5-15% contract. Comet is a real company with a real hiring process — this is more likely to surface a longer-cycle FT opportunity than a same-week retainer.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 1 week, contract within 6 weeks</h4><p>Realistic odds from this lead alone: ~20-40% conversation, ~5-15% contract. Comet is a real company with a real hiring process, this is more likely to surface a longer-cycle FT opportunity than a same-week retainer.</p></div></div>
     </div>
   </div>
 </section>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Xanadu · PennyLane #7807 · Francesco · 999purple999</title>
-<meta name="description" content="Fix for PennyLane issue #7807 — circuit drawing differs depending on whether default.qubit gets an explicit wires argument. Production-ready branch, snapshot updates, full README.">
+<meta name="description" content="Fix for PennyLane issue #7807, circuit drawing differs depending on whether default.qubit gets an explicit wires argument. Production-ready branch, snapshot updates, full README.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -175,7 +175,7 @@ flowchart TD
   P2 --> OutA["✓ rendered with ╭ ├ ╰ brackets"]
   Probe -- "== 0 (broadcast over device)" --> Q1[_add_grouping_symbols early-returns]
   Q1 --> Q2[append label to every wire]
-  Q2 --> OutB["✗ rendered without brackets — issue #7807"]
+  Q2 --> OutB["✗ rendered without brackets, issue #7807"]
   style OutA fill:#0a1e10,stroke:#10b981,color:#86efac
   style OutB fill:#1e0a0a,stroke:#ef4444,color:#fca5a5
       </pre>
@@ -187,12 +187,12 @@ flowchart TD
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
     <h2 class="section-title">Mirror the pattern <code>_add_global_op</code> already uses</h2>
-    <p class="section-sub">PennyLane's drawer already knows how to render an operation that spans every wire — it does so for <code>GlobalPhase</code> and <code>Identity</code> via <code>_add_global_op</code>, which calls <code>_add_grouping_symbols(list(config.wire_map.keys()), …)</code> when the operation's own wires are empty. The fix is to apply the same trick inside the broadcast branch of <code>_add_measurement</code>.</p>
+    <p class="section-sub">PennyLane's drawer already knows how to render an operation that spans every wire, it does so for <code>GlobalPhase</code> and <code>Identity</code> via <code>_add_global_op</code>, which calls <code>_add_grouping_symbols(list(config.wire_map.keys()), …)</code> when the operation's own wires are empty. The fix is to apply the same trick inside the broadcast branch of <code>_add_measurement</code>.</p>
 
     <div class="card">
       <h3>The change, in the only place it matters</h3>
       <div class="code-block">
-<span class="comment"># pennylane/drawer/_add_obj.py — _add_measurement, lines 386-393</span>
+<span class="comment"># pennylane/drawer/_add_obj.py, _add_measurement, lines 386-393</span>
 
 <span class="keyword">if</span> len(m.wires) == 0:                          <span class="comment"># state or probability across all wires</span>
     n_wires = len(config.wire_map)
@@ -211,7 +211,7 @@ flowchart TD
     <dl class="kv">
       <dt>Single-wire</dt><dd>Behaviour unchanged. <code>_add_grouping_symbols</code> early-exits.</dd>
       <dt>Multi-wire (explicit)</dt><dd>Behaviour unchanged. The function it already called is still called.</dd>
-      <dt>Multi-wire (broadcast)</dt><dd>Behaviour aligned with the explicit case — grouping brackets now appear.</dd>
+      <dt>Multi-wire (broadcast)</dt><dd>Behaviour aligned with the explicit case, grouping brackets now appear.</dd>
       <dt>Mid-circuit measurements</dt><dd>Untouched. Those go through <code>_add_cwire_measurement</code>.</dd>
       <dt>API surface</dt><dd>Zero change. No new arguments, no new exports.</dd>
     </dl>
@@ -222,11 +222,11 @@ flowchart TD
   <div class="container">
     <div class="section-eyebrow">03 · The tests</div>
     <h2 class="section-title">Two snapshot updates, the rest documented as drift</h2>
-    <p class="section-sub">Two test snapshots tested the function I changed directly and are updated in-place. The remaining multi-line snapshots in <code>test_draw.py</code> ship one column wider after this change — they are documented in the README so the maintainer (or CI) can pin them up against the actual pytest diff.</p>
+    <p class="section-sub">Two test snapshots tested the function I changed directly and are updated in-place. The remaining multi-line snapshots in <code>test_draw.py</code> ship one column wider after this change, they are documented in the README so the maintainer (or CI) can pin them up against the actual pytest diff.</p>
     <div class="card">
       <ul>
-        <li><strong>tests/drawer/test_tape_text.py:267-268</strong> — direct unit test for <code>_add_measurement</code> on the default 4-wire wire map. <code>qp.state()</code> now expected as <code>["╭State", "├State", "├State", "╰State"]</code>; <code>qp.sample()</code> same shape.</li>
-        <li><strong>tests/drawer/test_draw.py:411</strong> — <code>test_draw_all_wire_measurements</code> snapshot for the 2-wire (sample, probs, counts) parametrize.</li>
+        <li><strong>tests/drawer/test_tape_text.py:267-268</strong>, direct unit test for <code>_add_measurement</code> on the default 4-wire wire map. <code>qp.state()</code> now expected as <code>["╭State", "├State", "├State", "╰State"]</code>; <code>qp.sample()</code> same shape.</li>
+        <li><strong>tests/drawer/test_draw.py:411</strong>, <code>test_draw_all_wire_measurements</code> snapshot for the 2-wire (sample, probs, counts) parametrize.</li>
         <li><strong>Documented as drift in README:</strong> multi-line literal snapshots at <code>test_draw.py:1011-1014</code> and <code>:1032-1036</code> (multi-wire <code>qp.probs()</code> rendering inside mid-circuit measurement tests). They ship one column wider; their surrounding column alignment needs eyeballing against pytest output, which I could not run locally this session.</li>
       </ul>
     </div>

@@ -171,11 +171,11 @@ footer a:hover{color:var(--kp4)}
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
     <h2 class="section-title">The menu actions read from the display layer, not the record</h2>
-    <p class="section-sub">When an object has a custom URL property pinned to the featured-relations header, the cell is rendered with <code>shortUrl=true</code> and <code>textLimit=150</code> — both come from <code>src/ts/component/block/featured.tsx</code>. The visible string can therefore be a truncated form like <code>github.com/an...issues</code>, while the underlying record value is the full <code>https://github.com/anyproto/anytype-ts/issues</code>. Right-click on the cell opens the URL menu with three actions: <strong>Go</strong>, <strong>Copy</strong>, <strong>Reload</strong>.</p>
+    <p class="section-sub">When an object has a custom URL property pinned to the featured-relations header, the cell is rendered with <code>shortUrl=true</code> and <code>textLimit=150</code>, both come from <code>src/ts/component/block/featured.tsx</code>. The visible string can therefore be a truncated form like <code>github.com/an...issues</code>, while the underlying record value is the full <code>https://github.com/anyproto/anytype-ts/issues</code>. Right-click on the cell opens the URL menu with three actions: <strong>Go</strong>, <strong>Copy</strong>, <strong>Reload</strong>.</p>
     <div class="card">
       <h3>The original handler</h3>
       <div class="code-block">
-<span class="comment">// src/ts/component/cell/index.tsx — URL/Email/Phone menu onSelect</span>
+<span class="comment">// src/ts/component/cell/index.tsx, URL/Email/Phone menu onSelect</span>
 <span class="keyword">const</span> onSelect = (event: any, item: any) =&gt; {
     <span class="keyword">const</span> value = childRef.current.getValue();  <span class="comment">// ← reads from child cell</span>
     <span class="keyword">if</span> (!value) <span class="keyword">return</span>;
@@ -193,7 +193,7 @@ footer a:hover{color:var(--kp4)}
     };
 };
       </div>
-      <p>The value comes from <code>childRef.current.getValue()</code>. That exposes whatever the child text-cell has chosen to expose. The cell is configured to render truncated — and the data contract between the parent menu and the child renderer is implicit. Even if today's <code>getValue()</code> happens to return the full value, any future refactor to the text-cell render layer could quietly route the displayed string back through that ref, and the Go / Copy / Reload actions would start operating on <code>github.com/an...issues</code> instead of the real URL.</p>
+      <p>The value comes from <code>childRef.current.getValue()</code>. That exposes whatever the child text-cell has chosen to expose. The cell is configured to render truncated, and the data contract between the parent menu and the child renderer is implicit. Even if today's <code>getValue()</code> happens to return the full value, any future refactor to the text-cell render layer could quietly route the displayed string back through that ref, and the Go / Copy / Reload actions would start operating on <code>github.com/an...issues</code> instead of the real URL.</p>
     </div>
   </div>
 </section>
@@ -224,7 +224,7 @@ footer a:hover{color:var(--kp4)}
       <p>Why not "fix the child cell"? Because the child cell is doing the right thing: the truncation is the desired visual presentation. The bug is that the parent menu was treating the child's exposed value as the source of truth, when the record is the source of truth. The fix moves the authoritative read up to where it belongs.</p>
     </div>
     <div class="card">
-      <h3>No unit test added — why</h3>
+      <h3>No unit test added, why</h3>
       <p><code>src/ts/component/cell/index.tsx</code> has no <code>.test.ts</code> companion. The project's vitest coverage in <code>src/ts/lib/util/*.test.ts</code> is utility-level; component coverage is via desktop-build manual verification. Adding a component-level test would either require introducing a new mocking surface (unprecedented in this directory) or duplicating the assertion the patch itself encodes. The convention for component patches here is: tsc + biome clean, manual verify on a desktop build. The PR body documents the manual test plan step-by-step.</p>
     </div>
   </div>
@@ -236,7 +236,7 @@ footer a:hover{color:var(--kp4)}
     <h2 class="section-title">Continuing the conversation, not starting one</h2>
     <p class="section-sub">Second PR to Anytype, 24h after <a href="anytype.html" style="color:var(--cy)">#2233 merged</a>. The first one was the proof. This one is the pattern. PR open against <code>develop</code> with GitHub-noreply identity, tsc + biome clean.</p>
     <div class="timeline">
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Picked an unclaimed issue from the same maintainer's backlog</h4><p>Issue #2163 was open 6 weeks, zero comments, zero PRs — but in a code area Andrew (@ra3orblade) actively maintains. The first merge (#2208) established the working relationship; this one tests whether a second pull lands as cleanly.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Picked an unclaimed issue from the same maintainer's backlog</h4><p>Issue #2163 was open 6 weeks, zero comments, zero PRs, but in a code area Andrew (@ra3orblade) actively maintains. The first merge (#2208) established the working relationship; this one tests whether a second pull lands as cleanly.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Static-analysis triage</h4><p>Traced the bug from the issue report through <code>featured.tsx</code> → <code>Cell</code> → <code>onSelect</code> → <code>childRef.current.getValue()</code>. The implicit contract between the menu and the child renderer was the surface the bug lived on, even if today's text-cell implementation happens to expose the full value. Fix tightens the contract: actions read from <code>record[relation.relationKey]</code>, not from any child ref.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Surgical patch · tsc + biome clean</h4><p>+7/-1 LOC in one file (<code>src/ts/component/cell/index.tsx</code>). No new TypeScript errors on the patched project. Biome lint clean. PR body documents the manual verification plan step-by-step against a desktop build.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR open · cross-comment posted on issue #2163</h4><p>Same noreply identity as #2233 means CLA Assistant signs automatically. Reporter (dome-mjdiaz) gets a notification with the PR link without me having to chase them via mail.</p></div></div>
@@ -253,7 +253,7 @@ footer a:hover{color:var(--kp4)}
 <span class="comment"># 1. Pull the branch from the fork</span>
 git clone https://github.com/999purple999/anytype-ts --branch fix/2163-header-link-truncated-url
 
-<span class="comment"># 2. Inspect the change — fully contained in one file</span>
+<span class="comment"># 2. Inspect the change, fully contained in one file</span>
 <span class="keyword">git</span> diff develop -- src/ts/component/cell/index.tsx
 
 <span class="comment"># 3. TS + lint clean on the patched file</span>

@@ -1,4 +1,4 @@
-// Hero: NETWORK MESH 3D simbolico — nodi connessi, edges pulsanti.
+// Hero: NETWORK MESH 3D simbolico, nodi connessi, edges pulsanti.
 // Simboleggia: mesh P2P (HALCYON), collab CRDT (K-Perception), edge SaaS (K-Quest),
 // modular DSP routing (KLab). Visivamente: "connessioni che lavorano".
 

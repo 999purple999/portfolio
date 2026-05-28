@@ -152,7 +152,7 @@ footer a:hover{color:var(--kp4)}
     </div>
     <h1 class="title"><span class="name">Anytype</span></h1>
     <p class="issue-line">anyproto/anytype-ts · issue <a href="https://github.com/anyproto/anytype-ts/issues/2208" target="_blank" rel="noopener">#2208</a> · PR <a href="https://github.com/anyproto/anytype-ts/pull/2233" target="_blank" rel="noopener">#2233</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/2208-date-format-picker-symmetric-dates</code></p>
-    <p class="lede">The settings *Date Format* picker rendered every preview by formatting <code>now()</code>. On <span class="hi">12 days a year</span> where day equals month (Jan 1, Feb 2, …, Dec 12) the <code>Short</code> (d/m/Y) and <code>ShortUS</code> (m/d/Y) options produce the exact same string — `05.05.2026` for both — so the user can't tell which radio button is which. Five-line fix: pin the preview sample to a fixed asymmetric date (Jul 30, 2020 — already the convention used in the <code>DateFormat</code> enum comments). Plus two regression-guard tests in `date.test.ts`.</p>
+    <p class="lede">The settings *Date Format* picker rendered every preview by formatting <code>now()</code>. On <span class="hi">12 days a year</span> where day equals month (Jan 1, Feb 2, …, Dec 12) the <code>Short</code> (d/m/Y) and <code>ShortUS</code> (m/d/Y) options produce the exact same string, `05.05.2026` for both, so the user can't tell which radio button is which. Five-line fix: pin the preview sample to a fixed asymmetric date (Jul 30, 2020, already the convention used in the <code>DateFormat</code> enum comments). Plus two regression-guard tests in `date.test.ts`.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/anyproto/anytype-ts/pull/2233" target="_blank" rel="noopener">View PR #2233 <span>↗</span></a>
       <a class="btn btn-ghost" href="https://github.com/anyproto/anytype-ts/issues/2208" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
@@ -170,7 +170,7 @@ footer a:hover{color:var(--kp4)}
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
     <h2 class="section-title">Two radio buttons, identical labels</h2>
-    <p class="section-sub">Open Settings → Language &amp; Region → Date Format on any day where day equals month (12 days a year), and the picker shows two options with the exact same text. The reporter's screenshots from May 5 (`05.05.2026`) show two radio buttons reading `05.05.2026` and `05.05.2026` with no way to distinguish them — one is `dd.mm.yyyy`, the other is `mm.dd.yyyy`, and picking the wrong one changes how every date in the app renders.</p>
+    <p class="section-sub">Open Settings → Language &amp; Region → Date Format on any day where day equals month (12 days a year), and the picker shows two options with the exact same text. The reporter's screenshots from May 5 (`05.05.2026`) show two radio buttons reading `05.05.2026` and `05.05.2026` with no way to distinguish them, one is `dd.mm.yyyy`, the other is `mm.dd.yyyy`, and picking the wrong one changes how every date in the app renders.</p>
     <div class="card">
       <h3>The original code</h3>
       <div class="code-block">
@@ -201,7 +201,7 @@ dateFormatOptions () {
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
     <h2 class="section-title">Pin the preview to a fixed asymmetric date</h2>
-    <p class="section-sub">The <code>DateFormat</code> enum already documents its own canonical examples using Jul 30, 2020 (`Short = "30/07/2020"`, `ShortUS = "07/30/2020"`) — chosen precisely because day ≠ month. The fix uses that same sample as the picker preview, so every option renders distinguishably year-round and the labels never depend on what day it is.</p>
+    <p class="section-sub">The <code>DateFormat</code> enum already documents its own canonical examples using Jul 30, 2020 (`Short = "30/07/2020"`, `ShortUS = "07/30/2020"`), chosen precisely because day ≠ month. The fix uses that same sample as the picker preview, so every option renders distinguishably year-round and the labels never depend on what day it is.</p>
     <div class="card">
       <h3>Diff</h3>
       <div class="code-block">
@@ -209,7 +209,7 @@ dateFormatOptions () {
 <span class="add">+   // Use a fixed, asymmetric sample date (Jul 30, 2020) so Short (30/07/2020)</span>
 <span class="add">+   // and ShortUS (07/30/2020) stay visually distinct year-round. Using today's</span>
 <span class="add">+   // date collapsed both labels to the same string on symmetric dates</span>
-<span class="add">+   // (01/01, 02/02, ..., 12/12) — see issue #2208.</span>
+<span class="add">+   // (01/01, 02/02, ..., 12/12), see issue #2208.</span>
 <span class="add">+   const sample = U.Date.timestamp(2020, 7, 30);</span>
 <span class="add">+</span>
      return ([
@@ -225,7 +225,7 @@ dateFormatOptions () {
     </div>
     <div class="card">
       <h3>Two regression-guard tests</h3>
-      <p>Added to <code>src/ts/lib/util/date.test.ts</code> — both pass locally under vitest.</p>
+      <p>Added to <code>src/ts/lib/util/date.test.ts</code>, both pass locally under vitest.</p>
       <div class="code-block">
 <span class="keyword">describe</span>(<span class="string">'dateWithFormat (picker sample distinguishability)'</span>, () => {
 
@@ -236,7 +236,7 @@ dateFormatOptions () {
       .not.toBe(UtilDate.dateWithFormat(I.DateFormat.ShortUS, sample));
   });
 
-  <span class="comment">// Negative documentation: the bug — Short == ShortUS on May 5 — pinned so that</span>
+  <span class="comment">// Negative documentation: the bug, Short == ShortUS on May 5, pinned so that</span>
   <span class="comment">// any future regression picking today's date would fail the positive test above.</span>
   <span class="keyword">it</span>(<span class="string">'Short and ShortUS collapse on a symmetric date (the bug reported in #2208)'</span>, () => {
     <span class="keyword">const</span> symmetric = UtilDate.timestamp(2026, 5, 5);
@@ -256,11 +256,11 @@ dateFormatOptions () {
     <h2 class="section-title">Where this stands in the conversation funnel</h2>
     <p class="section-sub">PR open against <code>develop</code> (Anytype's default branch), GitHub-noreply identity from the start, vitest + tsc + biome all clean on the patched files.</p>
     <div class="timeline">
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Investigation + tests</h4><p>Traced the picker to <code>UtilMenu.dateFormatOptions</code>, confirmed both <code>Short</code> (`d/m/Y`) and <code>ShortUS</code> (`m/d/Y`) use zero-padded numeric formats that collapse when day == month. Added two regression-guard tests covering positive (asymmetric sample → distinguishable) and negative (symmetric date → bug reproduced) cases — both pass locally.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Surgical patch + clean toolchain</h4><p>Five lines of code change in <code>menu.ts</code> (one helper-comment block + one line move), 28 lines of new test coverage. TS clean (3 pre-existing errors in `dispatcher.ts` / `relation.ts` due to ungenerated proto files — unrelated). Biome lint clean on both patched files. Vitest run on the new tests: 2 passed.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Investigation + tests</h4><p>Traced the picker to <code>UtilMenu.dateFormatOptions</code>, confirmed both <code>Short</code> (`d/m/Y`) and <code>ShortUS</code> (`m/d/Y`) use zero-padded numeric formats that collapse when day == month. Added two regression-guard tests covering positive (asymmetric sample → distinguishable) and negative (symmetric date → bug reproduced) cases, both pass locally.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Surgical patch + clean toolchain</h4><p>Five lines of code change in <code>menu.ts</code> (one helper-comment block + one line move), 28 lines of new test coverage. TS clean (3 pre-existing errors in `dispatcher.ts` / `relation.ts` due to ungenerated proto files, unrelated). Biome lint clean on both patched files. Vitest run on the new tests: 2 passed.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR open with reporter cross-link</h4><p>PR body explains the root cause with an inline diff, lists the test commands, and includes the AI-assistance disclosure. Issue #2208 cross-commented so the reporter sees the fix without navigating to the PR list.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>MERGED — 4-hour turnaround, zero review friction</h4><p>2026-05-27 21:43 CEST: <strong>@ra3orblade</strong> (Andrew Simachev, the area owner identified in Phase 4b) approved → merged into <code>develop</code> → closed #2208 as completed, all in 4 consecutive minutes. No review comments requested. Clean accept. Maintainer signal validated retroactively — the +35/-1 footprint, the deterministic test pair, and the alignment with the enum-comment convention (Jul 30, 2020 sample) all combined into a one-look merge.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Paid follow-up conversation via the E2EE / local-first stack</h4><p>The shipped fix is the proof. The follow-up — once it makes sense to send, given Anytype is a small team — leverages the K-Perception stack overlap (closed-beta encrypted notes app with AES-256-GCM + Y.js CRDT collab on encrypted blobs) — the same problem space Anytype solves at a much larger scale. Paid-conversation odds rise because the merge happened without any sales surface attached, which means the next outreach lands with track record rather than pitch.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>MERGED, 4-hour turnaround, zero review friction</h4><p>2026-05-27 21:43 CEST: <strong>@ra3orblade</strong> (Andrew Simachev, the area owner identified in Phase 4b) approved → merged into <code>develop</code> → closed #2208 as completed, all in 4 consecutive minutes. No review comments requested. Clean accept. Maintainer signal validated retroactively, the +35/-1 footprint, the deterministic test pair, and the alignment with the enum-comment convention (Jul 30, 2020 sample) all combined into a one-look merge.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Paid follow-up conversation via the E2EE / local-first stack</h4><p>The shipped fix is the proof. The follow-up, once it makes sense to send, given Anytype is a small team, leverages the K-Perception stack overlap (closed-beta encrypted notes app with AES-256-GCM + Y.js CRDT collab on encrypted blobs), the same problem space Anytype solves at a much larger scale. Paid-conversation odds rise because the merge happened without any sales surface attached, which means the next outreach lands with track record rather than pitch.</p></div></div>
     </div>
   </div>
 </section>
@@ -273,7 +273,7 @@ dateFormatOptions () {
 <span class="comment"># 1. Pull the branch from the fork</span>
 git clone https://github.com/999purple999/anytype-ts --branch fix/2208-date-format-picker-symmetric-dates
 
-<span class="comment"># 2. Inspect the change — fully contained in one file</span>
+<span class="comment"># 2. Inspect the change, fully contained in one file</span>
 <span class="keyword">git</span> diff develop -- src/ts/lib/util/menu.ts src/ts/lib/util/date.test.ts
 
 <span class="comment"># 3. Run the new tests</span>

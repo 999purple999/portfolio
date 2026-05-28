@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SandboxAQ · Tangelo #408 · Francesco · 999purple999</title>
-<meta name="description" content="Fix for Tangelo issue #408 — Circuit.simplify() returns NoneType. One fix for four identical convenience methods.">
+<meta name="description" content="Fix for Tangelo issue #408, Circuit.simplify() returns NoneType. One fix for four identical convenience methods.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -120,7 +120,7 @@ footer a{color:var(--kp3);text-decoration:none}
     </div>
     <h1 class="title"><span class="name">SandboxAQ · Tangelo</span></h1>
     <p class="issue-line">sandbox-quantum/Tangelo · issue <a href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener">#408</a> · branch <code>fix/408-simplify-returns-self</code></p>
-    <p class="lede"><code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Circuit([Gate("H", 0)] * 2).simplify()</code> returned <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">None</code>. The fix touches four methods — not one — because the same pattern was repeated identically across <span class="hi">simplify, remove_redundant_gates, remove_small_rotations, and merge_rotations</span>. Two of the four even documented a Returns clause that the implementation never matched. <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">return self</code> on each, plus one focused regression test.</p>
+    <p class="lede"><code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Circuit([Gate("H", 0)] * 2).simplify()</code> returned <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">None</code>. The fix touches four methods, not one, because the same pattern was repeated identically across <span class="hi">simplify, remove_redundant_gates, remove_small_rotations, and merge_rotations</span>. Two of the four even documented a Returns clause that the implementation never matched. <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">return self</code> on each, plus one focused regression test.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/999purple999/Tangelo/tree/fix/408-simplify-returns-self" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
       <a class="btn btn-ghost" href="https://github.com/sandbox-quantum/Tangelo/issues/408" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
@@ -128,7 +128,7 @@ footer a{color:var(--kp3);text-decoration:none}
     <div class="metric-grid">
       <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">Identical instances of the same bug, all fixed in one pass</div></div>
       <div class="metric"><div class="metric-num">2 / 4</div><div class="metric-lbl">Methods whose docstrings already promised Returns: Circuit</div></div>
-      <div class="metric"><div class="metric-num">5 LOC</div><div class="metric-lbl">Actual code added — one line per method</div></div>
+      <div class="metric"><div class="metric-num">5 LOC</div><div class="metric-lbl">Actual code added, one line per method</div></div>
       <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">Breaking changes for in-place callers</div></div>
     </div>
   </div>
@@ -177,10 +177,10 @@ flowchart LR
       <h3>Why <code>return self</code> instead of a separate <code>simplified()</code> method</h3>
       <ul>
         <li>The strictly cleanest design would be to add <code>simplified()</code> / <code>without_redundant_gates()</code> for the read-only form. But that doubles the API surface for every existing pass.</li>
-        <li>The reporter expected the existing method to behave as if it returned <code>self</code> — every popular Python quantum lib (PennyLane's <code>qml.simplify</code>, Qiskit's <code>QuantumCircuit.decompose</code>) does this.</li>
+        <li>The reporter expected the existing method to behave as if it returned <code>self</code>, every popular Python quantum lib (PennyLane's <code>qml.simplify</code>, Qiskit's <code>QuantumCircuit.decompose</code>) does this.</li>
         <li>In-place semantic is preserved: existing callers writing <code>c.simplify(); use(c)</code> behave identically.</li>
       </ul>
-      <p>If the SandboxAQ team prefers the split API, the patch is trivial to fold into a <code>simplified()</code> variant — happy to rewrite either way on signal.</p>
+      <p>If the SandboxAQ team prefers the split API, the patch is trivial to fold into a <code>simplified()</code> variant, happy to rewrite either way on signal.</p>
     </div>
   </div>
 </section>
@@ -211,7 +211,7 @@ flowchart LR
         <span class="keyword">assert</span> returned <span class="keyword">is not</span> <span class="keyword">None</span>
         <span class="keyword">assert</span> isinstance(returned, Circuit)
     </div>
-    <p style="color:var(--text2);font-size:.94rem">The existing <code>test_simplify_circuit</code> (which uses <code>c.simplify(); assert c == ...</code>) continues to pass — in-place behaviour is identical, the new return is just additive.</p>
+    <p style="color:var(--text2);font-size:.94rem">The existing <code>test_simplify_circuit</code> (which uses <code>c.simplify(); assert c == ...</code>) continues to pass, in-place behaviour is identical, the new return is just additive.</p>
   </div>
 </section>
 

@@ -161,7 +161,7 @@ footer a:hover{color:var(--kp4)}
     </div>
     <h1 class="title"><span class="name">Element (Matrix)</span></h1>
     <p class="issue-line">element-hq/element-web · issue <a href="https://github.com/element-hq/element-web/issues/33494" target="_blank" rel="noopener">#33494</a> · PR <a href="https://github.com/element-hq/element-web/pull/33632" target="_blank" rel="noopener">#33632</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/33494-non-urgent-toast-link-light-theme</code></p>
-    <p class="lede">The <code>requests</code> inline link inside the <code>Your server isn't responding to some requests</code> non-urgent toast was <span class="hi">invisible on light theme</span> because the container hard-codes a dark background ("in all themes" per the comment) while the link inherits the theme-aware <code>--cpd-color-text-primary</code> token, which resolves dark on light theme — collapsing the link into the toast background. The fix scopes a <code>color: #fff</code> override to the container and the specific <code>AccessibleButton_kind_link_inline</code> selector, with specificity (0,4,0) that cleanly overrides the upstream rule (0,2,0) — no <code>!important</code>, no leak to any other inline link in the app.</p>
+    <p class="lede">The <code>requests</code> inline link inside the <code>Your server isn't responding to some requests</code> non-urgent toast was <span class="hi">invisible on light theme</span> because the container hard-codes a dark background ("in all themes" per the comment) while the link inherits the theme-aware <code>--cpd-color-text-primary</code> token, which resolves dark on light theme, collapsing the link into the toast background. The fix scopes a <code>color: #fff</code> override to the container and the specific <code>AccessibleButton_kind_link_inline</code> selector, with specificity (0,4,0) that cleanly overrides the upstream rule (0,2,0), no <code>!important</code>, no leak to any other inline link in the app.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/element-hq/element-web/pull/33632" target="_blank" rel="noopener">View PR #33632 <span>↗</span></a>
       <a class="btn btn-ghost" href="https://github.com/element-hq/element-web/issues/33494" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
@@ -179,7 +179,7 @@ footer a:hover{color:var(--kp4)}
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
     <h2 class="section-title">A theme-aware link inside a theme-locked container</h2>
-    <p class="section-sub">The non-urgent toast container at <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">apps/web/res/css/structures/_NonUrgentToastContainer.pcss</code> intentionally hard-codes its background and base text colour, with an explicit comment that those values stay the same in every theme. But the inline <code>requests</code> link inside it is rendered via <code>AccessibleButton kind="link_inline"</code>, whose colour rule pulls from the theme-aware Compound design token <code>--cpd-color-text-primary</code>. On light theme that token resolves dark — and dark text on the toast's hard-coded dark background is invisible.</p>
+    <p class="section-sub">The non-urgent toast container at <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">apps/web/res/css/structures/_NonUrgentToastContainer.pcss</code> intentionally hard-codes its background and base text colour, with an explicit comment that those values stay the same in every theme. But the inline <code>requests</code> link inside it is rendered via <code>AccessibleButton kind="link_inline"</code>, whose colour rule pulls from the theme-aware Compound design token <code>--cpd-color-text-primary</code>. On light theme that token resolves dark, and dark text on the toast's hard-coded dark background is invisible.</p>
     <div class="card">
       <h3>What the bug looks like in the existing CSS</h3>
       <div class="code-block">
@@ -206,7 +206,7 @@ footer a:hover{color:var(--kp4)}
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
     <h2 class="section-title">Pin the inline link colour inside the container, scope-isolated</h2>
-    <p class="section-sub">Ten lines of PostCSS added directly to <code>_NonUrgentToastContainer.pcss</code> — same file that already declares "we want it to be the same in all themes". The override is scoped to <code>.mx_NonUrgentToastContainer_toast</code> and the specific <code>link_inline</code> kind, so it cannot leak to any other inline link in the app.</p>
+    <p class="section-sub">Ten lines of PostCSS added directly to <code>_NonUrgentToastContainer.pcss</code>, same file that already declares "we want it to be the same in all themes". The override is scoped to <code>.mx_NonUrgentToastContainer_toast</code> and the specific <code>link_inline</code> kind, so it cannot leak to any other inline link in the app.</p>
     <div class="card">
       <h3>The added block</h3>
       <div class="code-block">
@@ -226,10 +226,10 @@ footer a:hover{color:var(--kp4)}
   }
 }
       </div>
-      <p>Selector specificity: <code>.mx_NonUrgentToastContainer .mx_NonUrgentToastContainer_toast .mx_AccessibleButton.mx_AccessibleButton_kind_link_inline</code> is <strong>(0,4,0)</strong>, which cleanly overrides the upstream <code>&amp;.mx_AccessibleButton_kind_link_inline</code> at <strong>(0,2,0)</strong> — no <code>!important</code> needed, no fight.</p>
+      <p>Selector specificity: <code>.mx_NonUrgentToastContainer .mx_NonUrgentToastContainer_toast .mx_AccessibleButton.mx_AccessibleButton_kind_link_inline</code> is <strong>(0,4,0)</strong>, which cleanly overrides the upstream <code>&amp;.mx_AccessibleButton_kind_link_inline</code> at <strong>(0,2,0)</strong>, no <code>!important</code> needed, no fight.</p>
     </div>
     <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:2rem 0 1rem">Why not fix the link rule itself?</h3>
-    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">Because <code>--cpd-color-text-primary</code> is correct for the vast majority of contexts (theme-aware text). The bug is local to this one container that explicitly opted out of theme-awareness — fixing the global rule would regress every other inline link. Scoping the override to the container is the minimum-blast-radius fix.</p>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">Because <code>--cpd-color-text-primary</code> is correct for the vast majority of contexts (theme-aware text). The bug is local to this one container that explicitly opted out of theme-awareness, fixing the global rule would regress every other inline link. Scoping the override to the container is the minimum-blast-radius fix.</p>
   </div>
 </section>
 
@@ -240,10 +240,10 @@ footer a:hover{color:var(--kp4)}
     <p class="section-sub">Draft PR #33632 open against <code>develop</code>, CLA form filled and license/cla check passing, GitHub-noreply identity from the start to avoid the rewrite-history dance.</p>
     <div class="timeline">
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Branch + commit + push to fork</h4><p>Commit <code>5e60d43</code>, ten-line PostCSS scoped override, full explanatory comment in the diff itself. Authored against the GitHub noreply email pattern so the CLA check passed without a force-push detour.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Draft PR with @-mention to @t3chguy</h4><p>Michael Telatynski is the most recent committer on the changed file — tagged in the PR body so he gets the natural notification. CLA Assistant marked <code>license/cla — Contributor License Agreement is signed</code>.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Cold mail to michaeltelatynski@element.io</h4><p>Mail anchored to the PR URL with the explicit stack-overlap signals: K-Perception (closed-beta notes app with AES-256-GCM client-side + Y.js CRDT collaboration on encrypted blobs — the same E2EE+real-time-collab problem Matrix solves) and HALCYON (Node 24 WebRTC mesh, GPL-3, 65+ green vitest + Playwright tests — adjacent to Element Call). Backup recipient if the address bounces: <code>florianduros@element.io</code> (verified via public commit).</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Draft PR with @-mention to @t3chguy</h4><p>Michael Telatynski is the most recent committer on the changed file, tagged in the PR body so he gets the natural notification. CLA Assistant marked <code>license/cla, Contributor License Agreement is signed</code>.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Cold mail to michaeltelatynski@element.io</h4><p>Mail anchored to the PR URL with the explicit stack-overlap signals: K-Perception (closed-beta notes app with AES-256-GCM client-side + Y.js CRDT collaboration on encrypted blobs, the same E2EE+real-time-collab problem Matrix solves) and HALCYON (Node 24 WebRTC mesh, GPL-3, 65+ green vitest + Playwright tests, adjacent to Element Call). Backup recipient if the address bounces: <code>florianduros@element.io</code> (verified via public commit).</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Workflow approval + reviewer assignment</h4><p>Community PR workflows require a maintainer to manually approve the run (security gate against malicious CI invocations from external forks). Once approved, the CSS lint / Playwright visual tests / build pipelines run for real on the change. Typical Element-web turnaround: 2-10 days depending on the area maintainer's backlog.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Merge + paid follow-up conversation</h4><p>Merge odds: <strong>~60-70%</strong> given the surgical scope, the clear root-cause analysis, the @-mention to the file's most recent committer, and zero behaviour change outside the targeted container. Paid-conversation odds: <strong>~10-15%</strong> on the explicit Matrix/E2EE stack overlap signal — Element-HQ historically hires for E2EE / cross-signing / device verification / Element Call, all areas where K-Perception and HALCYON portfolio map directly.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Merge + paid follow-up conversation</h4><p>Merge odds: <strong>~60-70%</strong> given the surgical scope, the clear root-cause analysis, the @-mention to the file's most recent committer, and zero behaviour change outside the targeted container. Paid-conversation odds: <strong>~10-15%</strong> on the explicit Matrix/E2EE stack overlap signal, Element-HQ historically hires for E2EE / cross-signing / device verification / Element Call, all areas where K-Perception and HALCYON portfolio map directly.</p></div></div>
     </div>
   </div>
 </section>
@@ -267,7 +267,7 @@ git clone https://github.com/999purple999/element-web --branch fix/33494-non-urg
 <span class="comment">#    - in light theme: the "requests" link is now white-on-dark and clearly visible</span>
 <span class="comment">#    - in dark theme: behaviour unchanged (the link was already visible)</span>
     </div>
-    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">No new unit tests added — the change is a visual style override with no logic surface. Playwright visual regression tests will pick up the change automatically in CI once a maintainer approves the workflow run.</p>
+    <p style="color:var(--text2);font-size:.94rem;line-height:1.65">No new unit tests added, the change is a visual style override with no logic surface. Playwright visual regression tests will pick up the change automatically in CI once a maintainer approves the workflow run.</p>
   </div>
 </section>
 

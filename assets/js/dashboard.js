@@ -21,7 +21,7 @@ if (root && M) {
     </div>
 
     <div class="dash-chart dash-chart-wide">
-      <h4>commits — last 12 months</h4>
+      <h4>commits, last 12 months</h4>
       <div class="chart-box"><canvas id="chart-commits"></canvas></div>
     </div>
 

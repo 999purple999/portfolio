@@ -1,4 +1,4 @@
-// W5 PWA service worker — static cache + stale-while-revalidate for data.
+// W5 PWA service worker, static cache + stale-while-revalidate for data.
 const VERSION = 'v4-' + '2026-05-26';
 const CACHE = `portfolio-${VERSION}`;
 const ASSETS = [

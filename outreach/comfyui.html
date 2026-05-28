@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ComfyUI · #14076 · Francesco · 999purple999</title>
-<meta name="description" content="Design proposal for ComfyUI issue #14076 — RAM model cache. No drive-by code; alignment-first because the patcher / finalizer / weakref lifecycle is fragile.">
+<meta name="description" content="Design proposal for ComfyUI issue #14076, RAM model cache. No drive-by code; alignment-first because the patcher / finalizer / weakref lifecycle is fragile.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,7 +139,7 @@ footer a{color:var(--kp3);text-decoration:none}
     </div>
     <h1 class="title"><span class="name">ComfyUI</span></h1>
     <p class="issue-line">comfyanonymous/ComfyUI · issue <a href="https://github.com/comfyanonymous/ComfyUI/issues/14076" target="_blank" rel="noopener">#14076</a> · branch <code>proposal/14076-ram-model-cache</code></p>
-    <p class="lede">Models get evicted from VRAM and then re-read from disk on every prompt, even when the host has 60+ GB of free system RAM. The bug is real and the cause is identified — but a drive-by patch would silently break at least three other systems. <span class="hi">This branch deliberately ships zero code</span>: it ships an honest design proposal, a failure trace pinned to specific line numbers, and four direct questions for <code>comfyanonymous</code> before any code is touched.</p>
+    <p class="lede">Models get evicted from VRAM and then re-read from disk on every prompt, even when the host has 60+ GB of free system RAM. The bug is real and the cause is identified, but a drive-by patch would silently break at least three other systems. <span class="hi">This branch deliberately ships zero code</span>: it ships an honest design proposal, a failure trace pinned to specific line numbers, and four direct questions for <code>comfyanonymous</code> before any code is touched.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/999purple999/ComfyUI/tree/proposal/14076-ram-model-cache" target="_blank" rel="noopener">View proposal on GitHub <span>↗</span></a>
       <a class="btn btn-ghost" href="https://github.com/comfyanonymous/ComfyUI/issues/14076" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
@@ -157,16 +157,16 @@ footer a{color:var(--kp3);text-decoration:none}
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
     <h2 class="section-title">Free RAM is sitting there, but the next prompt still hits the disk</h2>
-    <p class="section-sub">The reporter has 24 GB VRAM and runs a multi-model Wan workflow. When a model gets evicted from VRAM, ComfyUI doesn't keep its weights in CPU RAM as a write-through cache — it drops the only Python handle, the garbage collector reclaims the weights, and the next prompt loads them from disk again. On a 60+ GB workstation with weights that could comfortably live in system memory, every iteration eats 5-15 seconds of disk I/O for nothing.</p>
+    <p class="section-sub">The reporter has 24 GB VRAM and runs a multi-model Wan workflow. When a model gets evicted from VRAM, ComfyUI doesn't keep its weights in CPU RAM as a write-through cache, it drops the only Python handle, the garbage collector reclaims the weights, and the next prompt loads them from disk again. On a 60+ GB workstation with weights that could comfortably live in system memory, every iteration eats 5-15 seconds of disk I/O for nothing.</p>
 
     <div class="card">
       <h3>The exact code path that drops the handle</h3>
       <p>Two specific places, both in <code>comfy/model_management.py</code>:</p>
       <ol>
-        <li><code>model_unload()</code> at line 619 — calls <code>self.model.detach(unpatch_weights)</code>, then nulls out <code>self.model_finalizer</code> and <code>self.real_model</code>. The model's weight references are gone from the patcher side.</li>
-        <li><code>free_memory()</code> at line 706 — calls <code>current_loaded_models.pop(i)</code> and appends the popped <code>LoadedModel</code> to a local <code>unloaded_models</code> list that the caller in <code>load_models_gpu()</code> discards.</li>
+        <li><code>model_unload()</code> at line 619, calls <code>self.model.detach(unpatch_weights)</code>, then nulls out <code>self.model_finalizer</code> and <code>self.real_model</code>. The model's weight references are gone from the patcher side.</li>
+        <li><code>free_memory()</code> at line 706, calls <code>current_loaded_models.pop(i)</code> and appends the popped <code>LoadedModel</code> to a local <code>unloaded_models</code> list that the caller in <code>load_models_gpu()</code> discards.</li>
       </ol>
-      <p>The <code>offload_device</code> is CPU for nearly every config, so the actual weight tensors live in host RAM up until that <code>pop</code> happens. The problem isn't where the bytes go — it's that nobody keeps a Python reference to them, so Python's garbage collector reclaims them on the next major collection.</p>
+      <p>The <code>offload_device</code> is CPU for nearly every config, so the actual weight tensors live in host RAM up until that <code>pop</code> happens. The problem isn't where the bytes go, it's that nobody keeps a Python reference to them, so Python's garbage collector reclaims them on the next major collection.</p>
     </div>
 
     <div class="diagram-wrap">
@@ -191,11 +191,11 @@ flowchart TD
   <div class="container">
     <div class="section-eyebrow">02 · Why no drive-by patch</div>
     <h2 class="section-title">Three ways a naïve "keep weights in RAM" patch would silently break</h2>
-    <p class="section-sub">ComfyUI's memory management is tightly coupled to the patcher / finalizer / weakref lifecycle in <code>comfy/model_patcher.py</code>. The natural reflex — hold a strong reference to the model in a side cache — interacts poorly with three existing systems.</p>
+    <p class="section-sub">ComfyUI's memory management is tightly coupled to the patcher / finalizer / weakref lifecycle in <code>comfy/model_patcher.py</code>. The natural reflex, hold a strong reference to the model in a side cache, interacts poorly with three existing systems.</p>
 
     <div class="card">
       <h3>Failure mode 1 · pin-budget underflow</h3>
-      <p>The <code>ensure_pin_budget</code> + <code>dynamic_pins</code> path manages CUDA pinned-memory pools. If a cache holds models with active dynamic pins, racing requests to <code>ensure_pin_registerable</code> can underflow the recorded budget — meaning <code>can_unload_sorted</code> later picks the wrong victim, and a model that should be retained gets evicted instead.</p>
+      <p>The <code>ensure_pin_budget</code> + <code>dynamic_pins</code> path manages CUDA pinned-memory pools. If a cache holds models with active dynamic pins, racing requests to <code>ensure_pin_registerable</code> can underflow the recorded budget, meaning <code>can_unload_sorted</code> later picks the wrong victim, and a model that should be retained gets evicted instead.</p>
     </div>
 
     <div class="card">
@@ -208,7 +208,7 @@ flowchart TD
       <p>On CUDA, the CPU offload device is host RAM and tensor lifetime is straightforward. On MPS (Apple Silicon) and ROCm (AMD), offload can pin host memory differently or involve hidden copies, and the assumption "weights live in plain RAM until I drop the reference" no longer holds. A patch that works flawlessly on a CUDA RTX 5080 can OOM an M3 Max or a RX 7900 XT.</p>
     </div>
 
-    <div class="callout warn"><strong>Why this matters for the operator (you, hiring):</strong> sending a drive-by PR that "fixes" #14076 but introduces silent regressions on Mac or AMD is worse than not sending one. The proposal flow — design doc + explicit questions + agreement before code — protects both sides. It also signals to the maintainer that I read enough of the codebase to know <em>where</em> the patch is non-trivial, not just <em>what</em> the symptom is.</div>
+    <div class="callout warn"><strong>Why this matters for the operator (you, hiring):</strong> sending a drive-by PR that "fixes" #14076 but introduces silent regressions on Mac or AMD is worse than not sending one. The proposal flow, design doc + explicit questions + agreement before code, protects both sides. It also signals to the maintainer that I read enough of the codebase to know <em>where</em> the patch is non-trivial, not just <em>what</em> the symptom is.</div>
   </div>
 </section>
 
@@ -261,7 +261,7 @@ flowchart LR
       <dt>Custom nodes</dt><dd>No API change. Cache is transparent.</dd>
       <dt>Host RAM pressure</dt><dd>Cache shrinks under <code>psutil.virtual_memory().available</code> pressure. Never causes OOM.</dd>
       <dt>Finalizer order</dt><dd>When a cached model is evicted, <code>model_finalizer.detach()</code> is called once explicitly before GC.</dd>
-      <dt>--clear-cache-on-prompt</dt><dd>Open question for the maintainer — should the new cache honor it identically?</dd>
+      <dt>--clear-cache-on-prompt</dt><dd>Open question for the maintainer, should the new cache honor it identically?</dd>
     </dl>
   </div>
 </section>
@@ -288,7 +288,7 @@ flowchart LR
     <h2 class="section-title">Where this stands</h2>
     <p class="section-sub">ComfyUI is run by one core maintainer with strong opinions. Drive-by PRs to <code>model_management.py</code> have historically been bounced. The proposal-first flow is calibrated for that culture.</p>
     <div class="timeline">
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Proposal document committed</h4><p>Local branch <code>proposal/14076-ram-model-cache</code>, commit <code>f9f5b59</code>. The document is the deliverable — no executable code yet.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Proposal document committed</h4><p>Local branch <code>proposal/14076-ram-model-cache</code>, commit <code>f9f5b59</code>. The document is the deliverable, no executable code yet.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Next</div><div class="timeline-body"><h4>Reach out via Discord (preferred) or the GitHub issue thread</h4><p>Discord first because <code>comfyanonymous</code> is more responsive there than via email. The message links to the proposal branch and asks the four questions explicitly.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">If aligned</div><div class="timeline-body"><h4>PR opens within 2-3 days with tests</h4><p>Real code, tests, benchmarks against the WanWorkflow. Estimated 3-5 days of total work from alignment to merge.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Conversation within 1-2 weeks, contract within 6 weeks</h4><p>Realistic odds for this lead alone: ~15-30% conversation, ~5% contract. ComfyUI is mostly a single-maintainer project; contracts here are rare. More likely outcome: referral to a custom-node-shop or an inference-tooling company.</p></div></div>

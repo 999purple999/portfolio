@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mattermost · mattermost-plugin-calls #1143 · Francesco · 999purple999</title>
-<meta name="description" content="Fix for mattermost-plugin-calls issue #1143 — Docker RFC1918 ICE leak. Production-ready diagnostic at activate time, 3 unit tests, honest scope.">
+<meta name="description" content="Fix for mattermost-plugin-calls issue #1143, Docker RFC1918 ICE leak. Production-ready diagnostic at activate time, 3 unit tests, honest scope.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -153,7 +153,7 @@ footer a{color:var(--kp3);text-decoration:none}
     </div>
     <h1 class="title"><span class="name">Mattermost</span></h1>
     <p class="issue-line">mattermost/mattermost-plugin-calls · issue <a href="https://github.com/mattermost/mattermost-plugin-calls/issues/1143" target="_blank" rel="noopener">#1143</a> · branch <code>fix/1143-warn-rfc1918-docker-ice</code></p>
-    <p class="lede">A plugin-layer pre-flight diagnostic that detects the exact failure shape #1143 reports: <span class="hi">Mattermost Calls running in Docker, advertising a 172.x bridge IP as an ICE candidate</span>, coturn rejecting that peer with 403, and the call dropping minutes later on allocation timeout. Zero behavior change — a single loud log line at activate time, named IPs included, with the exact setting the operator should change.</p>
+    <p class="lede">A plugin-layer pre-flight diagnostic that detects the exact failure shape #1143 reports: <span class="hi">Mattermost Calls running in Docker, advertising a 172.x bridge IP as an ICE candidate</span>, coturn rejecting that peer with 403, and the call dropping minutes later on allocation timeout. Zero behavior change, a single loud log line at activate time, named IPs included, with the exact setting the operator should change.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/999purple999/mattermost-plugin-calls/tree/fix/1143-warn-rfc1918-docker-ice" target="_blank" rel="noopener">View branch on GitHub <span>↗</span></a>
       <a class="btn btn-ghost" href="https://github.com/mattermost/mattermost-plugin-calls/issues/1143" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
@@ -175,7 +175,7 @@ footer a{color:var(--kp3);text-decoration:none}
 
     <div class="card">
       <h3>Why the plugin couldn't tell</h3>
-      <p>The plugin only passes <code>ICEHostOverride</code> through to <code>github.com/mattermost/rtcd/service/rtc.NewServer</code>; the actual ICE candidate gathering lives there. When <code>ICEHostOverride</code> is empty and rtcd enumerates local interfaces, it picks up whatever the kernel hands it — including the Docker bridge address.</p>
+      <p>The plugin only passes <code>ICEHostOverride</code> through to <code>github.com/mattermost/rtcd/service/rtc.NewServer</code>; the actual ICE candidate gathering lives there. When <code>ICEHostOverride</code> is empty and rtcd enumerates local interfaces, it picks up whatever the kernel hands it, including the Docker bridge address.</p>
       <p>The operator has no signal that this is happening. The plugin logs say "activated"; the call starts; media flows; then on the first TURN relay refresh, coturn rejects the unreachable peer and the session falls apart. Diagnosing requires SSHing into the coturn host, tailing its log, and matching peer addresses against your Docker network.</p>
       <p>That diagnosis loop costs hours every time the misconfiguration ships. The fix below saves those hours by making the plugin itself shout, once, at startup.</p>
     </div>
@@ -205,16 +205,16 @@ sequenceDiagram
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
     <h2 class="section-title">One loud line, only when truly misconfigured</h2>
-    <p class="section-sub">A new file <code>server/ice_diagnostics.go</code> adds three small primitives that run once at <code>activate.go</code>: an RFC1918/RFC6598/ULA predicate, an interface enumerator, and a container detector. The composing function <code>checkICEDockerMisconfiguration</code> emits a single <code>LogError</code> only when four conditions all hold — the operator is not warned in any other configuration.</p>
+    <p class="section-sub">A new file <code>server/ice_diagnostics.go</code> adds three small primitives that run once at <code>activate.go</code>: an RFC1918/RFC6598/ULA predicate, an interface enumerator, and a container detector. The composing function <code>checkICEDockerMisconfiguration</code> emits a single <code>LogError</code> only when four conditions all hold, the operator is not warned in any other configuration.</p>
 
     <div class="card">
       <h3>The composition, in plain English</h3>
       <p>The warning fires only when <strong>all</strong> of the following are true:</p>
       <ul>
         <li><code>ICEHostOverride</code> is empty (the operator did not opt out of the diagnostic)</li>
-        <li>The plugin process is running inside a container — detected via both <code>/.dockerenv</code> and a <code>/proc/1/cgroup</code> scan for <code>docker</code>, <code>containerd</code>, or <code>kubepods</code></li>
+        <li>The plugin process is running inside a container, detected via both <code>/.dockerenv</code> and a <code>/proc/1/cgroup</code> scan for <code>docker</code>, <code>containerd</code>, or <code>kubepods</code></li>
         <li>No routable (public) IP is bound to any local interface</li>
-        <li>At least one private IP (RFC1918 / RFC6598 / IPv6 ULA) is bound — meaning we are about to advertise that one</li>
+        <li>At least one private IP (RFC1918 / RFC6598 / IPv6 ULA) is bound, meaning we are about to advertise that one</li>
       </ul>
       <p>The log message names the offending IPs and tells the operator exactly which setting to set:</p>
       <div class="callout"><strong>Log line:</strong> "Calls is running inside a container with only private (RFC1918/RFC6598) IP addresses available and ICEHostOverride is empty. ICE host candidates advertised to clients will be unreachable from outside the container, which typically manifests as the call dropping after connecting (issue #1143). Set the ICEHostOverride plugin setting to the public IP (or DNS name) that clients use to reach this host."</div>
@@ -223,7 +223,7 @@ sequenceDiagram
     <div class="card">
       <h3>What is intentionally NOT done</h3>
       <p>A LAN-only deployment where every participant sits on the same Docker network is a legitimate setup. Silently dropping the RFC1918 candidate would break that. The diagnostic is purely additive: it does not change which candidates are advertised. It just makes the most common misconfiguration visible.</p>
-      <p>The real candidate filter — the ability to <em>exclude</em> RFC1918 host candidates from the ICE gather rather than warn about them — belongs in <code>github.com/mattermost/rtcd/service/rtc.NewServer</code>, not in the plugin. The README on the branch offers to send that second PR as a follow-up after this one merges.</p>
+      <p>The real candidate filter, the ability to <em>exclude</em> RFC1918 host candidates from the ICE gather rather than warn about them, belongs in <code>github.com/mattermost/rtcd/service/rtc.NewServer</code>, not in the plugin. The README on the branch offers to send that second PR as a follow-up after this one merges.</p>
     </div>
 
     <div class="diagram-wrap">
@@ -269,14 +269,14 @@ flowchart TD
           <tr><td>172.21.0.3</td><td class="bad">private</td><td>The exact address in the bug report</td></tr>
           <tr><td>10.0.0.5</td><td class="bad">private</td><td>RFC1918 10.0.0.0/8</td></tr>
           <tr><td>192.168.1.1</td><td class="bad">private</td><td>RFC1918 192.168.0.0/16</td></tr>
-          <tr><td>100.64.1.2</td><td class="bad">private</td><td>RFC6598 carrier-grade NAT — cloud NAT gateways leak this</td></tr>
+          <tr><td>100.64.1.2</td><td class="bad">private</td><td>RFC6598 carrier-grade NAT, cloud NAT gateways leak this</td></tr>
           <tr><td>fd00::1</td><td class="bad">private</td><td>IPv6 ULA fc00::/7</td></tr>
-          <tr><td>127.0.0.1 / ::1</td><td class="bad">private</td><td>Loopback — always refuse-to-advertise</td></tr>
-          <tr><td>169.254.1.1</td><td class="bad">private</td><td>Link-local — should not leak</td></tr>
-          <tr><td>172.15.0.1</td><td class="good">public</td><td><strong>Must NOT be flagged</strong> — just outside 172.16/12</td></tr>
-          <tr><td>192.167.255.1</td><td class="good">public</td><td><strong>Must NOT be flagged</strong> — just outside 192.168/16</td></tr>
-          <tr><td>8.8.8.8 / 1.1.1.1</td><td class="good">public</td><td>Public DNS resolvers — sanity</td></tr>
-          <tr><td>2606:4700:4700::1111</td><td class="good">public</td><td>Public IPv6 (Cloudflare) — IPv6 sanity</td></tr>
+          <tr><td>127.0.0.1 / ::1</td><td class="bad">private</td><td>Loopback, always refuse-to-advertise</td></tr>
+          <tr><td>169.254.1.1</td><td class="bad">private</td><td>Link-local, should not leak</td></tr>
+          <tr><td>172.15.0.1</td><td class="good">public</td><td><strong>Must NOT be flagged</strong>, just outside 172.16/12</td></tr>
+          <tr><td>192.167.255.1</td><td class="good">public</td><td><strong>Must NOT be flagged</strong>, just outside 192.168/16</td></tr>
+          <tr><td>8.8.8.8 / 1.1.1.1</td><td class="good">public</td><td>Public DNS resolvers, sanity</td></tr>
+          <tr><td>2606:4700:4700::1111</td><td class="good">public</td><td>Public IPv6 (Cloudflare), IPv6 sanity</td></tr>
         </tbody>
       </table>
       <p>Two additional tests pin the documented behaviour: <code>nil</code> is treated as private (refuse-to-advertise default), and the package-level CIDR slice parses all five entries correctly.</p>

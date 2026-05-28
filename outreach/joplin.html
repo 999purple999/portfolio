@@ -161,7 +161,7 @@ footer a:hover{color:var(--kp4)}
     </div>
     <h1 class="title"><span class="name">Joplin</span></h1>
     <p class="issue-line">laurent22/joplin · issue <a href="https://github.com/laurent22/joplin/issues/15521" target="_blank" rel="noopener">#15521</a> · PR <a href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">#15544</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/15521-wysiwyg-link-dialog-focus</code></p>
-    <p class="lede">When a user selects text and opens the Rich Text Editor's "Insert hyperlink" command, TinyMCE's built-in link plugin pre-populates the <span class="hi">"Text to display" field but leaves keyboard focus on it</span> — the user has to tab once before they can type the URL, which is the field they actually wanted to fill. The fix introduces a small pure-function predicate plus a defensive <code>OpenWindow</code> event handler in <code>TinyMCE.tsx</code> that re-focuses the URL field exactly when the dialog has pre-populated text and no URL yet. Existing-link edits keep their default focus.</p>
+    <p class="lede">When a user selects text and opens the Rich Text Editor's "Insert hyperlink" command, TinyMCE's built-in link plugin pre-populates the <span class="hi">"Text to display" field but leaves keyboard focus on it</span>, the user has to tab once before they can type the URL, which is the field they actually wanted to fill. The fix introduces a small pure-function predicate plus a defensive <code>OpenWindow</code> event handler in <code>TinyMCE.tsx</code> that re-focuses the URL field exactly when the dialog has pre-populated text and no URL yet. Existing-link edits keep their default focus.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">View PR #15544 <span>↗</span></a>
       <a class="btn btn-ghost" href="https://github.com/laurent22/joplin/issues/15521" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
@@ -170,7 +170,7 @@ footer a:hover{color:var(--kp4)}
       <div class="metric"><div class="metric-num">12</div><div class="metric-lbl">jest unit tests, all green in workspace + isolated env</div></div>
       <div class="metric"><div class="metric-num">+123</div><div class="metric-lbl">LOC across function + test + JSDoc + integration</div></div>
       <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">commits on the branch (fix, CodeRabbit fix, test align, JSDoc)</div></div>
-      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">regressions — existing TinyMCE flows untouched</div></div>
+      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">regressions, existing TinyMCE flows untouched</div></div>
     </div>
   </div>
 </header>
@@ -179,10 +179,10 @@ footer a:hover{color:var(--kp4)}
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
     <h2 class="section-title">Selecting text + invoking the link command parks the cursor on the wrong field</h2>
-    <p class="section-sub">In the Joplin Rich Text Editor (WYSIWYG), if you select some text and trigger the "Insert hyperlink" command (toolbar button or <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Ctrl+K</code>), TinyMCE's built-in <code>link</code> plugin opens a dialog with two fields: <strong>"Text to display"</strong> (pre-populated from your selection) and <strong>"Url"</strong> (empty, the one you actually want to fill). Focus lands on the "Text to display" field. You have to tab once before the keyboard reaches the URL field — every single time, on every Joplin desktop install.</p>
+    <p class="section-sub">In the Joplin Rich Text Editor (WYSIWYG), if you select some text and trigger the "Insert hyperlink" command (toolbar button or <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Ctrl+K</code>), TinyMCE's built-in <code>link</code> plugin opens a dialog with two fields: <strong>"Text to display"</strong> (pre-populated from your selection) and <strong>"Url"</strong> (empty, the one you actually want to fill). Focus lands on the "Text to display" field. You have to tab once before the keyboard reaches the URL field, every single time, on every Joplin desktop install.</p>
     <div class="card">
       <h3>Why this is annoying enough to fix</h3>
-      <p>The Joplin team uses TinyMCE's built-in link plugin without any focus override (see <code>apps/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx</code>). The default TinyMCE focus behaviour is correct for the empty-selection case (cursor goes to the URL field by default), but when text is pre-populated the focus stays on the text field — which the user already filled by virtue of having selected text. One extra keystroke per link, every link, every note.</p>
+      <p>The Joplin team uses TinyMCE's built-in link plugin without any focus override (see <code>apps/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx</code>). The default TinyMCE focus behaviour is correct for the empty-selection case (cursor goes to the URL field by default), but when text is pre-populated the focus stays on the text field, which the user already filled by virtue of having selected text. One extra keystroke per link, every link, every note.</p>
     </div>
   </div>
 </section>
@@ -191,7 +191,7 @@ footer a:hover{color:var(--kp4)}
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
     <h2 class="section-title">A pure-function predicate + a defensive OpenWindow handler</h2>
-    <p class="section-sub">The fix isolates the focus-decision logic in a brand-new pure function so it can be unit-tested without firing up Electron, then wires it into the existing TinyMCE setup callback via the <code>OpenWindow</code> event with a defensive try/catch — so future TinyMCE upgrades that change the dialog API degrade gracefully to the default focus behaviour.</p>
+    <p class="section-sub">The fix isolates the focus-decision logic in a brand-new pure function so it can be unit-tested without firing up Electron, then wires it into the existing TinyMCE setup callback via the <code>OpenWindow</code> event with a defensive try/catch, so future TinyMCE upgrades that change the dialog API degrade gracefully to the default focus behaviour.</p>
     <div class="card">
       <h3>The new predicate</h3>
       <div class="code-block">
@@ -253,20 +253,20 @@ editor.on(<span class="string">'OpenWindow'</span>, (event: any) =&gt; {
         <li>whitespace-only href counts as non-empty → leave focus</li>
       </ul>
     </div>
-    <div class="callout"><strong>Belt-and-suspenders verification.</strong> Tests pass in two environments: (1) isolated ts-jest setup outside the workspace; (2) <code>corepack yarn workspace @joplin/app-desktop test shouldFocusLinkUrl</code> in the actual Joplin monorepo — same toolchain Joplin CI uses on PRs. <strong>12/12 PASS, 6.122s.</strong></div>
+    <div class="callout"><strong>Belt-and-suspenders verification.</strong> Tests pass in two environments: (1) isolated ts-jest setup outside the workspace; (2) <code>corepack yarn workspace @joplin/app-desktop test shouldFocusLinkUrl</code> in the actual Joplin monorepo, same toolchain Joplin CI uses on PRs. <strong>12/12 PASS, 6.122s.</strong></div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
     <div class="section-eyebrow">04 · The outcome</div>
-    <h2 class="section-title">Direct response from the project lead — PR closed for capacity, not for merit</h2>
+    <h2 class="section-title">Direct response from the project lead, PR closed for capacity, not for merit</h2>
     <p class="section-sub">PR <a href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">#15544</a> opened against <code>dev</code>, CodeRabbit-reviewed, 12/12 tests green in CI scope, CLA signed. Laurent Cozic (Joplin project lead) personally responded within ~1.5 hours of the PR opening, soft-declined for review-capacity reasons, and closed the PR after a gracious thank-you exchange.</p>
     <div class="timeline">
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR opened, CodeRabbit + CLA passed, 12/12 tests green</h4><p>Branch <code>fix/15521-wysiwyg-link-dialog-focus</code>, four commits (initial fix, CodeRabbit review fix, test alignment, JSDoc). Identity rewrite via filter-branch + force-push fixed an initial CLA blocker — lesson captured and applied to every subsequent target.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR opened, CodeRabbit + CLA passed, 12/12 tests green</h4><p>Branch <code>fix/15521-wysiwyg-link-dialog-focus</code>, four commits (initial fix, CodeRabbit review fix, test alignment, JSDoc). Identity rewrite via filter-branch + force-push fixed an initial CLA blocker, lesson captured and applied to every subsequent target.</p></div></div>
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Laurent22 personal response within 1.5h</h4><p>Direct quote: <em>"Hello, sorry we are not considering new pull requests at this time as we do not have the capacity to review them. I would suggest for now to maybe create a tech spec from this PR and attach it to the issue, so that it can be considered at a later time."</em></p></div></div>
       <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Gracious reply + Laurent closed the PR</h4><p>Reply acknowledged the capacity transparency without pushing back; left the PR open as draft and explicitly invited Laurent to close it whenever convenient for triage. Laurent closed the PR shortly after.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Park</div><div class="timeline-body"><h4>Permanent public record on the 999purple999 profile</h4><p>The PR commits + the project lead's personal response remain visible on the contributor's GitHub profile and on Joplin's PR history. Not a merge but a direct, documented engagement with a 55k-star OSS project's lead — citable in subsequent outreach as "submitted PR, received personal review from project lead, closed for project capacity reasons".</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Park</div><div class="timeline-body"><h4>Permanent public record on the 999purple999 profile</h4><p>The PR commits + the project lead's personal response remain visible on the contributor's GitHub profile and on Joplin's PR history. Not a merge but a direct, documented engagement with a 55k-star OSS project's lead, citable in subsequent outreach as "submitted PR, received personal review from project lead, closed for project capacity reasons".</p></div></div>
     </div>
   </div>
 </section>

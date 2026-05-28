@@ -40,9 +40,15 @@ JSON schema (pr_data.json):
 """
 from __future__ import annotations
 import argparse
+import io
 import json
 import sys
 from pathlib import Path
+
+# Force UTF-8 stdout on Windows (default cp1252 cannot encode common Unicode
+# characters like "→" used in the card template). No-op on Linux/macOS.
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 PORTFOLIO_ROOT = Path(r"c:/Users/FRA/Documents/github/portfolio")
 

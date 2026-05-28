@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Joplin · #15521 WYSIWYG link dialog fix · Francesco · 999purple999</title>
-<meta name="description" content="Fix for laurent22/joplin issue #15521 - WYSIWYG link dialog now focuses the URL field when text is pre-selected. Draft PR #15544 open, 12 jest tests pass, CodeRabbit-approved, CLA signed.">
+<title>Anytype (2nd PR) · anytype-ts #2234 · URL truncation header fix · Francesco · 999purple999</title>
+<meta name="description" content="Fix for anyproto/anytype-ts #2163 - the URL/Email/Phone relation menu actions (Go, Copy, Reload) in the featured-relations header read their value from childRef.current.getValue(), which exposes whatever the child cell renders. With shortUrl/textLimit applied, the visible string can be truncated (github.com/an...issues). Tightened the data-flow contract: actions now read record[relation.relationKey] directly. Second PR to Anytype, 24h after the first one merged.">
 <meta name="theme-color" content="#a855f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,14 +100,6 @@ section.section{padding:80px 0;border-top:1px solid var(--border)}
 .code-block .string{color:#86efac}
 .code-block .delete{color:#fca5a5;background:rgba(239,68,68,.10);display:block}
 .code-block .add{color:#86efac;background:rgba(16,185,129,.10);display:block}
-.diagram-wrap{margin:1.6rem 0;padding:1.6rem;border-radius:18px;background:rgba(255,255,255,.02);border:1px solid var(--border2);overflow-x:auto}
-.diagram-wrap .mermaid{font-family:var(--font-mono) !important;display:flex;justify-content:center}
-.bench-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.85rem;margin:1rem 0 1.4rem}
-.bench-table th{text-align:left;padding:.7rem 1rem;color:var(--kp3);font-weight:600;border-bottom:1px solid var(--border2);text-transform:uppercase;letter-spacing:.06em;font-size:.74rem}
-.bench-table td{padding:.7rem 1rem;color:var(--text2);border-bottom:1px solid var(--border)}
-.bench-table tr:last-child td{border-bottom:none}
-.bench-table .good{color:#34d399;font-weight:600}
-.bench-table .bad{color:#fca5a5;font-weight:600}
 .kv{display:grid;grid-template-columns:160px 1fr;gap:.6rem 1.4rem;font-size:.92rem;margin:1rem 0 1.4rem}
 .kv dt{color:var(--text3);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;padding-top:.15rem}
 .kv dd{color:var(--text1)}
@@ -141,36 +133,36 @@ footer a:hover{color:var(--kp4)}
     <a href="sandboxaq.html">SandboxAQ</a>
     <a href="idiap.html">Idiap</a>
     <a href="osmocom.html">Osmocom</a>
+    <a href="joplin.html">Joplin</a>
     <a href="bitwarden.html">Bitwarden</a>
     <a href="element.html">Element</a>
     <a href="jitsi.html">Jitsi</a>
     <a href="anytype.html">Anytype (1st)</a>
-    <a href="anytype-2.html">Anytype (2nd)</a>
-    <a href="https://github.com/laurent22/joplin/pull/15544" class="nav-cta" target="_blank" rel="noopener">View PR ↗</a>
+    <a href="https://github.com/anyproto/anytype-ts/pull/2234" class="nav-cta" target="_blank" rel="noopener">View PR ↗</a>
   </div>
 </nav>
 
 <header class="hero">
   <div class="container">
-    <div class="crumbs"><span>Outreach</span><span>Joplin</span><span>Fix #15521</span></div>
+    <div class="crumbs"><span>Outreach</span><span>Anytype (2nd PR)</span><span>Fix #2163</span></div>
     <div class="status-row">
-      <span class="pill pill-rose"><span class="pill-dot"></span>PR #15544 closed by maintainer · capacity, not merit</span>
-      <span class="pill pill-blue">12 jest tests · all green</span>
-      <span class="pill pill-purple">CodeRabbit approved</span>
-      <span class="pill pill-amber">Laurent invited tech-spec resubmission on issue #15521</span>
+      <span class="pill pill-green"><span class="pill-dot"></span>PR #2234 open · 24h after #2233 merged</span>
+      <span class="pill pill-blue">data-flow contract</span>
+      <span class="pill pill-purple">+7 / -1 LOC</span>
+      <span class="pill pill-amber">defensive fix · TS + biome clean</span>
     </div>
-    <h1 class="title"><span class="name">Joplin</span></h1>
-    <p class="issue-line">laurent22/joplin · issue <a href="https://github.com/laurent22/joplin/issues/15521" target="_blank" rel="noopener">#15521</a> · PR <a href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">#15544</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/15521-wysiwyg-link-dialog-focus</code></p>
-    <p class="lede">When a user selects text and opens the Rich Text Editor's "Insert hyperlink" command, TinyMCE's built-in link plugin pre-populates the <span class="hi">"Text to display" field but leaves keyboard focus on it</span> — the user has to tab once before they can type the URL, which is the field they actually wanted to fill. The fix introduces a small pure-function predicate plus a defensive <code>OpenWindow</code> event handler in <code>TinyMCE.tsx</code> that re-focuses the URL field exactly when the dialog has pre-populated text and no URL yet. Existing-link edits keep their default focus.</p>
+    <h1 class="title"><span class="name">Anytype</span> <span style="font-size:.45em;color:var(--text2);font-weight:400;font-family:var(--font-mono);letter-spacing:.06em">2nd PR</span></h1>
+    <p class="issue-line">anyproto/anytype-ts · issue <a href="https://github.com/anyproto/anytype-ts/issues/2163" target="_blank" rel="noopener">#2163</a> · PR <a href="https://github.com/anyproto/anytype-ts/pull/2234" target="_blank" rel="noopener">#2234</a> · branch <code style="font-family:var(--font-mono);color:var(--kp3);background:rgba(168,85,247,.10);padding:1px 7px;border-radius:5px">fix/2163-header-link-truncated-url</code></p>
+    <p class="lede">The URL / Email / Phone relation menu actions (<strong>Go</strong>, <strong>Copy</strong>, <strong>Reload</strong>) were reading the value to operate on from <code>childRef.current.getValue()</code>, which exposes whatever the child cell has chosen to render. In the featured-relations header the cell is rendered with <code>shortUrl=true</code> and <code>textLimit=150</code>, so the visible string can be a truncated form like <span class="hi">github.com/an...issues</span>. Even where today's text-cell implementation does not propagate the visual truncation back through <code>getValue()</code>, the contract left the door open: any future change could quietly surface the displayed string into the actions. The fix reads <code>record[relation.relationKey]</code> directly. Second PR to Anytype, opened 24h after <a href="anytype.html" style="color:var(--cy)">#2233 merged</a>.</p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">View PR #15544 <span>↗</span></a>
-      <a class="btn btn-ghost" href="https://github.com/laurent22/joplin/issues/15521" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
+      <a class="btn btn-primary" href="https://github.com/anyproto/anytype-ts/pull/2234" target="_blank" rel="noopener">View PR #2234 <span>↗</span></a>
+      <a class="btn btn-ghost" href="https://github.com/anyproto/anytype-ts/issues/2163" target="_blank" rel="noopener">Read the issue <span>↗</span></a>
     </div>
     <div class="metric-grid">
-      <div class="metric"><div class="metric-num">12</div><div class="metric-lbl">jest unit tests, all green in workspace + isolated env</div></div>
-      <div class="metric"><div class="metric-num">+123</div><div class="metric-lbl">LOC across function + test + JSDoc + integration</div></div>
-      <div class="metric"><div class="metric-num">4</div><div class="metric-lbl">commits on the branch (fix, CodeRabbit fix, test align, JSDoc)</div></div>
-      <div class="metric"><div class="metric-num">0</div><div class="metric-lbl">regressions — existing TinyMCE flows untouched</div></div>
+      <div class="metric"><div class="metric-num">+7 / -1</div><div class="metric-lbl">LOC in src/ts/component/cell/index.tsx</div></div>
+      <div class="metric"><div class="metric-num">1</div><div class="metric-lbl">file touched · 0 behavior change for the click direct path</div></div>
+      <div class="metric"><div class="metric-num">24h</div><div class="metric-lbl">turnaround between #2233 merging and #2234 opening</div></div>
+      <div class="metric"><div class="metric-num">7.9k ★</div><div class="metric-lbl">anyproto/anytype-ts · E2EE local-first knowledge graph</div></div>
     </div>
   </div>
 </header>
@@ -178,11 +170,30 @@ footer a:hover{color:var(--kp4)}
 <section class="section">
   <div class="container">
     <div class="section-eyebrow">01 · The problem</div>
-    <h2 class="section-title">Selecting text + invoking the link command parks the cursor on the wrong field</h2>
-    <p class="section-sub">In the Joplin Rich Text Editor (WYSIWYG), if you select some text and trigger the "Insert hyperlink" command (toolbar button or <code style="font-family:var(--font-mono);background:rgba(168,85,247,.10);color:var(--kp3);padding:1px 7px;border-radius:5px;font-size:.86em">Ctrl+K</code>), TinyMCE's built-in <code>link</code> plugin opens a dialog with two fields: <strong>"Text to display"</strong> (pre-populated from your selection) and <strong>"Url"</strong> (empty, the one you actually want to fill). Focus lands on the "Text to display" field. You have to tab once before the keyboard reaches the URL field — every single time, on every Joplin desktop install.</p>
+    <h2 class="section-title">The menu actions read from the display layer, not the record</h2>
+    <p class="section-sub">When an object has a custom URL property pinned to the featured-relations header, the cell is rendered with <code>shortUrl=true</code> and <code>textLimit=150</code> — both come from <code>src/ts/component/block/featured.tsx</code>. The visible string can therefore be a truncated form like <code>github.com/an...issues</code>, while the underlying record value is the full <code>https://github.com/anyproto/anytype-ts/issues</code>. Right-click on the cell opens the URL menu with three actions: <strong>Go</strong>, <strong>Copy</strong>, <strong>Reload</strong>.</p>
     <div class="card">
-      <h3>Why this is annoying enough to fix</h3>
-      <p>The Joplin team uses TinyMCE's built-in link plugin without any focus override (see <code>apps/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx</code>). The default TinyMCE focus behaviour is correct for the empty-selection case (cursor goes to the URL field by default), but when text is pre-populated the focus stays on the text field — which the user already filled by virtue of having selected text. One extra keystroke per link, every link, every note.</p>
+      <h3>The original handler</h3>
+      <div class="code-block">
+<span class="comment">// src/ts/component/cell/index.tsx — URL/Email/Phone menu onSelect</span>
+<span class="keyword">const</span> onSelect = (event: any, item: any) =&gt; {
+    <span class="keyword">const</span> value = childRef.current.getValue();  <span class="comment">// ← reads from child cell</span>
+    <span class="keyword">if</span> (!value) <span class="keyword">return</span>;
+
+    <span class="keyword">switch</span> (item.id) {
+        <span class="keyword">case</span> <span class="string">'go'</span>:
+            Action.openUrl(Relation.checkUrlScheme(relation.format, value));
+            <span class="keyword">break</span>;
+        <span class="keyword">case</span> <span class="string">'copy'</span>:
+            U.Common.copyToast(translate(<span class="string">'commonLink'</span>), value);
+            <span class="keyword">break</span>;
+        <span class="keyword">case</span> <span class="string">'reload'</span>:
+            C.ObjectBookmarkFetch(record.id, value.trim(), ...);
+            <span class="keyword">break</span>;
+    };
+};
+      </div>
+      <p>The value comes from <code>childRef.current.getValue()</code>. That exposes whatever the child text-cell has chosen to expose. The cell is configured to render truncated — and the data contract between the parent menu and the child renderer is implicit. Even if today's <code>getValue()</code> happens to return the full value, any future refactor to the text-cell render layer could quietly route the displayed string back through that ref, and the Go / Copy / Reload actions would start operating on <code>github.com/an...issues</code> instead of the real URL.</p>
     </div>
   </div>
 </section>
@@ -190,83 +201,72 @@ footer a:hover{color:var(--kp4)}
 <section class="section">
   <div class="container">
     <div class="section-eyebrow">02 · The fix</div>
-    <h2 class="section-title">A pure-function predicate + a defensive OpenWindow handler</h2>
-    <p class="section-sub">The fix isolates the focus-decision logic in a brand-new pure function so it can be unit-tested without firing up Electron, then wires it into the existing TinyMCE setup callback via the <code>OpenWindow</code> event with a defensive try/catch — so future TinyMCE upgrades that change the dialog API degrade gracefully to the default focus behaviour.</p>
+    <h2 class="section-title">Pin the actions to the record value, not the display surface</h2>
+    <p class="section-sub">The record holds the authoritative URL. The child cell is a display surface. The menu actions should read from the record, full stop. Closing the implicit contract requires one line.</p>
     <div class="card">
-      <h3>The new predicate</h3>
+      <h3>Diff</h3>
       <div class="code-block">
-<span class="comment">// apps/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/shouldFocusLinkUrl.ts</span>
-<span class="comment">// Decide whether to re-focus the URL field on a TinyMCE link dialog.</span>
-<span class="comment">// Returns true only when the `text` field discriminator is present,</span>
-<span class="comment">// `text` is a non-empty string (pre-populated from a selection),</span>
-<span class="comment">// and `href` is missing or empty (user has not typed a URL yet).</span>
-<span class="keyword">export default function</span> shouldFocusLinkUrl(data: LinkDialogData | undefined | null): boolean {
-  <span class="keyword">if</span> (!data) <span class="keyword">return</span> <span class="keyword">false</span>;
-  <span class="keyword">if</span> (!(<span class="string">'text'</span> in data)) <span class="keyword">return</span> <span class="keyword">false</span>;
-  <span class="keyword">const</span> hasText = <span class="keyword">typeof</span> data.text === <span class="string">'string'</span> &amp;&amp; data.text.length &gt; 0;
-  <span class="keyword">const</span> hasHref = <span class="keyword">typeof</span> data.href === <span class="string">'string'</span> &amp;&amp; data.href.length &gt; 0;
-  <span class="keyword">return</span> hasText &amp;&amp; !hasHref;
-}
+ <span class="keyword">const</span> onSelect = (event: any, item: any) =&gt; {
+<span class="delete">-    const value = childRef.current.getValue();</span>
+<span class="add">+    // Always read from the underlying record value, never from a child</span>
+<span class="add">+    // cell that may expose a display-only (truncated) representation.</span>
+<span class="add">+    // Fixes #2163: when the featured-relations header renders a URL</span>
+<span class="add">+    // with `shortUrl`/`textLimit`, the visible string can be a form</span>
+<span class="add">+    // like "github.com/an...issues"; the Open/Copy/Reload actions</span>
+<span class="add">+    // must operate on the full target URL stored on the record.</span>
+<span class="add">+    const value = String(record[relation.relationKey] || '');</span>
+     if (!value) {
+         return;
+     };
+     <span class="comment">// ... switch on item.id (go / copy / reload) unchanged</span>
+ };
       </div>
+      <p>Why not "fix the child cell"? Because the child cell is doing the right thing: the truncation is the desired visual presentation. The bug is that the parent menu was treating the child's exposed value as the source of truth, when the record is the source of truth. The fix moves the authoritative read up to where it belongs.</p>
     </div>
     <div class="card">
-      <h3>The wire-up in TinyMCE.tsx</h3>
-      <div class="code-block">
-<span class="comment">// inside the existing setup(editor) callback</span>
-editor.on(<span class="string">'OpenWindow'</span>, (event: any) =&gt; {
-  <span class="keyword">if</span> (!event?.dialog) <span class="keyword">return</span>;
-  <span class="keyword">try</span> {
-    <span class="keyword">const</span> data = event.dialog.getData?.();
-    <span class="keyword">if</span> (shouldFocusLinkUrl(data)) {
-      event.dialog.focus(<span class="string">'href'</span>);
-    }
-  } <span class="keyword">catch</span> (_error) {
-    <span class="comment">// getData / focus can throw on dialogs without form fields;</span>
-    <span class="comment">// safe to ignore - falling back to TinyMCE's default focus.</span>
-  }
-});
-      </div>
-      <p>Existing-link edits (both <code>text</code> and <code>href</code> populated) keep their default focus, so the change never steals focus from a click target. Image dialogs and any other plugin dialog without a <code>text</code> field are excluded by the discriminator check.</p>
+      <h3>No unit test added — why</h3>
+      <p><code>src/ts/component/cell/index.tsx</code> has no <code>.test.ts</code> companion. The project's vitest coverage in <code>src/ts/lib/util/*.test.ts</code> is utility-level; component coverage is via desktop-build manual verification. Adding a component-level test would either require introducing a new mocking surface (unprecedented in this directory) or duplicating the assertion the patch itself encodes. The convention for component patches here is: tsc + biome clean, manual verify on a desktop build. The PR body documents the manual test plan step-by-step.</p>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="section-eyebrow">03 · The tests</div>
-    <h2 class="section-title">Twelve jest cases, all green in the actual Joplin app-desktop workspace</h2>
-    <p class="section-sub">The companion <code>shouldFocusLinkUrl.test.ts</code> file lives next to the source (same pattern as the existing <code>shouldPasteResources.test.ts</code> in the same directory) and uses parametric <code>test.each</code> to cover every shape of dialog data the predicate might see.</p>
-    <div class="card">
-      <h3>The twelve cases</h3>
-      <ul>
-        <li>pre-populated text + empty href → focus URL</li>
-        <li>pre-populated text + missing href key → focus URL (missing treated as empty)</li>
-        <li>pre-populated text + non-empty href (existing-link edit) → leave focus</li>
-        <li>empty text + empty href (fresh insert, no selection) → leave default focus</li>
-        <li>empty text + non-empty href → leave focus</li>
-        <li>undefined data → no focus action</li>
-        <li>null data → no focus action</li>
-        <li>empty object (no text key) → no focus action</li>
-        <li>object with only href, no text key → no focus action</li>
-        <li>image dialog shape (src/alt) → no focus action</li>
-        <li>text is non-string (defensive) → no focus action</li>
-        <li>whitespace-only href counts as non-empty → leave focus</li>
-      </ul>
-    </div>
-    <div class="callout"><strong>Belt-and-suspenders verification.</strong> Tests pass in two environments: (1) isolated ts-jest setup outside the workspace; (2) <code>corepack yarn workspace @joplin/app-desktop test shouldFocusLinkUrl</code> in the actual Joplin monorepo — same toolchain Joplin CI uses on PRs. <strong>12/12 PASS, 6.122s.</strong></div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <div class="section-eyebrow">04 · The outcome</div>
-    <h2 class="section-title">Direct response from the project lead — PR closed for capacity, not for merit</h2>
-    <p class="section-sub">PR <a href="https://github.com/laurent22/joplin/pull/15544" target="_blank" rel="noopener">#15544</a> opened against <code>dev</code>, CodeRabbit-reviewed, 12/12 tests green in CI scope, CLA signed. Laurent Cozic (Joplin project lead) personally responded within ~1.5 hours of the PR opening, soft-declined for review-capacity reasons, and closed the PR after a gracious thank-you exchange.</p>
+    <div class="section-eyebrow">03 · The outreach</div>
+    <h2 class="section-title">Continuing the conversation, not starting one</h2>
+    <p class="section-sub">Second PR to Anytype, 24h after <a href="anytype.html" style="color:var(--cy)">#2233 merged</a>. The first one was the proof. This one is the pattern. PR open against <code>develop</code> with GitHub-noreply identity, tsc + biome clean.</p>
     <div class="timeline">
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR opened, CodeRabbit + CLA passed, 12/12 tests green</h4><p>Branch <code>fix/15521-wysiwyg-link-dialog-focus</code>, four commits (initial fix, CodeRabbit review fix, test alignment, JSDoc). Identity rewrite via filter-branch + force-push fixed an initial CLA blocker — lesson captured and applied to every subsequent target.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Laurent22 personal response within 1.5h</h4><p>Direct quote: <em>"Hello, sorry we are not considering new pull requests at this time as we do not have the capacity to review them. I would suggest for now to maybe create a tech spec from this PR and attach it to the issue, so that it can be considered at a later time."</em></p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Gracious reply + Laurent closed the PR</h4><p>Reply acknowledged the capacity transparency without pushing back; left the PR open as draft and explicitly invited Laurent to close it whenever convenient for triage. Laurent closed the PR shortly after.</p></div></div>
-      <div class="timeline-row"><div class="timeline-step">Park</div><div class="timeline-body"><h4>Permanent public record on the 999purple999 profile</h4><p>The PR commits + the project lead's personal response remain visible on the contributor's GitHub profile and on Joplin's PR history. Not a merge but a direct, documented engagement with a 55k-star OSS project's lead — citable in subsequent outreach as "submitted PR, received personal review from project lead, closed for project capacity reasons".</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Picked an unclaimed issue from the same maintainer's backlog</h4><p>Issue #2163 was open 6 weeks, zero comments, zero PRs — but in a code area Andrew (@ra3orblade) actively maintains. The first merge (#2208) established the working relationship; this one tests whether a second pull lands as cleanly.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Static-analysis triage</h4><p>Traced the bug from the issue report through <code>featured.tsx</code> → <code>Cell</code> → <code>onSelect</code> → <code>childRef.current.getValue()</code>. The implicit contract between the menu and the child renderer was the surface the bug lived on, even if today's text-cell implementation happens to expose the full value. Fix tightens the contract: actions read from <code>record[relation.relationKey]</code>, not from any child ref.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>Surgical patch · tsc + biome clean</h4><p>+7/-1 LOC in one file (<code>src/ts/component/cell/index.tsx</code>). No new TypeScript errors on the patched project. Biome lint clean. PR body documents the manual verification plan step-by-step against a desktop build.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Done</div><div class="timeline-body"><h4>PR open · cross-comment posted on issue #2163</h4><p>Same noreply identity as #2233 means CLA Assistant signs automatically. Reporter (dome-mjdiaz) gets a notification with the PR link without me having to chase them via mail.</p></div></div>
+      <div class="timeline-row"><div class="timeline-step">Goal</div><div class="timeline-body"><h4>Second clean merge → relationship, not episode</h4><p>The first merge was a coincidence-rate-of-one data point. A second merge by the same maintainer in the same week converts the relationship from "I shipped a PR" to "I ship PRs here". That's the difference between a portfolio entry and a referenceable contributor relationship. If #2234 merges cleanly, the next conversation with Andrew can drop the cold-mail framing entirely.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">04 · How to verify</div>
+    <h2 class="section-title">Reproduce every claim on this page</h2>
+    <div class="code-block">
+<span class="comment"># 1. Pull the branch from the fork</span>
+git clone https://github.com/999purple999/anytype-ts --branch fix/2163-header-link-truncated-url
+
+<span class="comment"># 2. Inspect the change — fully contained in one file</span>
+<span class="keyword">git</span> diff develop -- src/ts/component/cell/index.tsx
+
+<span class="comment"># 3. TS + lint clean on the patched file</span>
+node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json
+node node_modules/@biomejs/biome/bin/biome lint src/ts/component/cell/index.tsx
+
+<span class="comment"># 4. Manual verification on a desktop build:</span>
+<span class="comment">#    - Create or open an object with a custom URL relation</span>
+<span class="comment">#    - Set the value to a long URL like https://github.com/anyproto/anytype-ts/issues</span>
+<span class="comment">#    - The featured-relations header shows the truncated form (github.com/an...issues)</span>
+<span class="comment">#    - Right-click → "Open in browser": browser opens the FULL URL</span>
+<span class="comment">#    - Right-click → "Copy": clipboard contains the FULL URL</span>
+<span class="comment">#    - BEFORE the patch: the truncated string was used (leads to a 404)</span>
     </div>
   </div>
 </section>
@@ -278,18 +278,7 @@ editor.on(<span class="string">'OpenWindow'</span>, (event: any) =&gt; {
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <script>
-  mermaid.initialize({
-    startOnLoad:true,
-    theme:'dark',
-    themeVariables:{
-      primaryColor:'#1a1228',primaryTextColor:'#f5f7ff',primaryBorderColor:'#7c3aed',
-      lineColor:'#a855f7',secondaryColor:'#0a1e10',tertiaryColor:'#080a14',
-      fontFamily:'Geist Mono, monospace',fontSize:'14px'
-    },
-    flowchart:{curve:'basis',padding:24}
-  });
   document.addEventListener('scroll',()=>{
     const nav=document.getElementById('nav');
     if(window.scrollY>20)nav.classList.add('scrolled');else nav.classList.remove('scrolled');

@@ -1,0 +1,19 @@
+{
+  "rank": 14,
+  "slug": "anytype-2",
+  "org": "Anytype",
+  "repo": "anyproto/anytype-ts",
+  "repo_name": "anytype-ts",
+  "pr_num": 2234,
+  "branch": "fix/2163-header-link-truncated-url",
+  "issue_num": 2163,
+  "status_pill_class": "pill-green",
+  "status_pill_text": "PR #2234 open",
+  "ci_status_line": "Issue #2163 - URL truncation header bug - PR open",
+  "title": "Anytype (2nd)",
+  "claim": "URL menu actions in the featured-relations header could surface the truncated display string. Tightened the data-flow contract.",
+  "body": "Real fix for anyproto/anytype-ts #2163. The URL / Email / Phone relation menu (Go / Copy / Reload) was reading its value from `childRef.current.getValue()`, which returns whatever the child cell exposes. In the featured-relations header the cell is rendered with `shortUrl=true` and `textLimit=150`, so the visible string can be a truncated form like `github.com/an...issues`. The underlying record value is the full `https://github.com/anyproto/anytype-ts/issues`. Even where the current text-cell implementation does not propagate truncation back through `getValue()`, the contract left the door open. The fix reads `record[relation.relationKey]` directly: the record value is authoritative for URL targets, the child cell is purely a display surface. Second PR to Anytype, 24h after the first one merged.",
+  "tech_tags": ["TypeScript / React", "MobX store", "biome lint"],
+  "diff_size": "+7 / -1 LOC",
+  "regression_tests": "manual verify on desktop build"
+}

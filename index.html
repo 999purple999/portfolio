@@ -129,6 +129,14 @@
     <h2 class="section-title reveal">15 fixes on real upstream repos <span class="hi">shipped</span></h2>
     <p class="section-sub reveal delay-1">Eleven issues across eleven open-source projects, actioned in two days of focused sprint. <strong>Eight draft PRs open upstream</strong> on huggingface.js, mattermost-plugin-calls, PennyLane, Tangelo, coqui-ai-TTS, Joplin, Bitwarden, and Element-HQ (Matrix). Joplin ships with an 11-case jest suite all green; Bitwarden ships with 43/43 importer tests passing across four clients (browser, desktop, cli, web); Element ships scope-isolated CSS that cleanly overrides upstream specificity without `!important`. <strong>Six cold mails sent</strong> to the actual maintainers (verified GitHub commit emails, never scraped). <strong>One public technical comment</strong> posted on the ComfyUI bug thread. <strong>One silent contribution</strong> against pysim via fork + mailing-list-aware mail. <strong>One active maintainer engagement</strong>: @astralcai personally reviewed PennyLane #9532, two review comments addressed in commit a53cd62, awaiting re-review. Every page below documents the bug, the fix shape, the trade-offs, and the maintainer the case landed in front of.</p>
 
+    <div class="reveal delay-2" style="margin:1.5rem 0 2.4rem;padding:1.4rem 1.8rem;border-radius:14px;background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(103,232,249,.04));border:1px solid rgba(168,85,247,.28);display:flex;flex-wrap:wrap;align-items:center;gap:1.2rem;justify-content:space-between">
+      <div style="flex:1;min-width:280px">
+        <div style="font-family:var(--font-mono);font-size:.72rem;color:var(--kp3);text-transform:uppercase;letter-spacing:.14em;font-weight:600;margin-bottom:.3rem">Pipeline architecture</div>
+        <div style="font-family:var(--font-display);font-size:1.15rem;line-height:1.35;color:var(--text1);font-weight:500">The methodology behind these 15 PRs is open-sourced as <strong>Cold Forge</strong>: eight phase gates, a five-level pre-PR validation harness, comment-first ethical gate, and a file-based memory layer.</div>
+      </div>
+      <a href="https://github.com/999purple999/cold-forge" target="_blank" rel="noopener" style="white-space:nowrap;padding:11px 22px;border-radius:10px;background:var(--grad-kp);color:#fff;text-decoration:none;font-weight:600;font-size:.9rem;box-shadow:0 8px 22px rgba(168,85,247,.36)">View the protocol &rarr;</a>
+    </div>
+
     <div class="projects-grid">
 
       <article class="project featured reveal" data-tilt>

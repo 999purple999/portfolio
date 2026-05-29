@@ -42,7 +42,7 @@ window.__METRICS = {
     { m: '2026-01', n: 28 }, { m: '2026-02', n: 35 }, { m: '2026-03', n: 48 },
     { m: '2026-04', n: 38 }, { m: '2026-05', n: 132 }, { m: '2026-06', n: 0 },
   ],
-  // Upstream-OSS contributions overlay (NOT own repos — separate counter)
+  // Upstream-OSS contributions overlay (NOT own repos, separate counter)
   upstreamContribs: {
     totalPRs: 16,
     merged: 2,

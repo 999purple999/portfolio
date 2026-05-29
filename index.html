@@ -286,14 +286,13 @@
         </div>
       </article>
 
-      <article class="project featured reveal senior-tier" data-tilt>
-        <div class="tier-stamp">SENIOR</div>
+      <article class="project featured reveal is-senior" data-tilt>
         <div class="project-rank">#16 · mediasoup · PR #1812 · PortRangeKey struct closes #1805 · @ibc cleared the design</div>
         <div class="project-badge public">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Issue #1805 · IPv4 /30 + IPv6 XOR hash collisions
         </div>
-        <h3 class="project-title">mediasoup <span style="font-size:.7em;color:var(--text2);font-weight:400">C++ WebRTC SFU</span></h3>
+        <h3 class="project-title">mediasoup <span style="font-size:.7em;color:var(--text2);font-weight:400">C++ WebRTC SFU</span> <span class="status-pill senior"><span class="dot"></span>Senior tier</span></h3>
         <p class="project-claim">PortManager silently merged unrelated bindings whenever two IPv4 addresses shared a /30 block, or any two IPv6 addresses XOR-folded to the same 32 bits. Replaced the lossy hash with an exact-tuple struct key.</p>
         <p class="project-body">Real fix for versatica/mediasoup #1805. The legacy <code>GeneratePortRangeHash</code> mangled the bind address before placing it in a <code>uint64_t</code> hash: IPv4 dropped the bottom two bits (<code>(address &gt;&gt; 2) &lt;&lt; 2</code>), IPv6 XOR-folded the 128-bit address into 32 bits (<code>a[0] ^ a[1] ^ a[2] ^ a[3]</code>). Downstream, <code>mapPortRanges.find(hash)</code> treated a hit as "same range" and <code>Unbind(hash, port)</code> released ports against whatever PortRange the hash mapped to. Result: in a multi-tenant or multi-interface deployment with nearby IPv4 addresses (sequential container IPs) or word-swap-colliding IPv6 addresses, two unrelated bindings get silently merged into one <code>PortRange</code>; <code>Unbind</code> then frees ports from the wrong tenant's range. Replaced with <code>PortRangeKey</code> struct (<code>{Protocol, sockaddr_storage, minPort, maxPort}</code>) keyed in <code>absl::flat_hash_map&lt;PortRangeKey, PortRange, PortRangeKeyHash&gt;</code>. Map equality is exact-tuple; the hash function (<code>absl::HashOf</code> over protocol, family, raw address bytes, range bounds) is for bucket distribution only. Even on hash collision, key equality keeps distinct tuples in distinct entries. API change (per @ibc clearance: "no need to keep the uint64_t token") propagated through six caller sites (UdpSocket, TcpServer, PipeTransport, PlainTransport, WebRtcServer, WebRtcTransport). Co-authored-by penguinol who drafted the struct shape in the issue thread.</p>
         <ul class="project-tech">
@@ -328,14 +327,13 @@
         </div>
       </article>
 
-      <article class="project featured reveal merged-card" data-tilt>
-        <div class="merged-stamp">MERGED</div>
+      <article class="project featured reveal is-merged" data-tilt>
         <div class="project-rank">#14 · Anytype (2nd PR) · PR #2234 MERGED · @ra3orblade closed #2163 on his last day</div>
         <div class="project-badge merged">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Merged · closes #2163
         </div>
-        <h3 class="project-title">Anytype <span style="font-size:.7em;color:var(--text2);font-weight:400">2nd PR</span></h3>
+        <h3 class="project-title">Anytype <span style="font-size:.7em;color:var(--text2);font-weight:400">2nd PR</span> <span class="status-pill merged"><span class="dot"></span>Merged</span></h3>
         <p class="project-claim">URL menu actions in the object header could surface the displayed truncated string. Pinned the data-flow contract to the underlying record value.</p>
         <p class="project-body">Second PR to Anytype, 24h after <a href="https://github.com/anyproto/anytype-ts/pull/2233" target="_blank" rel="noopener" style="color:var(--cy)">#2233 merged</a>. Real fix for anyproto/anytype-ts #2163. The URL / Email / Phone relation menu (Go / Copy / Reload) was reading its value from <code>childRef.current.getValue()</code>, which exposes whatever the child cell renders. In the featured-relations header the cell renders with <code>shortUrl=true</code> and <code>textLimit=150</code>, so the visible string can be a truncated form like <code>github.com/an...issues</code>. Even where today's text-cell implementation does not propagate truncation back through <code>getValue()</code>, the contract left the door open. Fix: read <code>record[relation.relationKey]</code> directly. The record value is authoritative for URL targets; the cell is a display surface only. +7/-1 LOC, biome+tsc clean, no behaviour change for the click direct path (already used the record value).</p>
         <ul class="project-tech">
@@ -350,14 +348,13 @@
         </div>
       </article>
 
-      <article class="project featured reveal merged-card" data-tilt>
-        <div class="merged-stamp">MERGED</div>
+      <article class="project featured reveal is-merged" data-tilt>
         <div class="project-rank">#13 · Anytype · PR #2233 MERGED · 4-hour turnaround · @ra3orblade clean accept</div>
         <div class="project-badge merged">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3.8 0 1.7.1 2.5.3 1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C22 6.5 17.5 2 12 2z"/></svg>
           Merged · closes #2208
         </div>
-        <h3 class="project-title">Anytype</h3>
+        <h3 class="project-title">Anytype <span class="status-pill merged"><span class="dot"></span>Merged · 4h</span></h3>
         <p class="project-claim">Settings date-format picker showed identical labels on 12 days a year. Switched to a fixed asymmetric sample.</p>
         <p class="project-body">Real fix for anyproto/anytype-ts #2208. The settings *Language &amp; Region → Date Format* picker built every option preview by formatting `now()`. On May 5 (and 11 other days a year where day == month), `Short` (d/m/Y) and `ShortUS` (m/d/Y) both render to `05.05.2026`, two radio buttons with the same visible string. Switched the preview sample to a fixed asymmetric timestamp (Jul 30, 2020, already the convention used in the `DateFormat` enum comments). Five-line change in `menu.ts` plus two unit tests in `date.test.ts`: positive guard (asymmetric sample → distinguishable) and negative documentation (symmetric date → bug reproduced), both passing locally under vitest. Maintainer signal: @ra3orblade (Andrew Simachev) dominates the file's commit history and recently shipped JS-9098 fixing month-first date formats elsewhere.</p>
         <ul class="project-tech">

@@ -153,14 +153,19 @@ nav.scrolled { background:rgba(4,5,10,.92); border-color:var(--border2) }
 .project-badge { position:absolute; top:1.5rem; right:1.5rem; display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:7px; font-size:.7rem; font-family:var(--font-mono); font-weight:600; white-space:nowrap; max-width:130px; overflow:hidden; text-overflow:ellipsis }
 .project-badge.public { background:rgba(54,211,153,.12); color:#86efac; border:1px solid rgba(54,211,153,.3) }
 .project-badge.private { background:rgba(251,191,36,.10); color:var(--gold); border:1px solid rgba(251,191,36,.28) }
-.project-badge.merged { background:linear-gradient(135deg,rgba(168,85,247,.22),rgba(54,211,153,.22)); color:#a8f3c5; border:1px solid rgba(168,85,247,.5); box-shadow:0 0 18px rgba(168,85,247,.25),0 0 0 1px rgba(54,211,153,.15) inset; animation:mergedPulse 2.8s ease-in-out infinite; max-width:170px }
-@keyframes mergedPulse { 0%,100% { box-shadow:0 0 18px rgba(168,85,247,.25),0 0 0 1px rgba(54,211,153,.15) inset } 50% { box-shadow:0 0 28px rgba(168,85,247,.45),0 0 0 1px rgba(54,211,153,.3) inset } }
-.merged-stamp { position:absolute; top:14px; left:-38px; transform:rotate(-22deg); background:linear-gradient(135deg,#a855f7,#22d3ee); color:#fff; padding:5px 50px; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.18em; font-weight:700; box-shadow:0 4px 14px rgba(168,85,247,.4); z-index:3; pointer-events:none; user-select:none }
-.merged-stamp::before { content:'\2713  '; font-weight:900 }
-.project.merged-card { background:linear-gradient(135deg,rgba(168,85,247,.18),rgba(54,211,153,.06),rgba(15,17,30,.95)); border-color:rgba(168,85,247,.5) }
-.project.senior-tier { background:linear-gradient(135deg,rgba(244,114,182,.10),rgba(103,232,249,.06),rgba(15,17,30,.95)); border-color:rgba(244,114,182,.32); box-shadow:0 16px 50px rgba(244,114,182,.12),0 1px 0 rgba(255,255,255,.04) inset }
-.tier-stamp { position:absolute; top:14px; left:-38px; transform:rotate(-22deg); background:linear-gradient(135deg,#f472b6,#67e8f9); color:#fff; padding:5px 50px; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.18em; font-weight:700; box-shadow:0 4px 14px rgba(244,114,182,.4); z-index:3; pointer-events:none; user-select:none }
-@media (max-width:520px) { .merged-stamp,.tier-stamp { top:8px; left:-44px; padding:4px 50px; font-size:.6rem } .project { padding:1.6rem 1.4rem 1.4rem } .project-title { font-size:1.32rem } .project-rank { max-width:100%; font-size:.66rem; padding-right:90px } }
+.project-badge.merged { background:rgba(54,211,153,.12); color:#86efac; border:1px solid rgba(54,211,153,.32) }
+.status-pill { display:inline-flex; align-items:center; gap:7px; padding:4px 11px 4px 9px; border-radius:99px; font-family:var(--font-mono); font-size:.64rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; vertical-align:middle; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); white-space:nowrap; margin-left:.7rem; position:relative; top:-3px }
+.status-pill.merged { background:rgba(34,197,94,.10); border:1px solid rgba(54,211,153,.42); color:#86efac; box-shadow:0 0 18px rgba(54,211,153,.15),0 1px 0 rgba(255,255,255,.04) inset }
+.status-pill.senior { background:rgba(168,85,247,.10); border:1px solid rgba(244,114,182,.42); color:#f5d0fe; box-shadow:0 0 18px rgba(244,114,182,.15),0 1px 0 rgba(255,255,255,.04) inset }
+.status-pill .dot { width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow:0 0 6px currentColor; animation:dotPulse 1.8s ease-in-out infinite }
+@keyframes dotPulse { 0%,100% { opacity:1; transform:scale(1) } 50% { opacity:.55; transform:scale(.7) } }
+.project.is-merged, .project.is-senior { transform-style:preserve-3d; transition:transform .42s cubic-bezier(.16,.84,.44,1),box-shadow .42s ease,border-color .42s ease; border-left-width:3px }
+.project.is-merged { border-left-color:rgba(54,211,153,.78); box-shadow:-1px 0 26px rgba(54,211,153,.14),0 16px 50px rgba(168,85,247,.14),0 1px 0 rgba(255,255,255,.04) inset }
+.project.is-senior { border-left-color:rgba(244,114,182,.78); box-shadow:-1px 0 26px rgba(244,114,182,.14),0 16px 50px rgba(244,114,182,.12),0 1px 0 rgba(255,255,255,.04) inset }
+.project.is-merged:hover, .project.is-senior:hover { transform:translateY(-5px) }
+.project.is-merged:hover { box-shadow:-2px 0 36px rgba(54,211,153,.28),0 32px 72px rgba(168,85,247,.22),0 1px 0 rgba(255,255,255,.06) inset; border-left-color:rgba(54,211,153,1) }
+.project.is-senior:hover { box-shadow:-2px 0 36px rgba(244,114,182,.28),0 32px 72px rgba(244,114,182,.20),0 1px 0 rgba(255,255,255,.06) inset; border-left-color:rgba(244,114,182,1) }
+@media (max-width:520px) { .status-pill { display:inline-flex; margin-left:.45rem; font-size:.58rem; padding:3px 9px 3px 7px; top:-2px } .project { padding:1.6rem 1.4rem 1.4rem } .project-title { font-size:1.32rem; line-height:1.35 } .project-rank { max-width:100%; font-size:.66rem; padding-right:90px } .project.is-merged, .project.is-senior { border-left-width:2px } }
 .project-title { font-family:var(--font-display); font-size:1.55rem; letter-spacing:-.015em; color:var(--text1); font-weight:600; font-variation-settings:"opsz" 48 }
 .project-claim { font-family:var(--font-serif); font-style:italic; font-size:1.08rem; color:var(--kp3); line-height:1.4 }
 .project-body { font-size:.92rem; color:var(--text2); line-height:1.65 }

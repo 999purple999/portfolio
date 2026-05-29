@@ -153,6 +153,14 @@ nav.scrolled { background:rgba(4,5,10,.92); border-color:var(--border2) }
 .project-badge { position:absolute; top:1.5rem; right:1.5rem; display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:7px; font-size:.7rem; font-family:var(--font-mono); font-weight:600; white-space:nowrap; max-width:130px; overflow:hidden; text-overflow:ellipsis }
 .project-badge.public { background:rgba(54,211,153,.12); color:#86efac; border:1px solid rgba(54,211,153,.3) }
 .project-badge.private { background:rgba(251,191,36,.10); color:var(--gold); border:1px solid rgba(251,191,36,.28) }
+.project-badge.merged { background:linear-gradient(135deg,rgba(168,85,247,.22),rgba(54,211,153,.22)); color:#a8f3c5; border:1px solid rgba(168,85,247,.5); box-shadow:0 0 18px rgba(168,85,247,.25),0 0 0 1px rgba(54,211,153,.15) inset; animation:mergedPulse 2.8s ease-in-out infinite; max-width:170px }
+@keyframes mergedPulse { 0%,100% { box-shadow:0 0 18px rgba(168,85,247,.25),0 0 0 1px rgba(54,211,153,.15) inset } 50% { box-shadow:0 0 28px rgba(168,85,247,.45),0 0 0 1px rgba(54,211,153,.3) inset } }
+.merged-stamp { position:absolute; top:14px; left:-38px; transform:rotate(-22deg); background:linear-gradient(135deg,#a855f7,#22d3ee); color:#fff; padding:5px 50px; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.18em; font-weight:700; box-shadow:0 4px 14px rgba(168,85,247,.4); z-index:3; pointer-events:none; user-select:none }
+.merged-stamp::before { content:'\2713  '; font-weight:900 }
+.project.merged-card { background:linear-gradient(135deg,rgba(168,85,247,.18),rgba(54,211,153,.06),rgba(15,17,30,.95)); border-color:rgba(168,85,247,.5) }
+.project.senior-tier { background:linear-gradient(135deg,rgba(244,114,182,.10),rgba(103,232,249,.06),rgba(15,17,30,.95)); border-color:rgba(244,114,182,.32); box-shadow:0 16px 50px rgba(244,114,182,.12),0 1px 0 rgba(255,255,255,.04) inset }
+.tier-stamp { position:absolute; top:14px; left:-38px; transform:rotate(-22deg); background:linear-gradient(135deg,#f472b6,#67e8f9); color:#fff; padding:5px 50px; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.18em; font-weight:700; box-shadow:0 4px 14px rgba(244,114,182,.4); z-index:3; pointer-events:none; user-select:none }
+@media (max-width:520px) { .merged-stamp,.tier-stamp { top:8px; left:-44px; padding:4px 50px; font-size:.6rem } .project { padding:1.6rem 1.4rem 1.4rem } .project-title { font-size:1.32rem } .project-rank { max-width:100%; font-size:.66rem; padding-right:90px } }
 .project-title { font-family:var(--font-display); font-size:1.55rem; letter-spacing:-.015em; color:var(--text1); font-weight:600; font-variation-settings:"opsz" 48 }
 .project-claim { font-family:var(--font-serif); font-style:italic; font-size:1.08rem; color:var(--kp3); line-height:1.4 }
 .project-body { font-size:.92rem; color:var(--text2); line-height:1.65 }

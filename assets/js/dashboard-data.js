@@ -1,7 +1,7 @@
 // Auto-extracted from `gh repo list 999purple999 --json ...` on 2026-05-29.
 // Aggregati reali (own work only, upstream forks per Wave 3 PRs not counted).
 window.__METRICS = {
-  generatedAt: '2026-05-29',
+  generatedAt: '2026-05-30',
   totalRepos: 11,
   publicRepos: 6,
   privateRepos: 5,
@@ -25,7 +25,7 @@ window.__METRICS = {
   repos: [
     { name: 'portfolio',         lang: 'HTML',       stars: 0, public: true,  bytes: 854000,   pushedAt: '2026-05-29' },
     { name: 'cold-forge',        lang: 'Markdown',   stars: 0, public: true,  bytes: 32000,    pushedAt: '2026-05-29' },
-    { name: 'halcyon',           lang: 'JavaScript', stars: 0, public: true,  bytes: 107000,   pushedAt: '2026-05-24' },
+    { name: 'halcyon',           lang: 'JavaScript', stars: 0, public: true,  bytes: 272500,   pushedAt: '2026-05-30' },
     { name: 'k-quest',           lang: 'TypeScript', stars: 0, public: true,  bytes: 253000,   pushedAt: '2026-05-10' },
     { name: 'SISTEMI-5B-STUDIO', lang: 'JavaScript', stars: 0, public: true,  bytes: 1303000,  pushedAt: '2026-05-10' },
     { name: 'capsula-del-tempo', lang: 'HTML',       stars: 2, public: true,  bytes: 238000,   pushedAt: '2026-05-08' },
@@ -40,7 +40,7 @@ window.__METRICS = {
     { m: '2025-07', n: 4 },  { m: '2025-08', n: 6 },  { m: '2025-09', n: 8 },
     { m: '2025-10', n: 12 }, { m: '2025-11', n: 15 }, { m: '2025-12', n: 22 },
     { m: '2026-01', n: 28 }, { m: '2026-02', n: 35 }, { m: '2026-03', n: 48 },
-    { m: '2026-04', n: 38 }, { m: '2026-05', n: 132 }, { m: '2026-06', n: 0 },
+    { m: '2026-04', n: 38 }, { m: '2026-05', n: 162 }, { m: '2026-06', n: 0 },
   ],
   // Upstream-OSS contributions overlay (NOT own repos, separate counter)
   upstreamContribs: {
